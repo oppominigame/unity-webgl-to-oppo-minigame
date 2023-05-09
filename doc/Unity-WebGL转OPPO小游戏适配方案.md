@@ -22,7 +22,7 @@ Unity游戏是使用C\#语言开发的游戏，而OPPO小游戏的运行环境�
 
 -   Unity游戏提供了发布成WebGL项目的能力，详情见[Unity官网介绍](https://docs.unity3d.com/cn/2020.3/Manual/webgl-technical-overview.html)。
 -   OPPO小游戏引擎采用了WebGL1.0规范，使用adapter层模拟实现了Unity游戏发布WebGL项目后所依赖的WEB API。
--   使用华为提供的WebGL配置方案，将Unity游戏原生WebGL项目打包成OPPO小游戏。
+-   使用OPPO提供的WebGL配置方案，将Unity游戏原生WebGL项目打包成OPPO小游戏。
 
 
 ## 准备工作<a name="section2023_0506_001_004"></a>
@@ -31,18 +31,18 @@ Unity游戏是使用C\#语言开发的游戏，而OPPO小游戏的运行环境�
 * 安装了node环境，建议安装14.x以上稳定版本 [node官⽹网：https://nodejs.org/en/]
 
 
-* 游戏包体 rpk 限制在 <color style = 'color:red'>30M </color>以内，并且unity游戏不支持小游戏分包能力。用户本地文件大小限制在 <color style = 'color:red'> 500M </color>以内
+* 游戏包体 rpk 限制在**30M**以内，并且unity游戏不支持小游戏分包能力。用户本地文件大小限制在 **500M**以内
 
 
 -   您已[下载并安装Unity](https://unity.cn/releases/lts/2021)，请按实际情况选择Unity版本号：
 * 当前支持版本如下：
 
     | **Unity版本** | **推荐版本**      | **下载链接**      |
-    | :------      | :-----           | :-----           | 
-    | 2018.4.x     | 2018.4.30f1      |https://unity.com/releases/editor/whats-new/2018.4.30| 
-    | 2019.4.x     | 2019.4.35f1      |https://unity.com/releases/editor/whats-new/2019.4.35| 
-    | 2020.3.x     | 2020.3.47f1      |https://unity.com/releases/editor/whats-new/2020.3.47| 
-    | 2019.3.x     | 2021.3.14f1      |https://unity.com/releases/editor/whats-new/2021.3.14| 
+    | :------      | :-----           | :-----           |
+    | 2018.4.x     | 2018.4.30f1      |https://unity.com/releases/editor/whats-new/2018.4.30|
+    | 2019.4.x     | 2019.4.35f1      |https://unity.com/releases/editor/whats-new/2019.4.35|
+    | 2020.3.x     | 2020.3.47f1      |https://unity.com/releases/editor/whats-new/2020.3.47|
+    | 2019.3.x     | 2021.3.14f1      |https://unity.com/releases/editor/whats-new/2021.3.14|
 
 
 
@@ -56,7 +56,7 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
 
 2. 运行 `quickgame -V` 能够正确显示版本号表示安装成功
 
-<color style = 'color:red'>注：若提示 quickgame 不是内部或外部命令，可重新打开命令提示符窗口或者重启计算机后再运行 quickgame -V</color>
+**注：若提示 quickgame 不是内部或外部命令，可重新打开命令提示符窗口或者重启计算机后再运行 quickgame -V**
 
 > Unity ⽀持的打包工具是 2.1.6-beta.10 版本
 
@@ -96,9 +96,9 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
 
 ## 方案选择<a name="section2023_0506_001_005"></a>
 #### 当前两种适配方案
-1. [Unity-WebGL适配方案-Unity插件版](Unity适配方案-Unity插件版.md) <color style = 'color:red'>（强烈推荐） </color>
+1. [Unity-WebGL适配方案-Unity插件版](Unity适配方案-Unity插件版.md) **（强烈推荐）**
 
->该方案会在Unity编辑器内安装OPPO小游戏发布插件和C# SDK,发布和适配流程完全在Unity中完成，操作简单已用，强烈推荐。
+>该方案会在Unity编辑器内安装OPPO小游戏发布插件和C# SDK,发布和适配流程完全在Unity中完成，操作简单好用，强烈推荐。
 
 2. [Unity-WebGL适配方案-命令行版](Unity适配方案-命令行版.md)
 

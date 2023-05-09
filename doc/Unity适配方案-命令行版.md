@@ -9,7 +9,7 @@
 * 安装了node环境，建议安装14.x以上稳定版本 [node官⽹网：https://nodejs.org/en/]
 
 
-* 游戏包体 rpk 限制在 <color style = 'color:red'>30M </color>以内，并且unity游戏不支持小游戏分包能力。用户本地文件大小限制在 <color style = 'color:red'> 500M </color>以内
+* 游戏包体 rpk 限制在 **30M**以内，并且unity游戏不支持小游戏分包能力。用户本地文件大小限制在 **500M**以内
 
 * 当前支持版本如下：
 
@@ -32,7 +32,7 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
 
 2. 运行 `quickgame -V` 能够正确显示版本号表示安装成功
 
-<color style = 'color:red'>注：若提示 quickgame 不是内部或外部命令，可重新打开命令提示符窗口或者重启计算机后再运行 quickgame -V</color>
+**注：若提示 quickgame 不是内部或外部命令，可重新打开命令提示符窗口或者重启计算机后再运行 quickgame -V**
 
 > Unity ⽀持的打包工具是 2.1.6-beta.10 版本
 
@@ -51,22 +51,24 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
     > 需要根据错误信息，解决相关问题，并在 Web 版本上运⾏正常，没有相应的报错，才可以转成 OPPO 小游戏
 
  2. 进行“玩家设置（Player Settings）”
+    - 发布设置中，不要勾选Development Build,当前rpk包发布只不支持调试版本
+    ![](imgs/6.jpg)
     - Resolution and Presentation -> WebGL Template 设置为“Default”，如下所示：
-    ![](asset/1.png)
+    ![](imgs/1.png)
 
     - 由于当前 OPPO 小游戏只支持标准的 WebGL1.0 的 API ,故需要取消勾选“自动图形 API ”选项，并剔除“ WebGL 2.0”选项，只保留“WebGL 1.0”选项，如下图所示：
-    ![](asset/2.png)
+    ![](imgs/2.png)
 
     - 由于当前 OPPO 小游戏打包 rpk 时，已经做了 GZIP 的压缩，故需要选择非 GZIP 的选项，并勾选“Data caching”。如下图所示：
-    ![](asset/3.png)
+    ![](imgs/3.png)
 
  3. 完成后，在 WebGL 发布的目标目录上，执行
 
 ```
     quickgame unity --unityVer 20XX.X.XXf1
 ```
-<color style = 'color:red'>注：--unityVer 参数是当前游戏的unity游戏引擎版本 </color>
-<color style = 'color:red'>例如unity版本为2021.3.14f1，那么命令即为: quickgame unity --unityVer 2021.3.14f1</color>
+**注：--unityVer 参数是当前游戏的unity游戏引擎版本**
+**例如unity版本为2021.3.14f1，那么命令即为: quickgame unity --unityVer 2021.3.14f1**
 
  默认会在 WebGL 发布的目标目录生成quickgame文件夹同级目录;
 目录结构如下，dist目录内的rpk包即为可调试包
@@ -129,9 +131,11 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
     quickgame pack release
 ```
 2. 游戏调试
+- 打开手机设备的“开发者模式”，使用USB连接测试设备与电脑。
 - 手机上 sdcard 上新建目录 games/，若目录已存在，忽略这一步
 - 将准备好的 rpk 拷贝到手机 sdcard 的 games/ 中
 - 打开快应用=》小游戏 tab即可看到待调试游戏
+详细可查看[技术文档- 真机调试](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/debug)
 
 # 4. 发布<a name="section2023_0506_002_004"></a>
 
