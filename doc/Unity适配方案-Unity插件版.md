@@ -13,7 +13,7 @@
 
 ## OPPO小游戏C#SDK接口使用说明<a name="section2"></a>
 
-开发Unity游戏项目使用C\#语言，开发OPPO小游戏使用JS语言，C\#不能直接调JS接口，需在jslib库中[OPPO小游戏C#SDK接口使用说明](第一步-OPPO小游戏C#SDK接口使用说明.md)给C\#调用，就能使用OPPO小游戏丰富的能力，例如帐号、广告、支付等。
+开发Unity游戏项目使用C\#语言，开发OPPO小游戏使用JS语言，C\#不能直接调JS接口，需在jslib库中[OPPO小游戏C#SDK接口使用说明](第一步-OPPO小游戏C%23SDK接口使用说明.md)给C\#调用，就能使用OPPO小游戏丰富的能力，例如帐号、广告、支付等。
 
 ## 发布WebGL项目<a name="section3"></a>
 

@@ -1,12 +1,11 @@
 # 打包WebGL并发布到oppo小游戏平台
 -   [准备工作](#section2023_0506_002_001)
--   [安装和配置](#section2023_0506_002_002)
 -   [如何使用](#section2023_0506_002_003)
 -   [发布](#section2023_0506_002_004)
 
 # 1. 准备工作<a name="section2023_0506_002_001"></a>
 
-不再赘述，可查看[Unity WebGL OPPO小游戏适配方案](doc/Unity-WebGL转OPPO小游戏适配方案.md)的准备工作
+不再赘述，可查看[Unity WebGL OPPO小游戏适配方案](Unity-WebGL转OPPO小游戏适配方案.md)的准备工作
 
 # 2. 如何使用<a name="section2023_0506_002_003"></a>
 
