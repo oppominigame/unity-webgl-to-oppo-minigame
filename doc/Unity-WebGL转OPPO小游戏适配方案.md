@@ -42,8 +42,7 @@ Unity游戏是使用C\#语言开发的游戏，而OPPO小游戏的运行环境�
     | 2018.4.x     | 2018.4.30f1      |https://unity.com/releases/editor/whats-new/2018.4.30|
     | 2019.4.x     | 2019.4.35f1      |https://unity.com/releases/editor/whats-new/2019.4.35|
     | 2020.3.x     | 2020.3.47f1      |https://unity.com/releases/editor/whats-new/2020.3.47|
-    | 2019.3.x     | 2021.3.14f1      |https://unity.com/releases/editor/whats-new/2021.3.14|
-
+    | 2021.3.x     | 2021.3.14f1      |https://unity.com/releases/editor/whats-new/2021.3.14|
 
 
 ### 2. 安装打包工具
@@ -51,19 +50,22 @@ Unity游戏是使用C\#语言开发的游戏，而OPPO小游戏的运行环境�
 1. 安装 OPPO 小游戏打包工具 [@oppo-minigame/cli](https://www.npmjs.com/package/@oppo-minigame/cli)
 
 ```
-npm i -g @oppo-minigame/cli@2.1.6-beta.10
+npm install -g @oppo-minigame/cli
 ```
 
 2. 运行 `quickgame -V` 能够正确显示版本号表示安装成功
 
 **注：若提示 quickgame 不是内部或外部命令，可重新打开命令提示符窗口或者重启计算机后再运行 quickgame -V**
 
-> Unity ⽀持的打包工具是 2.1.6-beta.10 版本
+> Unity ⽀持的打包工具是 2.1.6 以上版本
+
+更多版本请查看[官方技术文档](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/quickgame)
 
 ### 3. 安装调试器
 
-1. 当前unity适配能力在内测阶段，所以安装压缩包中的 v_6.8.0_beta.apk 包到 OPPO 手机上才能力进行调试（调试包可向oppo小游戏的商务人员索取）
-
+1. 技术官网下载[调试器](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/use)即可，调试器要求V6.8.0以上版本,最低版本号要求**1103**以上
+  ![](imgs/7.png)
+  
 2. 如果安装成功，手机桌面有一个“快应用”图标出现
 
 ### 4. 素材与签名准备

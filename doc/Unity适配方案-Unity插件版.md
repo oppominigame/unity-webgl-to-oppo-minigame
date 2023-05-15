@@ -2,7 +2,8 @@
 - [下载并安装插件](#section1)
 - [OPPO小游戏C#SDK接口使用说明](#section2)
 - [发布WebGL项目](#section3)
-- [本地调试](#section4)
+- [Addressable教程](#section4)
+- [本地调试](#section5)
 
 ## 注意事项<a name="section0"></a>
 **当前插件仅支持Windows用户使用！** Mac用户可使用[Unity-WebGL适配方案-命令行版](Unity适配方案-命令行版.md)
@@ -18,7 +19,14 @@
 
 OPPO小游戏引擎采用了WebGL1.0规范，您需将Unity游戏项目[发布WebGL项目](第二步-发布WebGL项目.md)。
 
-## 本地调试<a name="section4"></a>
+## Addressable教程<a name="section4"></a>
+
+1.  当游戏使用Addressable插件并导出WebGl时，在WebGl文件夹内除项目代码的Build文件夹及index.xml文件，会多出一个StreamingAssets文件夹。
+2.  将StreamingAssets文件夹放到cdn即可。
+3.  插件内勾选<color style = 'color:red'>使用Addressable</color>并输入cdn地址。例：http://localhost:8080/StreamingAssets
+
+
+## 本地调试<a name="section5"></a>
 
 Unity游戏成功转换成OPPO小游戏后，您可以先在本地调试小游戏的功能、性能。
 

@@ -1,50 +1,16 @@
 # 打包WebGL并发布到oppo小游戏平台
--   [前提](#section2023_0506_002_001)
+-   [准备工作](#section2023_0506_002_001)
 -   [安装和配置](#section2023_0506_002_002)
 -   [如何使用](#section2023_0506_002_003)
 -   [发布](#section2023_0506_002_004)
 
-# 1. 前提<a name="section2023_0506_002_001"></a>
+# 1. 准备工作<a name="section2023_0506_002_001"></a>
 
-* 安装了node环境，建议安装14.x以上稳定版本 [node官⽹网：https://nodejs.org/en/]
+不再赘述，可查看[Unity WebGL OPPO小游戏适配方案](doc/Unity-WebGL转OPPO小游戏适配方案.md)的准备工作
 
+# 2. 如何使用<a name="section2023_0506_002_003"></a>
 
-* 游戏包体 rpk 限制在 **30M**以内，并且unity游戏不支持小游戏分包能力。用户本地文件大小限制在 **500M**以内
-
-* 当前支持版本如下：
-
-    | unity版本     | 推荐版本          |
-    | :------      | :-----           | 
-    | 2018.4       | 2018.4.30f1      | 
-    | 2019.4       | 2019.4.35f1      | 
-    | 2020.3       | 2021.3.47f1      | 
-    | 2019.3       | 2021.3.14f1      |
-
-# 2. 安装和配置<a name="section2023_0506_002_002"></a>
-
-## 2.1 安装打包工具
-
-1. 安装 OPPO 小游戏打包工具 [@oppo-minigame/cli](https://www.npmjs.com/package/@oppo-minigame/cli)
-
-```
-npm i -g @oppo-minigame/cli@2.1.6-beta.10
-```
-
-2. 运行 `quickgame -V` 能够正确显示版本号表示安装成功
-
-**注：若提示 quickgame 不是内部或外部命令，可重新打开命令提示符窗口或者重启计算机后再运行 quickgame -V**
-
-> Unity ⽀持的打包工具是 2.1.6-beta.10 版本
-
-## 2.2 安装调试器
-
-1. 当前unity适配能力在内测阶段，所以安装压缩包中的 v_6.8.0_beta.apk 包到 OPPO 手机上才能力进行调试
-
-2. 如果安装成功，手机桌面有一个“快应用”图标出现
-
-# 3. 如何使用<a name="section2023_0506_002_003"></a>
-
-## 3.1 打包 Unity 引擎开发的游戏
+## 2.1 打包 Unity 引擎开发的游戏
 
  1. 将游戏的 Unity 引擎版本升级到指定的版本.
 
@@ -94,7 +60,7 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
     |-xxxxxxxx                          //桌面图标（正方形），开发者自己替换
     |-manifest.json                     //可以配置包名、版本号、授权、图标位置、横竖屏等
 ```
-## 3.2 配置修改与游戏调试
+## 2.2 配置修改与游戏调试
 
 1. 包名、游戏名称、图标等配置修改可直接修改quickgame目录下的manifest.json文件，每次修改后，需要重新打包。
 ```javascript
@@ -137,14 +103,14 @@ npm i -g @oppo-minigame/cli@2.1.6-beta.10
 - 打开快应用=》小游戏 tab即可看到待调试游戏
 详细可查看[技术文档- 真机调试](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/debug)
 
-# 4. 发布<a name="section2023_0506_002_004"></a>
+# 3. 发布<a name="section2023_0506_002_004"></a>
 
 开发完成后，我们发布前，需要使用正式的签名和文件来签名
 
-## 4.1 增加 release 签名
+## 3.1 增加 release 签名
 
  1. 正式签名可参考官方[技术文档](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/quickgame)
 
-## 4.2 发包正式签名的 rpk 包
+## 3.2 发包正式签名的 rpk 包
 
 需要在quickgame目录下使用 “quickgame pack release” 打包生成 rpk，才可以上架到线上。其中开发者需要保留签名，用于以后代码更新重新打包。
