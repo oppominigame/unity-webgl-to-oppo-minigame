@@ -26,24 +26,25 @@ namespace QGMiniGame
         //(msg) => { Debug.Log("QG.HasShortcutInstalled success = " + JsonUtility.ToJson(msg)); },
         //(msg) => { Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg); }
         //);
-        public static void HasShortcutInstalled(Action<QGCommonResponse<QGShortcutBean>> succCallback = null, Action<QGCommonResponse<QGShortcutBean>> failCallback = null)
+        // public static void HasShortcutInstalled(Action<QGCommonResponse<QGShortcutBean>> succCallback = null, Action<QGCommonResponse<QGShortcutBean>> failCallback = null)
+        public static void HasShortcutInstalled(Action<QGCommonResponse<QGHasShortcutInstalled>> succCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
         {
             QGMiniGameManager.Instance.HasShortcutInstalled(succCallback, failCallback);
         }
         #endregion
 
-        #region InstallShortcut  创建桌面图标
-        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/install-shortcut
-        //QG.InstallShortcut(
-        //"我来自Unity",
-        //(msg) => { Debug.Log("QG.InstallShortcut success = " + JsonUtility.ToJson(msg)); },
-        //(msg) => { Debug.Log("QG.InstallShortcut fail = " + msg.errMsg); }
-        //);
-        public static void InstallShortcut(Action<QGBaseResponse> succCallback = null, Action<QGBaseResponse> failCallback = null)
-        {
-            QGMiniGameManager.Instance.InstallShortcut(succCallback, failCallback);
-        }
-        #endregion
+        // #region InstallShortcut  创建桌面图标
+        // // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/install-shortcut
+        // //QG.InstallShortcut(
+        // //"我来自Unity",
+        // //(msg) => { Debug.Log("QG.InstallShortcut success = " + JsonUtility.ToJson(msg)); },
+        // //(msg) => { Debug.Log("QG.InstallShortcut fail = " + msg.errMsg); }
+        // //);
+        // public static void InstallShortcut(Action<QGCommonResponse<QGHasShortcutInstalled>> succCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        // {
+        //     QGMiniGameManager.Instance.InstallShortcut(succCallback, failCallback);
+        // }
+        // #endregion
 
         #region CreateBannerAd  创建Banner广告
         // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/banner-ad
@@ -212,72 +213,21 @@ namespace QGMiniGame
         #endregion
 
         #region storage 
-        // 数据存储  
+        // 数据存储
         public static void StorageSetItem(string keyName, string keyValue)
         {
             QGMiniGameManager.StorageSetItem(keyName, keyValue);
         }
         // 数据读取  
-        public static void StorageGetItem(string keyName)
+        public static string StorageGetItem(string keyName)
         {
-            QGMiniGameManager.StorageGetItem(keyName);
+            return QGMiniGameManager.Instance.StorageGetItem(keyName);
         }
         // 清除数据 
         public static void StorageRemoveItem(string keyName)
         {
             QGMiniGameManager.StorageRemoveItem(keyName);
         }
-        #endregion
-
-
-
-        #region 覆盖unity的PlayerPrefs
-
-        public static void StorageSetIntSync(string key, int value)
-        {
-            QGMiniGameManager.Instance.StorageSetIntSync(key, value);
-        }
-
-        public static int StorageGetIntSync(string key, int defaultValue)
-        {
-            return QGMiniGameManager.Instance.StorageGetIntSync(key, defaultValue);
-        }
-
-        public static void StorageSetStringSync(string key, string value)
-        {
-            QGMiniGameManager.Instance.StorageSetStringSync(key, value);
-        }
-
-        public static string StorageGetStringSync(string key, string defaultValue)
-        {
-            return QGMiniGameManager.Instance.StorageGetStringSync(key, defaultValue);
-        }
-
-        public static void StorageSetFloatSync(string key, float value)
-        {
-            QGMiniGameManager.Instance.StorageSetFloatSync(key, value);
-        }
-
-        public static float StorageGetFloatSync(string key, float defaultValue)
-        {
-            return QGMiniGameManager.Instance.StorageGetFloatSync(key, defaultValue);
-        }
-
-        public static void StorageDeleteAllSync()
-        {
-            QGMiniGameManager.Instance.StorageDeleteAllSync();
-        }
-
-        public static void StorageDeleteKeySync(string key)
-        {
-            QGMiniGameManager.Instance.StorageDeleteKeySync(key);
-        }
-
-        public static bool StorageHasKeySync(string key)
-        {
-            return QGMiniGameManager.Instance.StorageHasKeySync(key);
-        }
-
         #endregion
 
         #region Pay 支付
@@ -298,53 +248,346 @@ namespace QGMiniGame
         //     (msg) => { Debug.Log("QG.Pay fail = " + JsonUtility.ToJson(msg)); },
         //     (msg) => { Debug.Log("QG.Pay complete = " + JsonUtility.ToJson(msg)); }
         // );
-        public static void Pay(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBean>> failCallback = null,Action<QGCommonResponse<QGPayBean>> completeCallback = null)
+        public static void Pay(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
         {
-            QGMiniGameManager.Instance.Pay(param, successCallback, failCallback, completeCallback);
+            QGMiniGameManager.Instance.Pay(param, successCallback, failCallback);
         }
         #endregion
 
-        #region AccessFile 判断文件是否存在 
-        public static string AccessFile(QGAccessFileParam param)
+        #region GetNetworkType 获取网络类型
+
+        public static void GetNetworkType(Action<QGCommonResponse<QGGetNetworkType>> succCallback = null, Action<QGCommonResponse<QGGetNetworkType>> failCallback = null)
         {
-            return QGMiniGameManager.Instance.AccessFile(param);
+          QGMiniGameManager.Instance.GetNetworkType(succCallback, failCallback);
         }
+
         #endregion
 
-        #region ReadFile 读取文件 
-        /*QGFileParam param = new QGFileParam()
+        #region OnNetworkStatusChange 监听网络状态变化事件
+
+        public static void OnNetworkStatusChange(Action<QGOnNetworkStatus> callback)
         {
-            uri = "internal://files/hehe.txt",
-            encoding = "utf8"
-        };
-        QG.ReadFile(
-            param,
-           (msg) => { Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(msg)); },
-               (msg) => { Debug.Log("QG.ReadFile fail = " + JsonUtility.ToJson(msg)); }
-        );*/
-        public static void ReadFile(QGFileParam param, Action<QGFileResponse> successCallback = null, Action<QGFileResponse> failCallback = null)
-        {
-            QGMiniGameManager.Instance.ReadFile(param, successCallback, failCallback);
+            QGMiniGameManager.Instance.OnNetworkStatusChange(callback);
         }
+
+        #endregion
+
+
+        #region VibrateShort 短振动
+
+        public static void VibrateShort()
+        {
+            QGMiniGameManager.Instance.VibrateShort();
+        }
+
+        #endregion
+
+        #region VibrateLong 长振动
+
+        public static void VibrateLong()
+        {
+            QGMiniGameManager.Instance.VibrateLong();
+        }
+
+        #endregion
+
+        #region GetSystemInfo 异步获取系统信息
+
+        public static void GetSystemInfo(Action<QGCommonResponse<QGSystemInfo>> successCallback = null, Action<QGCommonResponse<QGSystemInfo>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.GetSystemInfo(successCallback, failCallback);
+        }
+
+        #endregion
+
+        #region GetSystemInfoSync 同步获取系统信息
+
+        public static string GetSystemInfoSync()
+        {
+            return QGMiniGameManager.Instance.GetSystemInfoSync();
+        }
+
+        #endregion
+
+        #region SetEnableDebugTrue 打开vConsole
+
+        public static void SetEnableDebugTrue()
+        {
+            QGMiniGameManager.Instance.SetEnableDebugTrue();
+        }
+
+        #endregion
+
+        #region SetEnableDebugFalse 关闭vConsole
+
+        public static void SetEnableDebugFalse()
+        {
+            QGMiniGameManager.Instance.SetEnableDebugFalse();
+        }
+
+        #endregion
+
+        #region ShowModal 显示对话框
+
+        public static void ShowModal()
+        {
+            QGMiniGameManager.Instance.ShowModal();
+        }
+
+        #endregion
+
+        #region 键盘
+        public static void ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.ShowKeyboard(param, successCallback, failCallback, completeCallback);
+        }
+
+        public static void OnKeyboardInput(Action<QGResKeyBoardponse> callback)
+        {
+            QGMiniGameManager.Instance.OnKeyboardInput(callback);
+        }
+        
+        public static void OffKeyboardInput()
+        {
+            QGMiniGameManager.Instance.OffKeyboardInput();
+        }
+
+        public static void OnKeyboardConfirm(Action<QGResKeyBoardponse> callback)
+        {
+            QGMiniGameManager.Instance.OnKeyboardConfirm(callback);
+        }
+
+        public static void OffKeyboardConfirm()
+        {
+            QGMiniGameManager.Instance.OffKeyboardConfirm();
+        }
+
+        public static void OnKeyboardComplete(Action<QGResKeyBoardponse> callback)
+        {
+            QGMiniGameManager.Instance.OnKeyboardComplete(callback);
+        }
+
+        public static void OffKeyboardComplete()
+        {
+            QGMiniGameManager.Instance.OffKeyboardComplete();
+        }
+
+        public static void HideKeyboard()
+        {
+            QGMiniGameManager.Instance.HideKeyboard();
+        }
+
+        #endregion
+
+
+        // 文件系统
+        #region Mkdir 创建目录
+
+        public static void Mkdir()
+        {
+            QGMiniGameManager.Instance.Mkdir();
+        }
+
+        #endregion
+
+        #region Rmdir 删除目录
+
+        public static void Rmdir()
+        {
+            QGMiniGameManager.Instance.Rmdir();
+        }
+
+        #endregion
+
+        #region IsExist 是否是目录/文件
+
+        public static void IsExist()
+        {
+            QGMiniGameManager.Instance.IsExist();
+        }
+
+        #endregion
+
+        #region Rename 重命名目录
+
+        public static void Rename()
+        {
+            QGMiniGameManager.Instance.Rename();
+        }
+
+        #endregion
+
+        #region SaveFile 保存临时文件到本地
+
+        public static void SaveFile()
+        {
+            QGMiniGameManager.Instance.SaveFile();
+        }
+
+        #endregion
+
+        #region ReadDir 读取目录内文件列表
+
+        public static void ReadDir()
+        {
+            QGMiniGameManager.Instance.ReadDir();
+        }
+
         #endregion
 
         #region WriteFile 写入文件
-        /*QGFileParam param = new QGFileParam()
+
+        public static void WriteFile()
         {
-            uri = "internal://files/hehe.txt",
-            encoding = "utf8",
-            textStr = "你是谁啊 "
-        };
-        QG.WriteFile(
-            param,
-           (msg) => { Debug.Log("QG.WriteFile success = " + JsonUtility.ToJson(msg)); },
-               (msg) => { Debug.Log("QG.WriteFile fail = " + JsonUtility.ToJson(msg)); }
-        );*/
-        public static void WriteFile(QGFileParam param, Action<QGFileResponse> successCallback = null, Action<QGFileResponse> failCallback = null)
-        {
-            QGMiniGameManager.Instance.WriteFile(param, successCallback, failCallback);
+            QGMiniGameManager.Instance.WriteFile();
         }
+
         #endregion
+
+        #region ReadFile 读取文件
+
+        public static void ReadFile()
+        {
+            QGMiniGameManager.Instance.ReadFile();
+        }
+
+        #endregion
+
+        #region AppendFile 追加文件
+
+        public static void AppendFile()
+        {
+            QGMiniGameManager.Instance.AppendFile();
+        }
+
+        #endregion
+
+        #region CopyFile 复制文件
+
+        public static void CopyFile()
+        {
+            QGMiniGameManager.Instance.CopyFile();
+        }
+
+        #endregion
+
+        #region RemoveSavedFile 删除文件
+
+        public static void RemoveSavedFile()
+        {
+            QGMiniGameManager.Instance.RemoveSavedFile();
+        }
+
+        #endregion
+
+        #region Stat 获取文件信息
+
+        public static void Stat()
+        {
+            QGMiniGameManager.Instance.Stat();
+        }
+
+        #endregion
+
+        #region Unzip 解压文件
+
+        public static void Unzip()
+        {
+            QGMiniGameManager.Instance.Unzip();
+        }
+
+        #endregion
+
+        #region GetFileInfo 获取本地临时文件或本地用户文件的文件信息
+
+        public static void GetFileInfo()
+        {
+            QGMiniGameManager.Instance.GetFileInfo();
+        }
+
+        #endregion
+
+
+        #region PlayAudio 播放远程音频
+
+        public static void PlayAudio()
+        {
+            QGMiniGameManager.Instance.PlayAudio();
+        }
+
+        #endregion 
+
+        #region PauseAudio 暂停音频
+
+        public static void PauseAudio()
+        {
+            QGMiniGameManager.Instance.PauseAudio();
+        }
+
+        #endregion 
+
+        #region OnAudioInterruptionBegin 监听qg.onAudioInterruptionBegin
+
+        public static void OnAudioInterruptionBegin()
+        {
+            QGMiniGameManager.Instance.OnAudioInterruptionBegin();
+        }
+
+        #endregion 
+
+        #region OffAudioInterruptionBegin 取消监听qg.onAudioInterruptionBegin
+
+        public static void OffAudioInterruptionBegin()
+        {
+            QGMiniGameManager.Instance.OffAudioInterruptionBegin();
+        }
+
+        #endregion 
+
+        #region OnAudioInterruptionEnd 监听qg.onAudioInterruptionEnd
+
+        public static void OnAudioInterruptionEnd()
+        {
+            QGMiniGameManager.Instance.OnAudioInterruptionEnd();
+        }
+
+        #endregion 
+
+        #region OffAudioInterruptionEnd 取消监听qg.onAudioInterruptionEnd
+
+        public static void OffAudioInterruptionEnd()
+        {
+            QGMiniGameManager.Instance.OffAudioInterruptionEnd();
+        }
+
+        #endregion 
+
+        #region OnError 监听全局错误事件
+
+        public static void OnError()
+        {
+            QGMiniGameManager.Instance.OnError();
+        }
+
+        #endregion 
+
+        #region OffError 取消监听全局错误事件
+
+        public static void OffError()
+        {
+            QGMiniGameManager.Instance.OffError();
+        }
+
+        #endregion 
+
+        #region DispatchError 模拟触发Error
+
+        public static void DispatchError()
+        {
+            QGMiniGameManager.Instance.DispatchError();
+        }
+
+        #endregion 
     }
 }
 

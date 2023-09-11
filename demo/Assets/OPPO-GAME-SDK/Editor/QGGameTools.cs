@@ -41,7 +41,7 @@ namespace QGMiniGame
 
             commandStr += (" --packageName=" + getConfig.packageName);
  
-            var orientationArr = new[] { "Portrait", "Landscape" };
+            var orientationArr = new[] { "portrait", "landscape" };
             commandStr += (" --orientation=" + orientationArr[getConfig.orientation]);
             commandStr += (" --versionName=" + getConfig.projectVersionName);
             commandStr += (" --versionCode=" + getConfig.projectVersion);
@@ -254,8 +254,9 @@ namespace QGMiniGame
         // 设置打包成 webgl的参数 
         public static void SetPlayer()
         {
-#if UNITY_2021
+#if UNITY_2021 || UNITY_2020
             PlayerSettings.colorSpace = ColorSpace.Gamma;
+            PlayerSettings.WebGL.decompressionFallback = false;
 #endif
             PlayerSettings.runInBackground = false;
             PlayerSettings.WebGL.threadsSupport = false;

@@ -10,6 +10,7 @@ namespace QGMiniGame
         public string callbackId;
         public string errMsg;
         public string errCode;
+        
     }
 
     [Serializable]
@@ -17,8 +18,27 @@ namespace QGMiniGame
     {
         [SerializeField] public H data;
     }
-
     [Serializable]
+    public class QGHasShortcutInstalled
+    {
+        public string errMsg;
+        public string code;
+        public string errCode;
+
+    }
+    [Serializable]
+    public class  QGOnNetworkStatus : QGBaseResponse
+    {
+        public string isConnected;
+        public string networkType;
+    }
+    [Serializable]
+    public class QGResKeyBoardponse : QGBaseResponse
+    {
+        public string value;
+    }
+   
+    [Serializable] 
     public class QGLoginBean
     {   //public string userId;   //无返回
         //public string userName;  //无返回
@@ -35,13 +55,50 @@ namespace QGMiniGame
         public string phoneNum;
     }
 
+    
+
     [Serializable]
     public class QGPayBean
     {
-        public string result; //商户订单号
+        public string orderId; // 商户订单号ID
         public string code; //错误码
     }
 
+    [Serializable]
+    public class QGPayBeanFail
+    {
+        public string data; // 错误信息和错误码
+        public string code; //错误码
+    }
+
+    // 获取网络状态 
+    [Serializable]
+    public class QGGetNetworkType
+    {
+      public string networkType; // 网络类型
+      // public string isConnected; // 当前是否有网络链接
+    }
+
+    // 获取系统信息
+    [Serializable]
+    public class QGSystemInfo
+    {
+        public string brand; // 手机品牌
+        public string language; // 系统语言
+        public string model; // 手机型号
+        public string statusBarHeight; // 状态栏/异形缺口高度
+        public string pixelRatio; // 设备像素比
+        public string platformVersionName; // 客户端平台
+        public string platformVersionCode; // 网络类型
+        public string screenHeight; // 屏幕高度
+        public string screenWidth; // 屏幕宽度
+        public string system; // 系统版本
+        public string windowHeight; // 可使用窗口高度
+        public string windowWidth; // 可使用窗口宽度
+        public string theme; // 系统当前主题
+        public string deviceOrientation; // 设备方向
+        public string COREVersion; // 版本号
+    }
     // [Serializable]
     // public class QGFileBean
     // {
@@ -97,6 +154,12 @@ namespace QGMiniGame
         public string adId; //广告位id
     }
 
+    [Serializable]
+    public class QGKeyboardInputResponse : QGBaseResponse
+    {
+        public string value;
+    }
+
 
     public class QGCommonAdParam
     {
@@ -131,7 +194,7 @@ namespace QGMiniGame
 
     public class PayParam
     {
-        public string appId; // 平台分配的游戏 appId
+        public int appId; // 平台分配的游戏 appId
         public string token; // qg.login 成功时获得的用户 token
         public long timestamp; // 时间戳，CP 服务端参与签名的时间戳
         public string orderNo; // 下单订单号，由统一下单接口返回
@@ -165,6 +228,15 @@ namespace QGMiniGame
       public string encoding = "utf8"; //指定写入文件的字符编码 utf8 or binary，默认值为 utf8
       public object data;  // 要写入的文本或二进制数据
       public string append; // 默认为 false，覆盖旧文件
+    }
+
+    public class KeyboardParam
+    {
+        public string defaultValue; //键盘输入框显示的默认值
+        public int maxLength; //键盘中文本的最大长度
+        public bool multiple; //是否为多行输入
+        public bool confirmHold; //当点击完成时键盘是否收起
+        public string confirmType; //键盘右下角confirm按钮类型，只影响按钮的文本内容
     }
 
 

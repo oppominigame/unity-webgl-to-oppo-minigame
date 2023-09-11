@@ -11,31 +11,677 @@ var QgGameBridge = {
       "RewardedVideoAdOnCloseCallBack",
     ACTION_CALL_BACK_METHORD_NAME_AD_LOAD_NATIVE: "NativeAdOnLoadCallBack",
   },
-
   $mAdMap: {},
 
   $mFileData: {},
-  // Storage
-  QGStorageSetItem: function (keyName, keyValue) {
-    var keyNameStr = UTF8ToString(keyName);
-    var keyValueStr = UTF8ToString(keyValue);
-    localStorage.setItem(keyNameStr, keyValueStr);
-    console.log("QGStorageSetItem success");
+
+  QGShowModal: function () {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.showModal({
+      title: "提示",
+      content: "如需查看功能API接口详细日志信息打印，请先打开vConsole，点击vConsole进行查看。",
+      showCancel: false,
+      success: function(res) {
+        if (res.confirm) {
+          console.log("用户点击确定");
+        } else if (res.cancel) {
+          console.log("用户点击取消");
+        }
+      },
+    });
   },
-  QGStorageGetItem: function (keyName) {
-    var keyNameStr = UTF8ToString(keyName);
-    var val = localStorage.getItem(keyNameStr);
-    console.log("QGStorageGetItem111: " + val);
-    if (val) {
-      console.log("QGStorageGetItem: " + val);
+  QGGetNetworkType: function (success, fail) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    qg.getNetworkType({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res,
+        });
+        console.log(json);
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetNetworkTypeCallback",
+          json
+        );
+        console.log("获取网络状态：" + res.networkType);
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetNetworkTypeCallback",
+          json
+        );
+        console.log("获取网络状态失败：" + err);
+      },
+    });
+  },
+
+  QGOnNetworkStatusChange: function (callback) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var callbackID = Pointer_stringify(callback);
+    var func = function (data) {
+      var json = JSON.stringify({
+        callbackId: callbackID,
+        isConnected: data.isConnected,
+        networkType: data.networkType
+      })
+      console.log(data);
+      console.log(json);
+      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnNetworkStatusChangeResponseCallback", json);
+    }
+    qg.onNetworkStatusChange(func)
+    // qg.onNetworkStatusChange(function (res) {
+    //   console.log(
+    //     "当前是否有网络：" + res.isConnected + "," + "网络类型为：" + res.networkType
+    //   )
+    // });
+  },
+
+  QGVibrateShort: function () {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+
+    qg.vibrateShort({
+      type: "light", // heavy、medium、light
+      success: function (res) {
+        console.log("短振动-light");
+      },
+      fail: function (res) { },
+    });
+  },
+
+  QGVibrateLong: function () {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+
+    qg.vibrateLong({
+      success: function (res) {
+        console.log("长振动");
+      },
+      fail: function (res) { },
+    });
+  },
+
+  QGGetSystemInfo: function (success, fail) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    qg.getSystemInfo({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res,
+        });
+        console.log(json);
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "SystemInfo",
+          json
+        );
+        console.log("异步");
+        console.log("手机品牌 brand：" + res.brand);
+        console.log("系统语言 language：" + res.language);
+        console.log("手机型号 model：" + res.model);
+        console.log("状态栏/异形缺口高度 statusBarHeight：" + res.statusBarHeight);
+        console.log("设备像素比 pixelRatio：" + res.pixelRatio);
+        console.log("客户端平台 platformVersionName：" + res.platformVersionName);
+        console.log("平台版本号 platformVersionCode：" + res.platformVersionCode);
+        console.log("屏幕高度 screenHeight：" + res.screenHeight);
+        console.log("屏幕宽度 screenWidth：" + res.screenWidth);
+        console.log("系统版本 system：" + res.system);
+        console.log("可使用窗口高度 windowHeight：" + res.windowHeight);
+        console.log("可使用窗口宽度 windowWidth：" + res.windowWidth);
+        console.log("系统当前主题 theme：" + res.theme);
+        console.log("设备方向 deviceOrientation：" + res.deviceOrientation);
+        console.log("版本号 COREVersion：" + res.COREVersion);
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "SystemInfo",
+          json
+        );
+        console.log("异步获取系统信息失败")
+      },
+    });
+  },
+
+  QGGetSystemInfoSync: function () {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var res = qg.getSystemInfoSync()
+    var returnStr = JSON.stringify(res)
+    console.log(returnStr)
+    if (returnStr) {
+      var bufferSize = lengthBytesUTF8(returnStr) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(returnStr, buffer, bufferSize);
+      return buffer;
     } else {
-      console.log("QGStorageGetItem No data");
+      console.log("获取同步系统信息失败");
+    }
+    // console.log("同步");
+    // console.log("手机品牌 brand：" + res.brand);
+    // console.log("系统语言 language：" + res.language);
+    // console.log("手机型号 model：" + res.model);
+    // console.log("状态栏/异形缺口高度 statusBarHeight：" + res.statusBarHeight);
+    // console.log("设备像素比 pixelRatio：" + res.pixelRatio);
+    // console.log("客户端平台 platformVersionName：" + res.platformVersionName);
+    // console.log("平台版本号 platformVersionCode：" + res.platformVersionCode);
+    // console.log("屏幕高度 screenHeight：" + res.screenHeight);
+    // console.log("屏幕宽度 screenWidth：" + res.screenWidth);
+    // console.log("系统版本 system：" + res.system);
+    // console.log("可使用窗口高度 windowHeight：" + res.windowHeight);
+    // console.log("可使用窗口宽度 windowWidth：" + res.windowWidth);
+    // console.log("系统当前主题 theme：" + res.theme);
+    // console.log("设备方向 deviceOrientation：" + res.deviceOrientation);
+    // console.log("版本号 COREVersion：" + res.COREVersion);
+  },
+
+  // vConsole
+  QGSetEnableDebugTrue: function () {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.setEnableDebug({
+      enableDebug: true, // true 为打开，false 为关闭
+      success: function () {
+        // 以下语句将会在 vConsole 面板输出
+        console.log("test consol log");
+        console.info("test console info");
+        console.warn("test consol warn");
+        console.debug("test consol debug");
+        console.error("test consol error");
+      },
+      complete: function () { },
+      fail: function () { },
+    });
+  },
+
+  QGSetEnableDebugFalse: function () {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.setEnableDebug({
+      enableDebug: false, // true 为打开，false 为关闭
+      success: function () {
+        // 以下语句将会在 vConsole 面板输出
+        console.log("test consol log");
+        console.info("test console info");
+        console.warn("test consol warn");
+        console.debug("test consol debug");
+        console.error("test consol error");
+      },
+      complete: function () { },
+      fail: function () { },
+    });
+  },
+
+  QGShowKeyboard: function (param, success, fail, complete) {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+
+    qg.showKeyboard({
+      defaultValue: paramData.defaultValue,
+      maxLength: paramData.maxLength,
+      multiple: paramData.multiple,
+      confirmHold: paramData.confirmHold,
+      confirmType: paramData.confirmType,
+      success: function () {
+        var json = JSON.stringify({
+          callbackId: successID,
+        })
+        console.log(json);
+        unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,"ShowKeyboardResponseCallback", json);
+        console.log("show keyboard success");
+      },
+      fail: function () {
+        var json = JSON.stringify({
+          callbackId: failID,
+        })
+        console.log(json);
+        unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "ShowKeyboardResponseCallback", json);
+        console.log("show keyboard fail");
+      }
+    })
+  },
+
+
+  QGOnKeyboardInput: function (callback) {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var callbackID = Pointer_stringify(callback);
+
+    var func = function (data) {
+      var json = JSON.stringify({
+        callbackId: callbackID,
+        value: data.value
+
+      })
+      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnKeyboardInputResponseCallback", json);
+    };
+
+    qg.onKeyboardInput(func);
+  },
+
+  QGOffKeyboardInput: function () {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.offKeyboardInput();
+  },
+
+  QGOnKeyboardConfirm: function (callback) {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var callbackID = Pointer_stringify(callback);
+
+    var func = function (data) {
+      var json = JSON.stringify({
+        callbackId: callbackID,
+        value: data.value
+
+      })
+      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnKeyboardInputResponseCallback", json);
+    };
+    qg.onKeyboardConfirm(func);
+  },
+
+  QGOffKeyboardConfirm: function (callback) {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.offKeyboardConfirm();
+  },
+
+  QGOnKeyboardComplete: function (callback) {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var callbackID = Pointer_stringify(callback);
+
+    var func = function (data) {
+      var json = JSON.stringify({
+        callbackId: callbackID,
+        value: data.value
+
+      })
+      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnKeyboardInputResponseCallback", json);
+    };
+    qg.onKeyboardComplete(func);
+  },
+
+  QGOffKeyboardComplete: function (callback) {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.offKeyboardComplete();
+  },
+
+  QGHideKeyboard: function () {
+    if (typeof (qg) == 'undefined') {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.hideKeyboard();
+  },
+
+  QGMkdir: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.mkdir({
+      dirPath: localDir,
+      encoding: "utf8",
+      success: function () {
+        console.log("创建目录成功：" + localDir)
+      },
+      fail: function (res) {
+        console.log("创建目录失败：" + localDir + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGRmdir: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.rmdir({
+      dirPath: localDir,
+      success: function () {
+        console.log("删除目录成功：" + localDir)
+      },
+      fail: function (res) {
+        console.log("删除目录失败：" + localDir + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGIsExist: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    try {
+      var dirStat = fs.statSync(localDir, false)
+      var fileStat = fs.statSync(localFilePath, false)
+      console.log(localDir + "是否是目录：" + dirStat.isDirectory() +
+        localFilePath + "是否是文件：" + fileStat.isFile())
+    } catch (error) {
+      console.log(error + ", 请创建目录、写入文件")
     }
   },
-  QGStorageRemoveItem: function (keyName) {
-    var keyNameStr = UTF8ToString(keyName);
-    localStorage.removeItem(keyNameStr);
-    console.log("QGStorageRemoveItem: " + keyNameStr);
+
+  QGRename: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.rename({
+      oldPath: localDir,
+      // newPath: `${qgDir}/new${Math.random()}`,
+      newPath: qgDir + "/new/" + Math.random(),
+      success: function () {
+        console.log("重命名目录成功：" + localDir + "=>" + qgDir + "/new")
+      },
+      fail: function (res) {
+        console.log("重命名目录失败：" + localDir + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGSaveFile: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    qg.chooseImage({
+      count: 1,
+      sizeType: ['original'],
+      sourceType: ['album'],
+      success: function (imgRes) {
+        fs.saveFile({
+          filePath: localFilePath,
+          tempFilePath: imgRes.tempFilePaths[0],
+          success: function (res) {
+            console.log("保存地址为: " + res.savedFilePath)
+          },
+          fail: function (res) {
+            console.log("error：" + JSON.stringify(res))
+          }
+        })
+      },
+      fail: function (e) {
+        console.log("选择图片失败：" + JSON.stringify(e))
+      }
+    })
+  },
+
+  QGReadDir: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.readdir({
+      dirPath: localDir,
+      success: function (res) {
+        console.log("success：" + localDir + "，" + res.files)
+      },
+      fail: function (res) {
+        console.log("error：" + localFilePath + "=>" + qgDir + "/newPath.txt，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGWriteFile: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    var data = "Hello world."
+    var encoding = "utf8"
+    fs.writeFile({
+      filePath: localFilePath,
+      data: data,
+      encoding: encoding,
+      success: function () {
+        console.log("写入文件成功：" + localFilePath)
+      },
+      fail: function (res) {
+        console.log(JSON.stringify(res))
+      }
+    })
+  },
+
+  QGReadFile: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.readFile({
+      filePath: localFilePath,
+      data: "Hello world.",
+      encoding: "utf8",
+      success: function (res) {
+        console.log("读取文件成功：" + localFilePath + "，" + res.data)
+      },
+      fail: function (res) {
+        console.log("读取文件失败：" + localFilePath + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGAppendFile: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.appendFile({
+      filePath: localFilePath,
+      data: "Hello world.",
+      encoding: "utf8",
+      success: function () {
+        console.log("追加文件成功：" + localFilePath)
+      },
+      fail: function (res) {
+        console.log("追加文件失败：" + localFilePath + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGCopyFile: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.copyFile({
+      srcPath: localFilePath,
+      destPath: qgDir + "/copy.txt",
+      success: function () {
+        console.log("复制文件成功：" + localFilePath + "=>" + qgDir + "/copy.txt")
+      },
+      fail: function (res) {
+        console.log("复制文件失败：" + localFilePath + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGRemoveSavedFile: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.removeSavedFile({
+      filePath: localFilePath,
+      success: function () {
+        console.log("删除文件成功：" + localFilePath)
+      },
+      fail: function (res) {
+        console.log("追删除文件失败：" + localFilePath + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGStat: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    fs.stat({
+      path: localFilePath,
+      success: function (res) {
+        console.log("获取文件信息成功" + localFilePath + "：" + JSON.stringify(res))
+      },
+      fail: function (res) {
+        console.log("获取文件信息失败" + localFilePath + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGUnzip: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var localDir = qgDir + "/my"
+    var fs = qg.getFileSystemManager()
+    var tempFilePath = qg.env.USER_DATA_PATH + "/test.zip"
+    var url = "https://cdofs.oppomobile.com/cdo-activity/static/201905/08/da1f253b1854d1c6353ec79c3e3e8145.zip"
+    qg.downloadFile({
+      // TODO: 替换自己的文件压缩包
+      url: url,
+      filePath: tempFilePath
+    });
+    fs.unzip({
+      zipFilePath: tempFilePath,
+      targetPath: qgDir,
+      success: function (res) {
+        console.log("解压文件成功：" + qgDir)
+      },
+      fail: function (res) {
+        console.log("解压文件失败：" + qgDir + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGGetFileInfo: function () {
+    var qgDir = qg.env.USER_DATA_PATH
+    var localFilePath = qgDir + "/my/file.txt"
+    var fs = qg.getFileSystemManager()
+    fs.getFileInfo({
+      filePath: localFilePath,
+      success: function (res) {
+        console.log("success: " + localFilePath + "，" + "文件大小：" + res.size + "字节")
+      },
+      fail: function (res) {
+        console.log("error：" + localFilePath + "，" + JSON.stringify(res))
+      }
+    })
+  },
+
+  QGPlayAudio: function () {
+    var innerAudioContext = qg.createInnerAudioContext()
+    innerAudioContext.src = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3"
+    innerAudioContext.play()
+    // CONSTANT.InnerAudioContext.src = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3"
+    // CONSTANT.InnerAudioContext.play()
+    console.log("播放远程音频")
+  },
+  QGPauseAudio: function () {
+    var innerAudioContext = qg.createInnerAudioContext()
+    innerAudioContext.pause()
+    innerAudioContext.stop()
+    // CONSTANT.InnerAudioContext.pause()
+    console.log("暂停音频")
+  },
+  QGOnAudioInterruptionBegin: function () {
+    qg.onAudioInterruptionBegin(function () {
+      console.log("onAudioInterruptionBegin success: " + new Date().toLocaleString());
+    })
+    console.log("监听qg.onAudioInterruptionBegin");
+  },
+
+  QGOffAudioInterruptionBegin: function () {
+    qg.offAudioInterruptionBegin()
+    console.log("取消监听qg.onAudioInterruptionBegin");
+  },
+
+  QGOnAudioInterruptionEnd: function () {
+    qg.onAudioInterruptionEnd(function () {
+      console.log("onAudioInterruptionEnd success: " + new Date().toLocaleString());
+    })
+    console.log("监听qg.onAudioInterruptionEnd");
+  },
+
+  QGOffAudioInterruptionEnd: function () {
+    qg.offAudioInterruptionEnd()
+    console.log("取消监听qg.onAudioInterruptionEnd");
+  },
+
+  QGOnError: function () {
+    qg.onError(function (res) {
+      console.log("onError success: " + res.message.slice(0, 149));
+    })
+    console.log("监听全局错误事件");
+  },
+
+  QGOffError: function () {
+    qg.offError()
+    console.log("取消监听全局错误事件");
+  },
+
+  QGDispatchError: function () {
+    console.log("模拟触发Error");
+    throw Error('dispatch Error')
   },
 
   QGLogin: function (success, fail) {
@@ -53,17 +699,18 @@ var QgGameBridge = {
           callbackId: successID,
           data: res.data,
         });
+        console.log(json);
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
           "LoginResponseCallback",
           json
         );
       },
-      fail: function (res) {
+      fail: function (err) {
         var json = JSON.stringify({
           callbackId: failID,
-          errMsg: res.errMsg,
-          errCode: res.errCode,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -85,30 +732,50 @@ var QgGameBridge = {
 
     qg.hasShortcutInstalled({
       success: function (res) {
-        // If the icon does not exist, create an icon
         if (res == false) {
           qg.installShortcut({
-            success: function () {
-              // Perform user created icon rewards
-              console.log("qg.installShortcut create icon success");
+            success: function (res) {
+              console.log("调起创建桌面图标弹窗成功：" + JSON.stringify(res));
+              var json = JSON.stringify({
+                callbackId: successID,
+                data: res,
+              });
+              console.log(res);
+              console.log(res.data);
+              console.log(json);
+              unityInstance.SendMessage(
+                CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+                "HasShortcutInstalledResponseCallback",
+                json
+              );
             },
             fail: function (err) {
-              console.log("qg.installShortcut create icon fail");
-            },
-            complete: function () {
-              console.log("qg.installShortcut create icon  called");
+              console.log("调起创建桌面图标弹窗失败：" + JSON.stringify(err));
+              var json = JSON.stringify({
+                callbackId: failID,
+                data: err,
+              });
+              console.log(err);
+              console.log(json);
+              unityInstance.SendMessage(
+                CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+                "HasShortcutInstalledResponseCallback",
+                json
+              );
             },
           });
         } else {
-          console.log("desktop icon has been created");
+          console.log('桌面图标已创建')
         }
       },
-      fail: function (res) {
+      fail: function (err) {
         var json = JSON.stringify({
           callbackId: failID,
-          errMsg: res.errMsg,
-          errCode: res.errCode,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
         });
+        console.log(err);
+        console.log(json);
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
           "ShortcutResponseCallback",
@@ -126,7 +793,8 @@ var QgGameBridge = {
     var successID = UTF8ToString(success);
     var failID = UTF8ToString(fail);
 
-    qg.installShortcut({success: function (res) {
+    qg.installShortcut({
+      success: function (res) {
         var json = JSON.stringify({
           callbackId: successID,
           data: res,
@@ -137,10 +805,10 @@ var QgGameBridge = {
           json
         );
       },
-      fail: function (res) {
+      fail: function (err) {
         var json = JSON.stringify({
           callbackId: failID,
-          errMsg: res,
+          errMsg: err,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -204,6 +872,31 @@ var QgGameBridge = {
       bannerAd.show();
     }
   },
+  // showBannerAd
+  // QGshowBannerAd: function () {
+  //   if (!!this.bannerAd) {
+  //     this.bannerAd.show();
+  // } else {
+  //     this.QGCreateBannerAd(true);
+  // }
+  // },
+  // // hideBannerAd
+  // QGhideBannerAd: function () {
+  //   console.log("请求隐藏BannerAD : HOME");
+  //   if (!!this.bannerAd) {
+  //       this.bannerAd.hide();
+  //   }
+  // },
+  // // destroyBannerAd
+  // QGdestroyBannerAd: function () {
+  //   console.log("请求毁掉BannerAD : HOME");
+  //   if (!!this.bannerAd) {
+  //       this.bannerAd.destroy();
+  //       this.bannerAd = null;
+  //   }
+  // },
+  
+  
   // RewardedVideoAd
   QGCreateRewardedVideoAd: function (adId, adUnitId) {
     if (typeof qg == "undefined") {
@@ -486,7 +1179,12 @@ var QgGameBridge = {
             console.log("gamePortalAd show success");
           })
           .catch(function (error) {
-            console.log("gamePortalAd show fail with:" + error.errCode + "," + error.errMsg);
+            console.log(
+              "gamePortalAd show fail with:" +
+              error.errCode +
+              "," +
+              error.errMsg
+            );
           });
         var json = JSON.stringify({
           callbackId: adIdStr,
@@ -556,10 +1254,7 @@ var QgGameBridge = {
         })
         .catch(function (error) {
           console.log(
-            "GameDrawerAd show fail with:" +
-              error.errCode +
-              "," +
-              error.errMsg
+            "GameDrawerAd show fail with:" + error.errCode + "," + error.errMsg
           );
         });
       GameDrawerAd.onShow(function () {
@@ -613,8 +1308,8 @@ var QgGameBridge = {
           var errCodeValue = !err
             ? ""
             : err.data
-            ? err.data.errCode
-            : err.errCode;
+              ? err.data.errCode
+              : err.errCode;
           var json = JSON.stringify({
             callbackId: failID,
             errMsg: errMsgStr,
@@ -673,8 +1368,8 @@ var QgGameBridge = {
           var errCodeValue = !err
             ? ""
             : err.data
-            ? err.data.errCode
-            : err.errCode;
+              ? err.data.errCode
+              : err.errCode;
           var json = JSON.stringify({
             callbackId: failID,
             errMsg: errMsgStr,
@@ -713,11 +1408,8 @@ var QgGameBridge = {
     var successID = UTF8ToString(success);
     var failID = UTF8ToString(fail);
     var adIdStr = UTF8ToString(adId);
-    console.log("adIdStr11111111111111111111："+ adIdStr);
+
     var ad = mAdMap.get(adIdStr);
-    console.log("ad1111111111111111111111111："+ ad);
-
-
 
     if (ad) {
       ad.load()
@@ -736,8 +1428,8 @@ var QgGameBridge = {
           var errCodeValue = !err
             ? ""
             : err.data
-            ? err.data.errCode
-            : err.errCode;
+              ? err.data.errCode
+              : err.errCode;
           var json = JSON.stringify({
             callbackId: failID,
             errMsg: errMsgStr,
@@ -802,132 +1494,33 @@ var QgGameBridge = {
     }
   },
 
-  QGStorageSetIntSync: function (key, value) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
+  // Storage
+  QGStorageSetItem: function (keyName, keyValue) {
+    var keyNameStr = UTF8ToString(keyName);
+    var keyValueStr = UTF8ToString(keyValue);
+    localStorage.setItem(keyNameStr, keyValueStr);
+    console.log("QGStorageSetItem success");
+  },
+  QGStorageGetItem: function (keyName) {
+    var keyNameStr = UTF8ToString(keyName);
+    var returnStr = localStorage.getItem(keyNameStr);
+    if (returnStr) {
+      var bufferSize = lengthBytesUTF8(returnStr) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(returnStr, buffer, bufferSize);
+      return buffer;
+    } else {
+      console.log("暂无数据");
     }
-    var keyStr = UTF8ToString(key);
-    var valueStr = value + "";
-
-    qg.setStorageSync({
-      key: keyStr,
-      value: valueStr,
-    });
+  },
+  QGStorageRemoveItem: function (keyName) {
+    var keyNameStr = UTF8ToString(keyName);
+    localStorage.removeItem(keyNameStr);
+    console.log("QGStorageRemoveItem: " + keyNameStr);
   },
 
-  QGStorageGetIntSync: function (key, defaultValue) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-    var defaultValueStr = defaultValue + "";
-
-    var result = qg.getStorageSync({
-      key: keyStr,
-      default: defaultValueStr,
-    });
-    return parseInt(result);
-  },
-
-  QGStorageSetStringSync: function (key, value) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-    var valueStr = UTF8ToString(value);
-
-    qg.setStorageSync({
-      key: keyStr,
-      value: valueStr,
-    });
-  },
-
-  QGStorageGetStringSync: function (key, defaultValue) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-    var defaultValueStr = UTF8ToString(defaultValue);
-
-    var result = qg.getStorageSync({
-      key: keyStr,
-      default: defaultValueStr,
-    });
-
-    var bufferSize = lengthBytesUTF8(result) + 1;
-    var buffer = _malloc(bufferSize);
-    stringToUTF8(result, buffer, bufferSize);
-
-    return buffer;
-  },
-
-  QGStorageSetFloatSync: function (key, value) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-    var valueStr = value + "";
-
-    qg.setStorageSync({
-      key: keyStr,
-      value: valueStr,
-    });
-  },
-
-  QGStorageGetFloatSync: function (key, defaultValue) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-    var defaultValueStr = defaultValue + "";
-
-    var result = qg.getStorageSync({
-      key: keyStr,
-      default: defaultValueStr,
-    });
-    return parseFloat(result);
-  },
-
-  QGStorageDeleteAllSync: function () {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    qg.clearStorageSync();
-  },
-
-  QGStorageDeleteKeySync: function (key) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-    qg.deleteStorageSync({
-      key: keyStr,
-    });
-  },
-
-  QGStorageHasKeySync: function (key) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var keyStr = UTF8ToString(key);
-
-    var result = qg.getStorageSync({
-      key: keyStr,
-    });
-
-    return result === "" ? false : true;
-  },
   // pay
-  QGPay: function (param, success, fail, complete) {
+  QGPay: function (param, success, fail) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
@@ -936,14 +1529,14 @@ var QgGameBridge = {
     var paramStr = UTF8ToString(param);
     var successID = UTF8ToString(success);
     var failID = UTF8ToString(fail);
-    var completeID = UTF8ToString(complete);
+    var paramObj = JSON.parse(paramStr)
 
     qg.pay({
-      appId: paramStr.appId,
-      token: paramStr.token,
-      timestamp: paramStr.timestamp,
-      orderNo: paramStr.orderNo,
-      paySign: paramStr.paySign,
+      appId: paramObj.appId,
+      token: paramObj.token,
+      timestamp: paramObj.timestamp,
+      orderNo: paramObj.orderNo,
+      paySign: paramObj.paySign,
       success: function (res) {
         var json = JSON.stringify({
           callbackId: successID,
@@ -954,153 +1547,23 @@ var QgGameBridge = {
           "PayResponseCallback",
           json
         );
+        console.log("支付成功：" + JSON.stringify(res));
       },
       fail: function (err) {
         var json = JSON.stringify({
           callbackId: failID,
-          data: err.data,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
+          data: err
         });
+        console.log(json);
+        console.log("fail json" + json);
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "PayResponseCallback",
+          "PayResponseFailCallback",
           json
         );
-      },
-      complete: function () {
-        var json = JSON.stringify({
-          callbackId: completeID,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "PayResponseCallback",
-          json
-        );
-      },
-    });
-  },
-
-  QGAccessFile: function (path) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-
-    var pathStr = UTF8ToString(path);
-    var fs = qg.getFileSystemManager();
-    var result = fs.access({
-      path: pathStr,
-      success: function (res) {
-        console.log("QGAccessFile  have");
-      },
-      fail: function (err) {
-        console.log("QGAccessFile  nohave");
-      },
-    });
-
-    var bufferSize = lengthBytesUTF8(result) + 1;
-    var buffer = _malloc(bufferSize);
-    stringToUTF8(result, buffer, bufferSize);
-
-    return buffer;
-  },
-
-  QGReadFile: function (uri, encoding, position, length, success, fail) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-
-    var uriStr = UTF8ToString(uri);
-    var encodingStr = UTF8ToString(encoding);
-    var successID = UTF8ToString(success);
-    var failID = UTF8ToString(fail);
-
-    qg.readFile({
-      uri: uriStr,
-      encoding: encodingStr,
-      position: position,
-      length: length,
-      success: function (data) {
-        if (encodingStr == "binary") {
-          mFileData[successID] = data.text;
-        }
-        var json = JSON.stringify({
-          callbackId: successID,
-          textStr: data.text,
-          encoding: encodingStr,
-          byteLength: data.text.byteLength,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "ReadFileResponseCallback",
-          json
-        );
-      },
-      fail: function (data, code) {
-        var json = JSON.stringify({
-          callbackId: failID,
-          errCode: code,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "ReadFileResponseCallback",
-          json
-        );
-      },
-    });
-  },
-
-  QGGetFileBuffer: function (buffer, callBackId) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-
-    var callBackIdStr = UTF8ToString(callBackId);
-    HEAPU8.set(new Uint8Array(mFileData[callBackIdStr]), buffer);
-    delete mFileData[callBackIdStr];
-  },
-
-  QGWriteFile: function (filePath, data, encoding, success, fail) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var fs = qg.getFileSystemManager();
-    var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    // var localDir = `${qgDir}/my`;
-    var filePathStr = UTF8ToString(filePath);
-    var dataStrFinal = UTF8ToString(data);
-    // var appendStr = UTF8ToString(append);
-    var encodingStr = UTF8ToString(encoding);
-    var successID = UTF8ToString(success);
-    var failID = UTF8ToString(fail);
-
-    fs.writeFile({
-      filePath: localFilePath,
-      encoding: encodingStr,
-      data: dataStrFinal,
-      success: function (filePath) {
-        var json = JSON.stringify({
-          callbackId: successID,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "WriteFileResponseCallback",
-          json
-        );
-      },
-      fail: function (data, code) {
-        var json = JSON.stringify({
-          callbackId: failID,
-          errCode: code,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "WriteFileResponseCallback",
-          json
-        );
+        console.log("支付失败：" + JSON.stringify(err));
       },
     });
   },

@@ -48,21 +48,355 @@ namespace QGMiniGame
 
         #region 获取桌面图标是否创建
 
-        public void HasShortcutInstalled(Action<QGCommonResponse<QGShortcutBean>> successCallback = null, Action<QGCommonResponse<QGShortcutBean>> failCallback = null)
+        public void HasShortcutInstalled(Action<QGCommonResponse<QGHasShortcutInstalled>> successCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
         {
             QGHasShortcutInstalled(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
         #endregion
 
-        #region 创建桌面图标
+        // #region 创建桌面图标
 
-        public void InstallShortcut(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        // public void InstallShortcut(Action<QGCommonResponse<QGHasShortcutInstalled>> successCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        // {
+        //     QGInstallShortcut(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        // }
+
+        // #endregion
+
+        #region 获取网络类型
+
+        public void GetNetworkType(Action<QGCommonResponse<QGGetNetworkType>> successCallback = null, Action<QGCommonResponse<QGGetNetworkType>> failCallback = null)
         {
-            QGInstallShortcut(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            QGGetNetworkType(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
         #endregion
+
+        #region 监听网络状态变化事件
+
+        public void OnNetworkStatusChange(Action<QGOnNetworkStatus> successCallback = null)
+        {
+            QGOnNetworkStatusChange(QGCallBackManager.Add(successCallback));
+        }
+
+        #endregion
+
+
+        #region 短振动
+
+        public void VibrateShort()
+        {
+            QGVibrateShort();
+        }
+
+        #endregion
+
+        #region 长振动
+
+        public void VibrateLong()
+        {
+            QGVibrateLong();
+        }
+
+        #endregion
+
+        #region 异步获取系统信息
+
+        public void GetSystemInfo(Action<QGCommonResponse<QGSystemInfo>> successCallback = null, Action<QGCommonResponse<QGSystemInfo>> failCallback = null)
+        {
+            QGGetSystemInfo(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+        
+        #endregion
+
+        #region 同步获取系统信息
+
+        public string GetSystemInfoSync()
+        {
+            return QGGetSystemInfoSync();
+        }
+
+        #endregion
+
+        #region 打开vConsole
+
+        public void SetEnableDebugTrue()
+        {
+            QGSetEnableDebugTrue();
+        }
+        
+        #endregion
+
+        #region 关闭vConsole
+
+        public void SetEnableDebugFalse()
+        {
+            QGSetEnableDebugFalse();
+        }
+        
+        #endregion
+
+        #region 显示对话框
+
+        public void ShowModal()
+        {
+            QGShowModal();
+        }
+        
+        #endregion
+
+        #region 键盘
+        public void ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGShowKeyboard(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), 
+            QGCallBackManager.Add(failCallback),
+             QGCallBackManager.Add(completeCallback));
+        }
+
+        public void OnKeyboardInput(Action<QGResKeyBoardponse> successCallback = null)
+        {
+            QGOnKeyboardInput(QGCallBackManager.Add(successCallback));
+        }
+
+        public void OffKeyboardInput()
+        {
+            QGOffKeyboardInput();
+        }
+
+        public void OnKeyboardConfirm(Action<QGResKeyBoardponse> successCallback = null)
+        {
+            QGOnKeyboardConfirm(QGCallBackManager.Add(successCallback));
+        }
+
+        public void OffKeyboardConfirm()
+        {
+            QGOffKeyboardConfirm();
+        }
+
+        public void OnKeyboardComplete(Action<QGResKeyBoardponse> successCallback = null)
+        {
+            QGOnKeyboardComplete(QGCallBackManager.Add(successCallback));
+        }
+
+        public void OffKeyboardComplete()
+        {
+            QGOffKeyboardComplete();
+        }
+
+        public void HideKeyboard()
+        {
+            QGHideKeyboard();
+        }
+        #endregion
+
+        #region 创建目录
+
+        public void Mkdir()
+        {
+            QGMkdir();
+        }
+        
+        #endregion
+
+        #region 删除目录
+
+        public void Rmdir()
+        {
+            QGRmdir();
+        }
+        
+        #endregion
+
+        #region 是否是目录/文件
+
+        public void IsExist()
+        {
+            QGIsExist();
+        }
+        
+        #endregion
+
+        #region 重命名目录
+
+        public void Rename()
+        {
+            QGRename();
+        }
+        
+        #endregion
+
+        #region 保存临时文件到本地
+
+        public void SaveFile()
+        {
+            QGSaveFile();
+        }
+        
+        #endregion
+
+        #region 读取目录内文件列表
+
+        public void ReadDir()
+        {
+            QGReadDir();
+        }
+        
+        #endregion
+
+        #region 写入文件
+
+        public void WriteFile()
+        {
+            QGWriteFile();
+        }
+        
+        #endregion
+
+        #region 读取文件
+
+        public void ReadFile()
+        {
+            QGReadFile();
+        }
+        
+        #endregion
+
+        #region 追加文件
+
+        public void AppendFile()
+        {
+            QGAppendFile();
+        }
+        
+        #endregion
+
+        #region 复制文件
+
+        public void CopyFile()
+        {
+            QGCopyFile();
+        }
+        
+        #endregion
+
+        #region 删除文件
+
+        public void RemoveSavedFile()
+        {
+            QGRemoveSavedFile();
+        }
+        
+        #endregion
+
+        #region 获取文件信息
+
+        public void Stat()
+        {
+            QGStat();
+        }
+        
+        #endregion
+
+        #region 解压文件
+
+        public void Unzip()
+        {
+            QGUnzip();
+        }
+        
+        #endregion
+
+        #region 获取本地临时文件或本地用户文件的文件信息
+
+        public void GetFileInfo()
+        {
+            QGGetFileInfo();
+        }
+        
+        #endregion
+
+        #region 播放远程音频
+
+        public void PlayAudio()
+        {
+            QGPlayAudio();
+        }
+        
+        #endregion
+
+        #region 暂停音频
+
+        public void PauseAudio()
+        {
+            QGPauseAudio();
+        }
+
+        #endregion
+
+        #region 监听qg.onAudioInterruptionBegin
+
+        public void OnAudioInterruptionBegin()
+        {
+            QGOnAudioInterruptionBegin();
+        }
+
+        #endregion
+
+        #region 取消监听qg.onAudioInterruptionBegin
+
+        public void OffAudioInterruptionBegin()
+        {
+            QGOffAudioInterruptionBegin();
+        }
+        
+        #endregion
+
+        #region 监听qg.onAudioInterruptionEnd
+
+        public void OnAudioInterruptionEnd()
+        {
+            QGOnAudioInterruptionEnd();
+        }        
+
+        #endregion
+
+        #region 取消监听qg.onAudioInterruptionEnd
+
+        public void OffAudioInterruptionEnd()
+        {
+            QGOffAudioInterruptionEnd();
+        }
+                
+        #endregion
+
+        #region 监听全局错误事件
+
+        public void OnError()
+        {
+            QGOnError();
+        }
+                
+        #endregion
+
+        #region 取消监听全局错误事件
+
+        public void OffError()
+        {
+            QGOffError();
+        }
+                
+        #endregion
+
+        #region 模拟触发Error
+
+        public void DispatchError()
+        {
+            QGDispatchError();
+        }
+                
+        #endregion
+
 
         #region 创建Banner广告
 
@@ -142,7 +476,7 @@ namespace QGMiniGame
 
         #endregion
 
-         #region 创建互推盒子抽屉广告
+        #region 创建互推盒子抽屉广告
 
         public QGGameDrawerAd CreateGameDrawerAd (QGCreateGameDrawerAdParam param)
         {
@@ -184,9 +518,9 @@ namespace QGMiniGame
             QGStorageSetItem(keyName, keyValue);
         }
         // 数据读取  
-        public static void StorageGetItem(string keyName)
+        public string StorageGetItem(string keyName)
         {
-            QGStorageGetItem(keyName);
+            return QGStorageGetItem(keyName);
         }
         // 清除数据 
         public static void StorageRemoveItem(string keyName)
@@ -195,80 +529,10 @@ namespace QGMiniGame
         }
         #endregion
 
-        #region unity的PlayerPrefs
-
-        public void StorageSetIntSync(string key, int value)
-        {
-            QGStorageSetIntSync(key, value);
-        }
-
-        public int StorageGetIntSync(string key, int defaultValue)
-        {
-            return QGStorageGetIntSync(key, defaultValue);
-        }
-
-        public void StorageSetStringSync(string key, string value)
-        {
-            QGStorageSetStringSync(key, value);
-        }
-
-        public string StorageGetStringSync(string key, string defaultValue)
-        {
-            return QGStorageGetStringSync(key, defaultValue);
-        }
-
-        public void StorageSetFloatSync(string key, float value)
-        {
-            QGStorageSetFloatSync(key, value);
-        }
-
-        public float StorageGetFloatSync(string key, float defaultValue)
-        {
-            return QGStorageGetFloatSync(key, defaultValue);
-        }
-
-        public void StorageDeleteAllSync()
-        {
-            QGStorageDeleteAllSync();
-        }
-
-        public void StorageDeleteKeySync(string key)
-        {
-            QGStorageDeleteKeySync(key);
-        }
-
-        public bool StorageHasKeySync(string key)
-        {
-            return QGStorageHasKeySync(key);
-        }
-
-        #endregion
-
         #region 支付
-        public void Pay(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBean>> failCallback = null,Action<QGCommonResponse<QGPayBean>> completeCallback = null)
+        public void Pay(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
         {
-            QGPay(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback),QGCallBackManager.Add(completeCallback));
-        }
-        #endregion
-
-        #region 判断文件是否存在
-        public string AccessFile(QGAccessFileParam param)
-        {
-            return QGAccessFile(param.path);
-        }
-        #endregion
-
-        #region 读取文件
-        public void ReadFile(QGFileParam param, Action<QGFileResponse> successCallback = null, Action<QGFileResponse> failCallback = null)
-        {
-            QGReadFile(param.uri, param.encoding, param.position, param.length, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
-        }
-        #endregion
-
-        #region 写入文件
-        public void WriteFile(QGFileParam param, Action<QGFileResponse> successCallback = null, Action<QGFileResponse> failCallback = null)
-        {
-            QGWriteFile(param.filePath, param.data, param.encoding, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            QGPay(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
         #endregion
 
@@ -278,48 +542,61 @@ namespace QGMiniGame
             QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGLoginBean>>(msg);
         }
 
+        public void OnKeyboardInputResponseCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGResKeyBoardponse>(msg,false);
+        }
+
+        public void ShowKeyboardResponseCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGBaseResponse>(msg,false);
+        }
+        
+
+        public void OnNetworkStatusChangeResponseCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGOnNetworkStatus>(msg,false);
+        }
+
         // public void GetUserInfoResponseCallback(string msg)
         // {
         //     QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGUserInfoBean>>(msg);
         // }
-
         public void ShortcutResponseCallback(string msg)
         {
             QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGShortcutBean>>(msg);
+        }
+
+        public void HasShortcutInstalledResponseCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGHasShortcutInstalled>>(msg);
         }
 
         public void DefaultResponseCallback(string msg)
         {
             QGCallBackManager.InvokeResponseCallback<QGBaseResponse>(msg);
         }
-
+        
+        // 支付回调成功
         public void PayResponseCallback(string msg)
         {
             QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGPayBean>>(msg);
         }
 
-        public void ReadFileResponseCallback(string msg)
+        // 支付回调失败
+        public void PayResponseFailCallback(string msg)
         {
-            if (msg.Contains("utf8"))
-            {
-                QGCallBackManager.InvokeResponseCallback<QGFileResponse>(msg);
-            }
-            else
-            {
-                QGFileResponse response = JsonUtility.FromJson<QGFileResponse>(msg);
-                var fileBuffer = new byte[response.byteLength];
-                QGGetFileBuffer(fileBuffer, response.callbackId);
-                response.textData = fileBuffer;
-                var callback = (Action<QGFileResponse>)QGCallBackManager.responseCallBacks[response.callbackId];
-                callback(response);
-                QGCallBackManager.responseCallBacks.Remove(response.callbackId);
-            }
-
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGPayBeanFail>>(msg);
         }
 
-        public void WriteFileResponseCallback(string msg)
+        public void GetNetworkTypeCallback(string msg)
         {
-            QGCallBackManager.InvokeResponseCallback<QGFileResponse>(msg);
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGGetNetworkType>>(msg);
+        }
+
+        public void SystemInfo(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGSystemInfo>>(msg);
         }
 
         // 广告通用回调 
@@ -435,54 +712,135 @@ namespace QGMiniGame
 
         // 数据存储
         [DllImport("__Internal")]
-        private static extern bool QGStorageSetItem(string k, string v);
+        private static extern void QGStorageSetItem(string k, string v);
 
         [DllImport("__Internal")]
-        private static extern bool QGStorageGetItem(string k);
+        private static extern string QGStorageGetItem(string k);
 
         [DllImport("__Internal")]
-        private static extern bool QGStorageRemoveItem(string k);
+        private static extern void QGStorageRemoveItem(string k);
 
         [DllImport("__Internal")]
-        private static extern void QGStorageSetIntSync(string k, int v);
+        private static extern void QGPay(string p, string s, string f);
 
         [DllImport("__Internal")]
-        private static extern int QGStorageGetIntSync(string k, int d);
+        private static extern void QGGetNetworkType(string s, string f);
 
         [DllImport("__Internal")]
-        private static extern void QGStorageSetStringSync(string k, string v);
+        private static extern void QGOnNetworkStatusChange(string p);
 
         [DllImport("__Internal")]
-        private static extern string QGStorageGetStringSync(string k, string d);
+        private static extern void QGVibrateShort();
 
         [DllImport("__Internal")]
-        private static extern void QGStorageSetFloatSync(string k, float v);
+        private static extern void QGVibrateLong();
 
         [DllImport("__Internal")]
-        private static extern float QGStorageGetFloatSync(string k, float d);
+        private static extern void QGGetSystemInfo(string s, string f);
+        
+        [DllImport("__Internal")]
+        private static extern string QGGetSystemInfoSync();
 
         [DllImport("__Internal")]
-        private static extern void QGStorageDeleteAllSync();
+        private static extern void QGSetEnableDebugTrue();
 
         [DllImport("__Internal")]
-        private static extern void QGStorageDeleteKeySync(string k);
+        private static extern void QGSetEnableDebugFalse();
 
         [DllImport("__Internal")]
-        private static extern bool QGStorageHasKeySync(string k);
+        private static extern void QGShowModal();
+        
+        [DllImport("__Internal")]
+        private static extern void QGShowKeyboard(string p, string s, string f, string o);
 
         [DllImport("__Internal")]
-        private static extern void QGPay(string p, string s, string f, string o);
+        private static extern void QGOnKeyboardInput(string p);
 
         [DllImport("__Internal")]
-        private static extern string QGAccessFile(string p);
+        private static extern void QGOffKeyboardInput();
 
         [DllImport("__Internal")]
-        private static extern void QGReadFile(string u, string e, int p, int l, string s, string f);
+        private static extern void QGOnKeyboardConfirm(string p);
 
         [DllImport("__Internal")]
-        private static extern void QGGetFileBuffer(byte[] d, string c);
+        private static extern void QGOffKeyboardConfirm();
 
         [DllImport("__Internal")]
-        private static extern void QGWriteFile(string fp, object d, string e, string c, string f);
+        private static extern void QGOnKeyboardComplete(string p);
+
+        [DllImport("__Internal")]
+        private static extern void QGOffKeyboardComplete();
+
+        [DllImport("__Internal")]
+        private static extern void QGHideKeyboard();
+
+        [DllImport("__Internal")]
+        private static extern void QGMkdir();
+
+        [DllImport("__Internal")]
+        private static extern void QGRmdir();
+
+        [DllImport("__Internal")]
+        private static extern void QGIsExist();
+
+        [DllImport("__Internal")]
+        private static extern void QGRename();
+
+        [DllImport("__Internal")]
+        private static extern void QGSaveFile();
+
+        [DllImport("__Internal")]
+        private static extern void QGReadDir();
+
+        [DllImport("__Internal")]
+        private static extern void QGWriteFile();
+
+        [DllImport("__Internal")]
+        private static extern void QGReadFile();
+
+        [DllImport("__Internal")]
+        private static extern void QGAppendFile();
+
+        [DllImport("__Internal")]
+        private static extern void QGCopyFile();
+
+        [DllImport("__Internal")]
+        private static extern void QGRemoveSavedFile();
+
+        [DllImport("__Internal")]
+        private static extern void QGStat();
+
+        [DllImport("__Internal")]
+        private static extern void QGUnzip();
+
+        [DllImport("__Internal")]
+        private static extern void QGGetFileInfo();
+
+        [DllImport("__Internal")]
+        private static extern void QGPlayAudio();
+        
+        [DllImport("__Internal")]
+        private static extern void QGPauseAudio();
+
+        [DllImport("__Internal")]
+        private static extern void QGOnAudioInterruptionBegin();
+
+        [DllImport("__Internal")]
+        private static extern void QGOffAudioInterruptionBegin();
+
+        [DllImport("__Internal")]
+        private static extern void QGOnAudioInterruptionEnd();
+
+        [DllImport("__Internal")]
+        private static extern void QGOffAudioInterruptionEnd();
+
+        [DllImport("__Internal")]
+        private static extern void QGOnError();
+
+        [DllImport("__Internal")]
+        private static extern void QGOffError();
+
+        [DllImport("__Internal")]
+        private static extern void QGDispatchError();
     }
 }

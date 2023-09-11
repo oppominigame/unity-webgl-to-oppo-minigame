@@ -16,11 +16,11 @@ MonoBehaviour:
     wasmUrl: 
     streamingAssetsUrl: 
     preloadUrl: 
-  buildSrc: F:/unityworkspace/test_demo_2019
+  buildSrc: F:/unityworkspace/oppo_unity_demo/webgl
   packageName: com.oppo.littleGameDemo
-  projectName: "Unity\u6E38\u620F\u793A\u4F8B2019"
+  projectName: oppo-unity-demo
   orientation: 0
-  projectVersionName: 1.0.1
+  projectVersionName: 1.0
   projectVersion: 1
   minPlatVersion: 1103
   useAddressable: 0
