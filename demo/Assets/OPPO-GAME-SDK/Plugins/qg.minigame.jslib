@@ -21,14 +21,14 @@ var QgGameBridge = {
       return;
     }
     qg.showModal({
-      title: "提示",
-      content: "如需查看功能API接口详细日志信息打印，请先打开vConsole，点击vConsole进行查看。",
+      title: "??",
+      content: "??????API???????????????vConsole???vConsole?????",
       showCancel: false,
       success: function(res) {
         if (res.confirm) {
-          console.log("用户点击确定");
+          console.log("??????");
         } else if (res.cancel) {
-          console.log("用户点击取消");
+          console.log("??????");
         }
       },
     });
@@ -52,7 +52,7 @@ var QgGameBridge = {
           "GetNetworkTypeCallback",
           json
         );
-        console.log("获取网络状态：" + res.networkType);
+        console.log("???????" + res.networkType);
       },
       fail: function (err) {
         var json = JSON.stringify({
@@ -65,7 +65,7 @@ var QgGameBridge = {
           "GetNetworkTypeCallback",
           json
         );
-        console.log("获取网络状态失败：" + err);
+        console.log("?????????" + err);
       },
     });
   },
@@ -89,7 +89,7 @@ var QgGameBridge = {
     qg.onNetworkStatusChange(func)
     // qg.onNetworkStatusChange(function (res) {
     //   console.log(
-    //     "当前是否有网络：" + res.isConnected + "," + "网络类型为：" + res.networkType
+    //     "????????" + res.isConnected + "," + "??????" + res.networkType
     //   )
     // });
   },
@@ -101,9 +101,9 @@ var QgGameBridge = {
     }
 
     qg.vibrateShort({
-      type: "light", // heavy、medium、light
+      type: "light", // heavy?medium?light
       success: function (res) {
-        console.log("短振动-light");
+        console.log("???-light");
       },
       fail: function (res) { },
     });
@@ -117,7 +117,7 @@ var QgGameBridge = {
 
     qg.vibrateLong({
       success: function (res) {
-        console.log("长振动");
+        console.log("???");
       },
       fail: function (res) { },
     });
@@ -142,22 +142,22 @@ var QgGameBridge = {
           "SystemInfo",
           json
         );
-        console.log("异步");
-        console.log("手机品牌 brand：" + res.brand);
-        console.log("系统语言 language：" + res.language);
-        console.log("手机型号 model：" + res.model);
-        console.log("状态栏/异形缺口高度 statusBarHeight：" + res.statusBarHeight);
-        console.log("设备像素比 pixelRatio：" + res.pixelRatio);
-        console.log("客户端平台 platformVersionName：" + res.platformVersionName);
-        console.log("平台版本号 platformVersionCode：" + res.platformVersionCode);
-        console.log("屏幕高度 screenHeight：" + res.screenHeight);
-        console.log("屏幕宽度 screenWidth：" + res.screenWidth);
-        console.log("系统版本 system：" + res.system);
-        console.log("可使用窗口高度 windowHeight：" + res.windowHeight);
-        console.log("可使用窗口宽度 windowWidth：" + res.windowWidth);
-        console.log("系统当前主题 theme：" + res.theme);
-        console.log("设备方向 deviceOrientation：" + res.deviceOrientation);
-        console.log("版本号 COREVersion：" + res.COREVersion);
+        console.log("??");
+        console.log("???? brand?" + res.brand);
+        console.log("???? language?" + res.language);
+        console.log("???? model?" + res.model);
+        console.log("???/?????? statusBarHeight?" + res.statusBarHeight);
+        console.log("????? pixelRatio?" + res.pixelRatio);
+        console.log("????? platformVersionName?" + res.platformVersionName);
+        console.log("????? platformVersionCode?" + res.platformVersionCode);
+        console.log("???? screenHeight?" + res.screenHeight);
+        console.log("???? screenWidth?" + res.screenWidth);
+        console.log("???? system?" + res.system);
+        console.log("??????? windowHeight?" + res.windowHeight);
+        console.log("??????? windowWidth?" + res.windowWidth);
+        console.log("?????? theme?" + res.theme);
+        console.log("???? deviceOrientation?" + res.deviceOrientation);
+        console.log("??? COREVersion?" + res.COREVersion);
       },
       fail: function (err) {
         var json = JSON.stringify({
@@ -170,7 +170,7 @@ var QgGameBridge = {
           "SystemInfo",
           json
         );
-        console.log("异步获取系统信息失败")
+        console.log("??????????")
       },
     });
   },
@@ -189,24 +189,24 @@ var QgGameBridge = {
       stringToUTF8(returnStr, buffer, bufferSize);
       return buffer;
     } else {
-      console.log("获取同步系统信息失败");
+      console.log("??????????");
     }
-    // console.log("同步");
-    // console.log("手机品牌 brand：" + res.brand);
-    // console.log("系统语言 language：" + res.language);
-    // console.log("手机型号 model：" + res.model);
-    // console.log("状态栏/异形缺口高度 statusBarHeight：" + res.statusBarHeight);
-    // console.log("设备像素比 pixelRatio：" + res.pixelRatio);
-    // console.log("客户端平台 platformVersionName：" + res.platformVersionName);
-    // console.log("平台版本号 platformVersionCode：" + res.platformVersionCode);
-    // console.log("屏幕高度 screenHeight：" + res.screenHeight);
-    // console.log("屏幕宽度 screenWidth：" + res.screenWidth);
-    // console.log("系统版本 system：" + res.system);
-    // console.log("可使用窗口高度 windowHeight：" + res.windowHeight);
-    // console.log("可使用窗口宽度 windowWidth：" + res.windowWidth);
-    // console.log("系统当前主题 theme：" + res.theme);
-    // console.log("设备方向 deviceOrientation：" + res.deviceOrientation);
-    // console.log("版本号 COREVersion：" + res.COREVersion);
+    // console.log("??");
+    // console.log("???? brand?" + res.brand);
+    // console.log("???? language?" + res.language);
+    // console.log("???? model?" + res.model);
+    // console.log("???/?????? statusBarHeight?" + res.statusBarHeight);
+    // console.log("????? pixelRatio?" + res.pixelRatio);
+    // console.log("????? platformVersionName?" + res.platformVersionName);
+    // console.log("????? platformVersionCode?" + res.platformVersionCode);
+    // console.log("???? screenHeight?" + res.screenHeight);
+    // console.log("???? screenWidth?" + res.screenWidth);
+    // console.log("???? system?" + res.system);
+    // console.log("??????? windowHeight?" + res.windowHeight);
+    // console.log("??????? windowWidth?" + res.windowWidth);
+    // console.log("?????? theme?" + res.theme);
+    // console.log("???? deviceOrientation?" + res.deviceOrientation);
+    // console.log("??? COREVersion?" + res.COREVersion);
   },
 
   // vConsole
@@ -216,9 +216,9 @@ var QgGameBridge = {
       return;
     }
     qg.setEnableDebug({
-      enableDebug: true, // true 为打开，false 为关闭
+      enableDebug: true, // true ????false ???
       success: function () {
-        // 以下语句将会在 vConsole 面板输出
+        // ??????? vConsole ????
         console.log("test consol log");
         console.info("test console info");
         console.warn("test consol warn");
@@ -236,9 +236,9 @@ var QgGameBridge = {
       return;
     }
     qg.setEnableDebug({
-      enableDebug: false, // true 为打开，false 为关闭
+      enableDebug: false, // true ????false ???
       success: function () {
-        // 以下语句将会在 vConsole 面板输出
+        // ??????? vConsole ????
         console.log("test consol log");
         console.info("test console info");
         console.warn("test consol warn");
@@ -384,10 +384,10 @@ var QgGameBridge = {
       dirPath: localDir,
       encoding: "utf8",
       success: function () {
-        console.log("创建目录成功：" + localDir)
+        console.log("???????" + localDir)
       },
       fail: function (res) {
-        console.log("创建目录失败：" + localDir + "，" + JSON.stringify(res))
+        console.log("???????" + localDir + "?" + JSON.stringify(res))
       }
     })
   },
@@ -400,10 +400,10 @@ var QgGameBridge = {
     fs.rmdir({
       dirPath: localDir,
       success: function () {
-        console.log("删除目录成功：" + localDir)
+        console.log("???????" + localDir)
       },
       fail: function (res) {
-        console.log("删除目录失败：" + localDir + "，" + JSON.stringify(res))
+        console.log("???????" + localDir + "?" + JSON.stringify(res))
       }
     })
   },
@@ -416,10 +416,10 @@ var QgGameBridge = {
     try {
       var dirStat = fs.statSync(localDir, false)
       var fileStat = fs.statSync(localFilePath, false)
-      console.log(localDir + "是否是目录：" + dirStat.isDirectory() +
-        localFilePath + "是否是文件：" + fileStat.isFile())
+      console.log(localDir + "??????" + dirStat.isDirectory() +
+        localFilePath + "??????" + fileStat.isFile())
     } catch (error) {
-      console.log(error + ", 请创建目录、写入文件")
+      console.log(error + ", ??????????")
     }
   },
 
@@ -433,10 +433,10 @@ var QgGameBridge = {
       // newPath: `${qgDir}/new${Math.random()}`,
       newPath: qgDir + "/new/" + Math.random(),
       success: function () {
-        console.log("重命名目录成功：" + localDir + "=>" + qgDir + "/new")
+        console.log("????????" + localDir + "=>" + qgDir + "/new")
       },
       fail: function (res) {
-        console.log("重命名目录失败：" + localDir + "，" + JSON.stringify(res))
+        console.log("????????" + localDir + "?" + JSON.stringify(res))
       }
     })
   },
@@ -455,15 +455,15 @@ var QgGameBridge = {
           filePath: localFilePath,
           tempFilePath: imgRes.tempFilePaths[0],
           success: function (res) {
-            console.log("保存地址为: " + res.savedFilePath)
+            console.log("?????: " + res.savedFilePath)
           },
           fail: function (res) {
-            console.log("error：" + JSON.stringify(res))
+            console.log("error?" + JSON.stringify(res))
           }
         })
       },
       fail: function (e) {
-        console.log("选择图片失败：" + JSON.stringify(e))
+        console.log("???????" + JSON.stringify(e))
       }
     })
   },
@@ -476,10 +476,10 @@ var QgGameBridge = {
     fs.readdir({
       dirPath: localDir,
       success: function (res) {
-        console.log("success：" + localDir + "，" + res.files)
+        console.log("success?" + localDir + "?" + res.files)
       },
       fail: function (res) {
-        console.log("error：" + localFilePath + "=>" + qgDir + "/newPath.txt，" + JSON.stringify(res))
+        console.log("error?" + localFilePath + "=>" + qgDir + "/newPath.txt?" + JSON.stringify(res))
       }
     })
   },
@@ -496,7 +496,7 @@ var QgGameBridge = {
       data: data,
       encoding: encoding,
       success: function () {
-        console.log("写入文件成功：" + localFilePath)
+        console.log("???????" + localFilePath)
       },
       fail: function (res) {
         console.log(JSON.stringify(res))
@@ -514,10 +514,10 @@ var QgGameBridge = {
       data: "Hello world.",
       encoding: "utf8",
       success: function (res) {
-        console.log("读取文件成功：" + localFilePath + "，" + res.data)
+        console.log("???????" + localFilePath + "?" + res.data)
       },
       fail: function (res) {
-        console.log("读取文件失败：" + localFilePath + "，" + JSON.stringify(res))
+        console.log("???????" + localFilePath + "?" + JSON.stringify(res))
       }
     })
   },
@@ -532,10 +532,10 @@ var QgGameBridge = {
       data: "Hello world.",
       encoding: "utf8",
       success: function () {
-        console.log("追加文件成功：" + localFilePath)
+        console.log("???????" + localFilePath)
       },
       fail: function (res) {
-        console.log("追加文件失败：" + localFilePath + "，" + JSON.stringify(res))
+        console.log("???????" + localFilePath + "?" + JSON.stringify(res))
       }
     })
   },
@@ -549,10 +549,10 @@ var QgGameBridge = {
       srcPath: localFilePath,
       destPath: qgDir + "/copy.txt",
       success: function () {
-        console.log("复制文件成功：" + localFilePath + "=>" + qgDir + "/copy.txt")
+        console.log("???????" + localFilePath + "=>" + qgDir + "/copy.txt")
       },
       fail: function (res) {
-        console.log("复制文件失败：" + localFilePath + "，" + JSON.stringify(res))
+        console.log("???????" + localFilePath + "?" + JSON.stringify(res))
       }
     })
   },
@@ -565,10 +565,10 @@ var QgGameBridge = {
     fs.removeSavedFile({
       filePath: localFilePath,
       success: function () {
-        console.log("删除文件成功：" + localFilePath)
+        console.log("???????" + localFilePath)
       },
       fail: function (res) {
-        console.log("追删除文件失败：" + localFilePath + "，" + JSON.stringify(res))
+        console.log("????????" + localFilePath + "?" + JSON.stringify(res))
       }
     })
   },
@@ -581,10 +581,10 @@ var QgGameBridge = {
     fs.stat({
       path: localFilePath,
       success: function (res) {
-        console.log("获取文件信息成功" + localFilePath + "：" + JSON.stringify(res))
+        console.log("????????" + localFilePath + "?" + JSON.stringify(res))
       },
       fail: function (res) {
-        console.log("获取文件信息失败" + localFilePath + "，" + JSON.stringify(res))
+        console.log("????????" + localFilePath + "?" + JSON.stringify(res))
       }
     })
   },
@@ -597,7 +597,7 @@ var QgGameBridge = {
     var tempFilePath = qg.env.USER_DATA_PATH + "/test.zip"
     var url = "https://cdofs.oppomobile.com/cdo-activity/static/201905/08/da1f253b1854d1c6353ec79c3e3e8145.zip"
     qg.downloadFile({
-      // TODO: 替换自己的文件压缩包
+      // TODO: ??????????
       url: url,
       filePath: tempFilePath
     });
@@ -605,10 +605,10 @@ var QgGameBridge = {
       zipFilePath: tempFilePath,
       targetPath: qgDir,
       success: function (res) {
-        console.log("解压文件成功：" + qgDir)
+        console.log("???????" + qgDir)
       },
       fail: function (res) {
-        console.log("解压文件失败：" + qgDir + "，" + JSON.stringify(res))
+        console.log("???????" + qgDir + "?" + JSON.stringify(res))
       }
     })
   },
@@ -620,10 +620,10 @@ var QgGameBridge = {
     fs.getFileInfo({
       filePath: localFilePath,
       success: function (res) {
-        console.log("success: " + localFilePath + "，" + "文件大小：" + res.size + "字节")
+        console.log("success: " + localFilePath + "?" + "?????" + res.size + "??")
       },
       fail: function (res) {
-        console.log("error：" + localFilePath + "，" + JSON.stringify(res))
+        console.log("error?" + localFilePath + "?" + JSON.stringify(res))
       }
     })
   },
@@ -634,53 +634,53 @@ var QgGameBridge = {
     innerAudioContext.play()
     // CONSTANT.InnerAudioContext.src = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3"
     // CONSTANT.InnerAudioContext.play()
-    console.log("播放远程音频")
+    console.log("??????")
   },
   QGPauseAudio: function () {
     var innerAudioContext = qg.createInnerAudioContext()
     innerAudioContext.pause()
     innerAudioContext.stop()
     // CONSTANT.InnerAudioContext.pause()
-    console.log("暂停音频")
+    console.log("????")
   },
   QGOnAudioInterruptionBegin: function () {
     qg.onAudioInterruptionBegin(function () {
       console.log("onAudioInterruptionBegin success: " + new Date().toLocaleString());
     })
-    console.log("监听qg.onAudioInterruptionBegin");
+    console.log("??qg.onAudioInterruptionBegin");
   },
 
   QGOffAudioInterruptionBegin: function () {
     qg.offAudioInterruptionBegin()
-    console.log("取消监听qg.onAudioInterruptionBegin");
+    console.log("????qg.onAudioInterruptionBegin");
   },
 
   QGOnAudioInterruptionEnd: function () {
     qg.onAudioInterruptionEnd(function () {
       console.log("onAudioInterruptionEnd success: " + new Date().toLocaleString());
     })
-    console.log("监听qg.onAudioInterruptionEnd");
+    console.log("??qg.onAudioInterruptionEnd");
   },
 
   QGOffAudioInterruptionEnd: function () {
     qg.offAudioInterruptionEnd()
-    console.log("取消监听qg.onAudioInterruptionEnd");
+    console.log("????qg.onAudioInterruptionEnd");
   },
 
   QGOnError: function () {
     qg.onError(function (res) {
       console.log("onError success: " + res.message.slice(0, 149));
     })
-    console.log("监听全局错误事件");
+    console.log("????????");
   },
 
   QGOffError: function () {
     qg.offError()
-    console.log("取消监听全局错误事件");
+    console.log("??????????");
   },
 
   QGDispatchError: function () {
-    console.log("模拟触发Error");
+    console.log("????Error");
     throw Error('dispatch Error')
   },
 
@@ -735,7 +735,7 @@ var QgGameBridge = {
         if (res == false) {
           qg.installShortcut({
             success: function (res) {
-              console.log("调起创建桌面图标弹窗成功：" + JSON.stringify(res));
+              console.log("?????????????" + JSON.stringify(res));
               var json = JSON.stringify({
                 callbackId: successID,
                 data: res,
@@ -750,7 +750,7 @@ var QgGameBridge = {
               );
             },
             fail: function (err) {
-              console.log("调起创建桌面图标弹窗失败：" + JSON.stringify(err));
+              console.log("?????????????" + JSON.stringify(err));
               var json = JSON.stringify({
                 callbackId: failID,
                 data: err,
@@ -765,7 +765,7 @@ var QgGameBridge = {
             },
           });
         } else {
-          console.log('桌面图标已创建')
+          console.log('???????')
         }
       },
       fail: function (err) {
@@ -882,14 +882,14 @@ var QgGameBridge = {
   // },
   // // hideBannerAd
   // QGhideBannerAd: function () {
-  //   console.log("请求隐藏BannerAD : HOME");
+  //   console.log("????BannerAD : HOME");
   //   if (!!this.bannerAd) {
   //       this.bannerAd.hide();
   //   }
   // },
   // // destroyBannerAd
   // QGdestroyBannerAd: function () {
-  //   console.log("请求毁掉BannerAD : HOME");
+  //   console.log("????BannerAD : HOME");
   //   if (!!this.bannerAd) {
   //       this.bannerAd.destroy();
   //       this.bannerAd = null;
@@ -1510,7 +1510,7 @@ var QgGameBridge = {
       stringToUTF8(returnStr, buffer, bufferSize);
       return buffer;
     } else {
-      console.log("暂无数据");
+      console.log("????");
     }
   },
   QGStorageRemoveItem: function (keyName) {
@@ -1547,7 +1547,7 @@ var QgGameBridge = {
           "PayResponseCallback",
           json
         );
-        console.log("支付成功：" + JSON.stringify(res));
+        console.log("?????" + JSON.stringify(res));
       },
       fail: function (err) {
         var json = JSON.stringify({
@@ -1563,7 +1563,7 @@ var QgGameBridge = {
           "PayResponseFailCallback",
           json
         );
-        console.log("支付失败：" + JSON.stringify(err));
+        console.log("?????" + JSON.stringify(err));
       },
     });
   },

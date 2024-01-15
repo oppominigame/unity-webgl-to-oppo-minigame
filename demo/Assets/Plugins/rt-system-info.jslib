@@ -1,5 +1,5 @@
 /*******************************************************************************
-Xiamen Yaji Software Co., Ltd., (the “Licensor”) grants the user (the “Licensee”
+Xiamen Yaji Software Co., Ltd., (the ?Licensor?) grants the user (the ?Licensee?
 ) non-exclusive and non-transferable rights to use the software according to
 the following conditions:
 a.  The Licensee shall pay royalties to the Licensor, and the amount of those
@@ -18,7 +18,7 @@ d.  The Licensee acknowledges and consents to the possibility that errors may
     Licensor will not assume any liability beyond the explicit wording of this
     Licensing Agreement.
 e.  Where the Licensor must assume liability for the software according to
-    relevant laws, the Licensor’s entire liability is limited to the annual
+    relevant laws, the Licensor?s entire liability is limited to the annual
     royalty payable by the Licensee.
 f.  The Licensor owns the portions listed in the root directory and subdirectory
     (if any) in the software and enjoys the intellectual property rights over
@@ -29,7 +29,7 @@ f.  The Licensor owns the portions listed in the root directory and subdirectory
     ii. Release the source codes to any other parties;
     iii.Disassemble, decompile, decipher, attack, emulate, exploit or
         reverse-engineer these portion of code;
-    iv. Apply it to any third-party products or services without Licensor’s
+    iv. Apply it to any third-party products or services without Licensor?s
         permission;
     v.  Publish, copy, rent, lease, sell, export, import, distribute or lend any
         products containing these portions of code;
@@ -38,7 +38,7 @@ f.  The Licensor owns the portions listed in the root directory and subdirectory
     vii.Conduct any other act beyond the scope of this Licensing Agreement.
 g.  This Licensing Agreement terminates immediately if the Licensee breaches
     this Agreement. The Licensor may claim compensation from the Licensee where
-    the Licensee’s breach causes any damage to the Licensor.
+    the Licensee?s breach causes any damage to the Licensor.
 h.  The laws of the People's Republic of China apply to this Licensing Agreement.
 i.  This Agreement is made in both Chinese and English, and the Chinese version
     shall prevail the event of conflict.

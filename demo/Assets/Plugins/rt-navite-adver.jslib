@@ -56,7 +56,7 @@ var rt_native_adver = {
         }
     },
 
-    /* 先写成单例形式吧， nativeAd是可以有多实例的 */
+    /* ????????? nativeAd???????? */
     RTCreateNativeAd: function(objname, adUnitId, callbackId) {
         var args = RTNativeAdverModule.handleCreateNativeAdCallback(Pointer_stringify(callbackId));
         args.adUnitId = Pointer_stringify(adUnitId);
