@@ -13,17 +13,17 @@
 ![UnityWebGLTemplate](image/UnityWebGLTemplate.png)
 
 4. 在 `Player` 页签中展开 `Other Settings`，取消勾选 `Auto Graphics API`，仅保留 `WebGL 1` 选项
-    > <span style="font-size:0.8em">OPPO 小游戏当前只支持 WebGL1.0，WebGL2.0支持正在开发中</span>
+    > <span style="font-size:0.7em">OPPO 小游戏当前只支持 WebGL1.0，WebGL2.0支持正在开发中</span>
 
     ![UnityGraphicsAPI](image/UnityGraphicsAPI.png)
 
 5. 在 `Player` 页签中展开 `Publishing Settings`，将 `Compression Format` 设置为 `Disabled`，并勾选 `Data Caching`
-    > <span style="font-size:0.8em">后续打包 OPPO 小游戏时将会统一进行 GZip 压缩，因此在这里忽略压缩</span>
+    > <span style="font-size:0.7em">后续打包 OPPO 小游戏时将会统一进行 GZip 压缩，因此在这里忽略压缩</span>
 
     ![UnityPublishCompression](image/UnityPublishCompression.png)
 
 6. 打开 `File -> Build Settings...`，添加需要打包的场景到 `Scenes In Build` 面板中，取消勾选 `Development Build`，点击 `Build` 进行构建
-    > <span style="font-size:0.8em">OPPO 小游戏当前不支持调试模式，正在开发中</span>
+    > <span style="font-size:0.7em">OPPO 小游戏当前不支持调试模式，正在开发中</span>
 
     ![UnityBuild](image/UnityBuild.png)
 
@@ -32,7 +32,7 @@
 ## 打包 OPPO 小游戏
 
 1. 在 Unity WebGL 构建目录中打开控制台窗口，执行 `quickgame unity --unityVer <unityVer>` 进行打包
-    > <span style="font-size:0.8em">unityVer(不含尖括号)为必填项，表示当前 Unity 引擎版本号，例如 2021.3.14f1</span>
+    > <span style="font-size:0.7em">unityVer(不含尖括号)为必填项，表示当前 Unity 引擎版本号，例如 2021.3.14f1</span>
 
     其他打包参数可以通过 `quickgame unity --help` 命令进行查询
 

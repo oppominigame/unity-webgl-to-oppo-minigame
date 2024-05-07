@@ -6,7 +6,7 @@
 
 2. 安装小游戏打包工具，在控制台执行 `npm install -g @oppo-minigame/cli` 进行安装。安装完成后执行 `quickgame -V` 能正确显示版本号表示安装成功。Unity 支持 **2.1.6 及以上版本**，推荐使用最新正式版本，beta 版本包含新特性但可能不稳定
 
-    > <span style="font-size:0.8em">若提示 quickgame 不是内部或外部命令，可重新打开控制台或重启计算机后重新执行命令</span>
+    > <span style="font-size:0.7em">若提示 quickgame 不是内部或外部命令，可重新打开控制台或重启计算机后重新执行命令</span>
 
 ## 导出方式
 

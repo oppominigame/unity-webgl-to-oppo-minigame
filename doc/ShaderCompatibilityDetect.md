@@ -3,11 +3,11 @@
 ## 版本要求
 
 SDK：V8.0.0 及以上
-> <span style="font-size:0.8em">可前往`tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.0.unitypackage` 及以上版本，后续版本可通过 [SDK 自检更新](SDKUpdate.md) 能力进行升级</span>
+> <span style="font-size:0.7em">可前往`tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.0.unitypackage` 及以上版本，后续版本可通过 [SDK 自检更新](SDKUpdate.md) 能力进行升级</span>
 
 ## 功能说明
 
-> <span style="font-size:0.8em">界面截图以 `Unity 2021.3.14f1` 版本为例</span>
+> <span style="font-size:0.7em">界面截图以 `Unity 2021.3.14f1` 版本为例</span>
 
 ### 静态检测
 
