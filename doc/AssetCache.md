@@ -23,13 +23,13 @@ OPPO 小游戏打包工具：2.1.8-beta.0 及以上
 
 ### 配置项
 
-缓存系统支持用户进行多字段配置，来满足个性化需求，最终写入小游戏工程根目录的 `manifest.json` 文件中。我们建议您通过 [SDK 打包工具](TransformBySDK.md#使用指引) 进行配置，您也可以通过命令行 `quickgame unity --*` 进行配置或直接修改目标文件。具体字段解释如下
+缓存系统支持用户进行多字段配置，来满足个性化需求，最终写入小游戏工程根目录的 `manifest.json` 文件中。我们建议您通过 [SDK 打包工具](TransformBySDK.md) 进行配置，您也可以通过命令行 `quickgame unity --*` 进行配置或直接修改目标文件。具体字段解释如下
 
 - <span style="font-size:12px">**disableBundleCache**  
 是否禁用缓存，建议默认开启</span>
 - <span style="font-size:12px">**bundlePathIdentifier**  
 缓存路径标识，使用分号分隔，例如 StreamingAssets;bundles  
-只有以配置项结尾的 URL 路径才会进行缓存判断，例如配置为 StreamingAssets，请求 URL 为 https://localhost:8080/StreamingAssets/8d265a9dfd6cb7669cdb8b726f0afb1e.bundle； 若不填写则所有路径都会进行缓存判断；其他情况传入的 URL 均视为常规网络请求</span>
+只有以配置项结尾的 URL 路径才会进行缓存判断，例如配置为 StreamingAssets，请求 URL 为 https://localhost:8080/StreamingAssets/8d265a9dfd6cb7669cdb8b726f0afb1e.bundle ；若不填写则所有路径都会进行缓存判断；其他情况传入的 URL 均视为常规网络请求</span>
 - <span style="font-size:12px">**excludeFileExtensions**  
 不缓存的文件类型，使用分号分隔，例如 .json;.hash  
 建议将确定不缓存的资源文件类型写入配置，提高缓存系统的性能</span>
