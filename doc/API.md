@@ -2,7 +2,7 @@
 
 Unity SDK 提供了许多与 OPPO 小游戏相关的功能和接口，在 C# 脚本中可以使用多种 API 来实现包括登录、支付、各类广告、数据存储读取删除等能力
 
-## 登录
+## <a id="登录"></a>登录
 
 使用此接口可以让玩家使用 OPPO 账号登录游戏
 
@@ -13,7 +13,7 @@ QG.Login(
 );
 ```
 
-## 支付
+## <a id="支付"></a>支付
 
 使用此接口可以让玩家在游戏中购买虚拟物品道具
 
@@ -74,7 +74,7 @@ QG.Login(
 
 ```
 
-## 激励视频广告
+## <a id="激励视频广告"></a>激励视频广告
 
 使用此接口可以让玩家在游戏中打开激励视频广告
 
@@ -102,7 +102,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
          });
 ```
 
-## 文件下载
+## <a id="文件下载"></a>文件下载
 
 使用此接口可以让玩家在游戏中下载文件
 
@@ -132,7 +132,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
  });
 ```
 
-## 文件上传
+## <a id="文件上传"></a>文件上传
 
 使用此接口可以让玩家在游戏中上传文件
 
@@ -164,7 +164,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 
 ```
 
-## 视频播放
+## <a id="视频播放"></a>视频播放
 
 使用此接口可以让玩家在游戏中播放远程视频
 
@@ -181,7 +181,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
     obj.Destroy(); //销毁
 ```
 
-## 音频播放
+## <a id="音频播放"></a>音频播放
 
 使用此接口可以让玩家在游戏中播放远程音频
 
@@ -204,7 +204,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 // 新增视频音频通用方法:Play(),Pause(),Stop(),Seek(Time),Destroy.
 ```
 
-## 消息框
+## <a id="消息框"></a>消息框
 
 使用此接口可以让玩家在游戏中弹出提示框
 
@@ -221,7 +221,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
       });
 ```
 
-## 数据储存
+## <a id="数据储存"></a>数据储存
 
 ```c#
      QG.StorageSetItem(Key, Value); //存储
@@ -241,7 +241,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
     });
 ```
 
-## 自定义拓展
+## <a id="自定义拓展"></a>自定义拓展
 
 - 可参考 Unity 提供的 C# 调用 JS 方法的 [代码示例](https://docs.unity.cn/cn/2019.4/Manual/webgl-interactingwithbrowserscripting.html)
 - 主要在 `Plugins/qg.minigame.jslib` 中编写 JS 代码以及在 QGMiniGameManager 中封装调用入口，可依据 [OPPO 小游戏文档](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/account) 自行添加能力

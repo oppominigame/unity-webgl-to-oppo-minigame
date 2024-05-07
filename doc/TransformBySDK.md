@@ -1,13 +1,13 @@
 # 使用 SDK 导出小游戏
 
-## 下载安装
+## <a id="下载安装"></a>下载安装
 
 1. 下载 `tools/unity_webgl_rpk_oppo_v*.unitypackage`，推荐使用最新版本
 
 2. 在 Unity Editor 中导入下载的 SDK 包即可完成安装
 
 
-## 使用指引
+## <a id="使用指引"></a>使用指引
 
 > <span style="font-size:12px">以下步骤均基于 Unity SDK V8.0.0 版本进行描述，建议您前往 `tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.0.unitypackage` 及以上版本，界面截图以 `Unity 2021.3.14f1` 版本为例 </span>
 
