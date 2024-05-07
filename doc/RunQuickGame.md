@@ -6,16 +6,16 @@
 
 ![工程结构](image/QuickGameStructure.png)
 
-- <font size=2>**Build**：Unity WebGL 导出目录</font>
-- <font size=2>**dist**：存放打包好的小游戏 rpk</font>
-- <font size=2>**sign**：存放签名文件</font>
-- <font size=2>**StreamingAssets**：对应 Unity 中的同名目录，若非必需，可删除此目录，减少包体大小</font>
-- <font size=2>**logo.png**：游戏图标</font>
-- <font size=2>**main.js**：游戏入口文件</font>
-- <font size=2>**manifest.json**：通过 [Unity SDK](TransformBySDK.md) 或 [命令行](TransformByCLI.md) 导出小游戏时生成的游戏配置文件</font>
-- <font size=2>**ral.js、ral_2021.js、web-adapter.js**：小游戏适配文件</font>
+- <span style="font-size:0.8em">**Build**：Unity WebGL 导出目录</span>
+- <span style="font-size:0.8em">**dist**：存放打包好的小游戏 rpk</span>
+- <span style="font-size:0.8em">**sign**：存放签名文件</span>
+- <span style="font-size:0.8em">**StreamingAssets**：对应 Unity 中的同名目录，若非必需，可删除此目录，减少包体大小</span>
+- <span style="font-size:0.8em">**logo.png**：游戏图标</span>
+- <span style="font-size:0.8em">**main.js**：游戏入口文件</span>
+- <span style="font-size:0.8em">**manifest.json**：通过 [Unity SDK](TransformBySDK.md) 或 [命令行](TransformByCLI.md) 导出小游戏时生成的游戏配置文件</span>
+- <span style="font-size:0.8em">**ral.js、ral_2021.js、web-adapter.js**：小游戏适配文件</span>
 
-> <font size=2>原则上不建议对导出工程进行修改，若确实需要修改，则在修改后执行 quickgame pack 重新打包</font>
+> <span style="font-size:0.8em">原则上不建议对导出工程进行修改，若确实需要修改，则在修改后执行 quickgame pack 重新打包</span>
 
 ## 真机调试
 

@@ -3,18 +3,18 @@
 ## 版本要求
 
 SDK：V8.0.0 及以上
-> <font size=2>可前往`tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.0.unitypackage` 及以上版本，后续版本可通过 [SDK 自检更新](SDKUpdate.md) 能力进行升级</font>
+> <span style="font-size:0.8em">可前往`tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.0.unitypackage` 及以上版本，后续版本可通过 [SDK 自检更新](SDKUpdate.md) 能力进行升级</span>
 
 ## 功能说明
 
-> <font size=2>界面截图以 `Unity 2021.3.14f1` 版本为例</font>
+> <span style="font-size:0.8em">界面截图以 `Unity 2021.3.14f1` 版本为例</span>
 
 Unity SDK 自 V8.0.0 版本开始具备自检更新能力，展示及交互区域位于界面底部，如下图所示
 
 ![SDKUpdateArea](image/SDKUpdateArea.png)
 
 由于 SDK 部分模块依赖 `OPPO 小游戏打包工具`（以下简称 `打包工具`），因此每次打开主界面时，会对 SDK 本身和打包工具进行版本检查。在打包工具不满足指定版本时，部分模块及打包功能将不可用，`打包` 按钮置灰无法点击，需要升级后方可使用。第一次打开界面进行版本检查会相对较慢，并且与您的网络环境和速度相关，请您耐心等待，若长时间停留在版本检查阶段，请 [联系我们](IssueAndContact.md)
-> <font size=2>若出现未检测到打包工具最新版本的情况，请尝试将源切换为 npm（推荐使用 [nrm](https://www.npmjs.com/package/nrm)），其他 npm 源中的版本可能会滞后</font>
+> <span style="font-size:0.8em">若出现未检测到打包工具最新版本的情况，请尝试将源切换为 npm（推荐使用 [nrm](https://www.npmjs.com/package/nrm)），其他 npm 源中的版本可能会滞后</span>
 
 ### SDK 更新
 

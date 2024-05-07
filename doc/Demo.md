@@ -9,7 +9,7 @@
 ![UnityPlatform](image/DemoLogin.png)
 
 ## 3.支付
-> <font size=2>非测试页面，此操作将进行真实的支付</font>
+> <span style="font-size:0.8em">非测试页面，此操作将进行真实的支付</span>
 
 点击 `支付` 将调起 OPPO 支付 SDK，参考 API [QG.Pay](API.md#支付)
 
@@ -26,7 +26,7 @@
 ![UnityPlatform](image/DemoHasShortcutInstalled.png)
 
 ## 6.广告
-> <font size=2>测试 RPK 包名必须为 `com.oppo.littleGameDemo` 才能显示广告</font>
+> <span style="font-size:0.8em">测试 RPK 包名必须为 `com.oppo.littleGameDemo` 才能显示广告</span>
 
 支持多种类型的广告，以激励视频广告为例，参考 API [QG.CreateRewardedVideoAd](API.md#激励视频广告)
 
