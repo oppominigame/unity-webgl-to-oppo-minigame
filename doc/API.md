@@ -229,7 +229,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
      QG.StorageRemoveItem(Key); //删除
 ```
 
-## 创建桌面图标
+## <a id="创建桌面图标"></a>创建桌面图标
 
 ```c#
     QG.HasShortcutInstalled((msg) =>
