@@ -10,10 +10,47 @@ var QgGameBridge = {
     ACTION_CALL_BACK_METHORD_NAME_AD_CLOSE_REWARDED:
       "RewardedVideoAdOnCloseCallBack",
     ACTION_CALL_BACK_METHORD_NAME_AD_LOAD_NATIVE: "NativeAdOnLoadCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_PLAY: "pdOnPlayCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_CANPLAY: "pdOnCanPlayCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_PAUSE: "pdOnPauseCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_STOP: "pdOnStopCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_ENDED: "pdOnEndedCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_TIMEUPDATE: "pdOnTimeUpdateCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_ERROR: "pdOnErrorCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_WAITING: "pdOnWaitingCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_SEEKING: "pdOnSeekingCallBack",
+    ACTION_CALL_BACK_METHORD_NAME_PD_SEEKED: "pdOnSeekedCallBack",
   },
   $mAdMap: {},
 
   $mFileData: {},
+
+  QGLog: function () {
+    var originalConsoleLog = console.log;
+
+    window.UnityLog = function (message) {
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "HandleLogMessage",
+        message
+      );
+    };
+    console.log = function (message) {
+      UnityLog(message);
+    };
+
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    mAdMap.set("QGLog", originalConsoleLog);
+  },
+
+  QGLogClose: function () {
+    var originalConsoleLog = mAdMap.get("QGLog");
+    if (originalConsoleLog) {
+      console.log = originalConsoleLog;
+    }
+  },
 
   QGShowModal: function () {
     if (typeof qg == "undefined") {
@@ -24,7 +61,7 @@ var QgGameBridge = {
       title: "??",
       content: "??????API???????????????vConsole???vConsole?????",
       showCancel: false,
-      success: function(res) {
+      success: function (res) {
         if (res.confirm) {
           console.log("??????");
         } else if (res.cancel) {
@@ -33,6 +70,24 @@ var QgGameBridge = {
       },
     });
   },
+
+  QGShowToast: function (param) {
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.showToast({
+      title: paramData.title,
+      icon: paramData.iconType,
+      duration: paramData.durationTime,
+    });
+
+    var qgDir = qg.env.USER_DATA_PATH;
+    console.log("qgDir::" + qgDir);
+  },
+
   QGGetNetworkType: function (success, fail) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
@@ -80,13 +135,17 @@ var QgGameBridge = {
       var json = JSON.stringify({
         callbackId: callbackID,
         isConnected: data.isConnected,
-        networkType: data.networkType
-      })
+        networkType: data.networkType,
+      });
       console.log(data);
       console.log(json);
-      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnNetworkStatusChangeResponseCallback", json);
-    }
-    qg.onNetworkStatusChange(func)
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnNetworkStatusChangeResponseCallback",
+        json
+      );
+    };
+    qg.onNetworkStatusChange(func);
     // qg.onNetworkStatusChange(function (res) {
     //   console.log(
     //     "????????" + res.isConnected + "," + "??????" + res.networkType
@@ -105,7 +164,7 @@ var QgGameBridge = {
       success: function (res) {
         console.log("???-light");
       },
-      fail: function (res) { },
+      fail: function (res) {},
     });
   },
 
@@ -119,7 +178,7 @@ var QgGameBridge = {
       success: function (res) {
         console.log("???");
       },
-      fail: function (res) { },
+      fail: function (res) {},
     });
   },
 
@@ -170,7 +229,7 @@ var QgGameBridge = {
           "SystemInfo",
           json
         );
-        console.log("??????????")
+        console.log("??????????");
       },
     });
   },
@@ -180,9 +239,9 @@ var QgGameBridge = {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
-    var res = qg.getSystemInfoSync()
-    var returnStr = JSON.stringify(res)
-    console.log(returnStr)
+    var res = qg.getSystemInfoSync();
+    var returnStr = JSON.stringify(res);
+    console.log(returnStr);
     if (returnStr) {
       var bufferSize = lengthBytesUTF8(returnStr) + 1;
       var buffer = _malloc(bufferSize);
@@ -225,8 +284,8 @@ var QgGameBridge = {
         console.debug("test consol debug");
         console.error("test consol error");
       },
-      complete: function () { },
-      fail: function () { },
+      complete: function () {},
+      fail: function () {},
     });
   },
 
@@ -245,13 +304,13 @@ var QgGameBridge = {
         console.debug("test consol debug");
         console.error("test consol error");
       },
-      complete: function () { },
-      fail: function () { },
+      complete: function () {},
+      fail: function () {},
     });
   },
 
   QGShowKeyboard: function (param, success, fail, complete) {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -271,25 +330,32 @@ var QgGameBridge = {
       success: function () {
         var json = JSON.stringify({
           callbackId: successID,
-        })
+        });
         console.log(json);
-        unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,"ShowKeyboardResponseCallback", json);
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ShowKeyboardResponseCallback",
+          json
+        );
         console.log("show keyboard success");
       },
       fail: function () {
         var json = JSON.stringify({
           callbackId: failID,
-        })
+        });
         console.log(json);
-        unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "ShowKeyboardResponseCallback", json);
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ShowKeyboardResponseCallback",
+          json
+        );
         console.log("show keyboard fail");
-      }
-    })
+      },
+    });
   },
 
-
   QGOnKeyboardInput: function (callback) {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -298,17 +364,20 @@ var QgGameBridge = {
     var func = function (data) {
       var json = JSON.stringify({
         callbackId: callbackID,
-        value: data.value
-
-      })
-      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnKeyboardInputResponseCallback", json);
+        value: data.value,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnKeyboardInputResponseCallback",
+        json
+      );
     };
 
     qg.onKeyboardInput(func);
   },
 
   QGOffKeyboardInput: function () {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -316,7 +385,7 @@ var QgGameBridge = {
   },
 
   QGOnKeyboardConfirm: function (callback) {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -325,16 +394,19 @@ var QgGameBridge = {
     var func = function (data) {
       var json = JSON.stringify({
         callbackId: callbackID,
-        value: data.value
-
-      })
-      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnKeyboardInputResponseCallback", json);
+        value: data.value,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnKeyboardInputResponseCallback",
+        json
+      );
     };
     qg.onKeyboardConfirm(func);
   },
 
   QGOffKeyboardConfirm: function (callback) {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -342,7 +414,7 @@ var QgGameBridge = {
   },
 
   QGOnKeyboardComplete: function (callback) {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -351,16 +423,19 @@ var QgGameBridge = {
     var func = function (data) {
       var json = JSON.stringify({
         callbackId: callbackID,
-        value: data.value
-
-      })
-      unityInstance.SendMessage(CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT, "OnKeyboardInputResponseCallback", json);
+        value: data.value,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnKeyboardInputResponseCallback",
+        json
+      );
     };
     qg.onKeyboardComplete(func);
   },
 
   QGOffKeyboardComplete: function (callback) {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -368,7 +443,7 @@ var QgGameBridge = {
   },
 
   QGHideKeyboard: function () {
-    if (typeof (qg) == 'undefined') {
+    if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
@@ -376,312 +451,445 @@ var QgGameBridge = {
   },
 
   QGMkdir: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.mkdir({
       dirPath: localDir,
       encoding: "utf8",
       success: function () {
-        console.log("???????" + localDir)
+        console.log("???????" + localDir);
       },
       fail: function (res) {
-        console.log("???????" + localDir + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("???????" + localDir + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGRmdir: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.rmdir({
       dirPath: localDir,
       success: function () {
-        console.log("???????" + localDir)
+        console.log("???????" + localDir);
       },
       fail: function (res) {
-        console.log("???????" + localDir + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("???????" + localDir + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGIsExist: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     try {
-      var dirStat = fs.statSync(localDir, false)
-      var fileStat = fs.statSync(localFilePath, false)
-      console.log(localDir + "??????" + dirStat.isDirectory() +
-        localFilePath + "??????" + fileStat.isFile())
+      var dirStat = fs.statSync(localDir, false);
+      var fileStat = fs.statSync(localFilePath, false);
+      console.log(
+        localDir +
+          "??????" +
+          dirStat.isDirectory() +
+          localFilePath +
+          "??????" +
+          fileStat.isFile()
+      );
     } catch (error) {
-      console.log(error + ", ??????????")
+      console.log(error + ", ??????????");
     }
   },
 
   QGRename: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.rename({
       oldPath: localDir,
       // newPath: `${qgDir}/new${Math.random()}`,
       newPath: qgDir + "/new/" + Math.random(),
       success: function () {
-        console.log("????????" + localDir + "=>" + qgDir + "/new")
+        console.log("????????" + localDir + "=>" + qgDir + "/new");
       },
       fail: function (res) {
-        console.log("????????" + localDir + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("????????" + localDir + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGSaveFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     qg.chooseImage({
       count: 1,
-      sizeType: ['original'],
-      sourceType: ['album'],
+      sizeType: ["original"],
+      sourceType: ["album"],
       success: function (imgRes) {
         fs.saveFile({
           filePath: localFilePath,
           tempFilePath: imgRes.tempFilePaths[0],
           success: function (res) {
-            console.log("?????: " + res.savedFilePath)
+            console.log("?????: " + res.savedFilePath);
           },
           fail: function (res) {
-            console.log("error?" + JSON.stringify(res))
-          }
-        })
+            console.log("error?" + JSON.stringify(res));
+          },
+        });
       },
       fail: function (e) {
-        console.log("???????" + JSON.stringify(e))
-      }
-    })
+        console.log("???????" + JSON.stringify(e));
+      },
+    });
   },
 
   QGReadDir: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.readdir({
       dirPath: localDir,
       success: function (res) {
-        console.log("success?" + localDir + "?" + res.files)
+        console.log("success?" + localDir + "?" + res.files);
       },
       fail: function (res) {
-        console.log("error?" + localFilePath + "=>" + qgDir + "/newPath.txt?" + JSON.stringify(res))
-      }
-    })
+        console.log(
+          "error?" +
+            localFilePath +
+            "=>" +
+            qgDir +
+            "/newPath.txt?" +
+            JSON.stringify(res)
+        );
+      },
+    });
   },
 
   QGWriteFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
-    var data = "Hello world."
-    var encoding = "utf8"
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
+    var data = "Hello world.";
+    var encoding = "utf8";
     fs.writeFile({
       filePath: localFilePath,
       data: data,
       encoding: encoding,
       success: function () {
-        console.log("???????" + localFilePath)
+        console.log("???????" + localFilePath);
       },
       fail: function (res) {
-        console.log(JSON.stringify(res))
-      }
-    })
+        console.log(JSON.stringify(res));
+      },
+    });
   },
 
   QGReadFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.readFile({
       filePath: localFilePath,
       data: "Hello world.",
       encoding: "utf8",
       success: function (res) {
-        console.log("???????" + localFilePath + "?" + res.data)
+        console.log("???????" + localFilePath + "?" + res.data);
       },
       fail: function (res) {
-        console.log("???????" + localFilePath + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("???????" + localFilePath + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGAppendFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.appendFile({
       filePath: localFilePath,
       data: "Hello world.",
       encoding: "utf8",
       success: function () {
-        console.log("???????" + localFilePath)
+        console.log("???????" + localFilePath);
       },
       fail: function (res) {
-        console.log("???????" + localFilePath + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("???????" + localFilePath + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGCopyFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.copyFile({
       srcPath: localFilePath,
       destPath: qgDir + "/copy.txt",
       success: function () {
-        console.log("???????" + localFilePath + "=>" + qgDir + "/copy.txt")
+        console.log("???????" + localFilePath + "=>" + qgDir + "/copy.txt");
       },
       fail: function (res) {
-        console.log("???????" + localFilePath + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("???????" + localFilePath + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGRemoveSavedFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.removeSavedFile({
       filePath: localFilePath,
       success: function () {
-        console.log("???????" + localFilePath)
+        console.log("???????" + localFilePath);
       },
       fail: function (res) {
-        console.log("????????" + localFilePath + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("????????" + localFilePath + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGStat: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
     fs.stat({
       path: localFilePath,
       success: function (res) {
-        console.log("????????" + localFilePath + "?" + JSON.stringify(res))
+        console.log("????????" + localFilePath + "?" + JSON.stringify(res));
       },
       fail: function (res) {
-        console.log("????????" + localFilePath + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("????????" + localFilePath + "?" + JSON.stringify(res));
+      },
+    });
+  },
+
+  QGUploadFile: function (param, success, fail) {
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var tempFilePath = qg.env.USER_DATA_PATH + paramData.path;
+    qg.uploadFile({
+      url: paramData.url,
+      filePath: tempFilePath,
+      name: paramData.name,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res.data,
+        });
+        console.log("success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
+        });
+        console.log("fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGDownLoadFile: function (param, success, fail) {
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var tempFilePath = qg.env.USER_DATA_PATH + paramData.path;
+    qg.downloadFile({
+      url: paramData.url,
+      filePath: tempFilePath,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res.data,
+        });
+        console.log("success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
+        });
+        console.log("fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
   },
 
   QGUnzip: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var localDir = qgDir + "/my"
-    var fs = qg.getFileSystemManager()
-    var tempFilePath = qg.env.USER_DATA_PATH + "/test.zip"
-    var url = "https://cdofs.oppomobile.com/cdo-activity/static/201905/08/da1f253b1854d1c6353ec79c3e3e8145.zip"
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var localDir = qgDir + "/my";
+    var fs = qg.getFileSystemManager();
+    var tempFilePath = qg.env.USER_DATA_PATH + "/test.zip";
+    var url =
+      "https://cdofs.oppomobile.com/cdo-activity/static/201905/08/da1f253b1854d1c6353ec79c3e3e8145.zip";
     qg.downloadFile({
       // TODO: ??????????
       url: url,
-      filePath: tempFilePath
+      filePath: tempFilePath,
     });
     fs.unzip({
       zipFilePath: tempFilePath,
       targetPath: qgDir,
       success: function (res) {
-        console.log("???????" + qgDir)
+        console.log("???????" + qgDir);
       },
       fail: function (res) {
-        console.log("???????" + qgDir + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("???????" + qgDir + "?" + JSON.stringify(res));
+      },
+    });
   },
 
   QGGetFileInfo: function () {
-    var qgDir = qg.env.USER_DATA_PATH
-    var localFilePath = qgDir + "/my/file.txt"
-    var fs = qg.getFileSystemManager()
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + "/my/file.txt";
+    var fs = qg.getFileSystemManager();
     fs.getFileInfo({
       filePath: localFilePath,
       success: function (res) {
-        console.log("success: " + localFilePath + "?" + "?????" + res.size + "??")
+        console.log(
+          "success: " + localFilePath + "?" + "?????" + res.size + "??"
+        );
       },
       fail: function (res) {
-        console.log("error?" + localFilePath + "?" + JSON.stringify(res))
-      }
-    })
+        console.log("error?" + localFilePath + "?" + JSON.stringify(res));
+      },
+    });
+  },
+  QGCreateVideo: function (adId, param) {
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var video = qg.createVideo({
+      x: paramData.ParamX,
+      y: paramData.ParamY,
+      width: paramData.ParamWidth,
+      height: paramData.ParamHeight,
+      src: paramData.url,
+      poster: paramData.poster,
+      playbackRate: 1.0,
+      objectFit: "contain",
+      autoplay: false,
+    });
+
+    video.onPlay(function () {
+      console.log("video play");
+    });
+    video.play();
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    var adIdStr = UTF8ToString(adId);
+    mAdMap.set(adIdStr, video);
   },
 
-  QGPlayAudio: function () {
-    var innerAudioContext = qg.createInnerAudioContext()
-    innerAudioContext.src = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3"
-    innerAudioContext.play()
-    // CONSTANT.InnerAudioContext.src = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3"
-    // CONSTANT.InnerAudioContext.play()
-    console.log("??????")
+  QGPlayAudio: function (playerId, param) {
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var innerAudioContext = qg.createInnerAudioContext();
+    innerAudioContext.startTime = paramData.startTime ? paramData.startTime : 0;
+    innerAudioContext.autoplay = paramData.autoplay
+      ? paramData.autoplay
+      : false;
+    innerAudioContext.loop = paramData.loop ? paramData.loop : false;
+    innerAudioContext.autoplay = paramData.autoplay
+      ? paramData.autoplay
+      : false;
+    innerAudioContext.volume = paramData.volume ? paramData.volume : 1;
+    innerAudioContext.src = paramData.url;
+    innerAudioContext.play();
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    var pdIdStr = UTF8ToString(playerId);
+    mAdMap.set(pdIdStr, innerAudioContext);
   },
-  QGPauseAudio: function () {
-    var innerAudioContext = qg.createInnerAudioContext()
-    innerAudioContext.pause()
-    innerAudioContext.stop()
-    // CONSTANT.InnerAudioContext.pause()
-    console.log("????")
-  },
+  // QGPauseAudio: function () {
+  //   var innerAudioContext = qg.createInnerAudioContext();
+  //   innerAudioContext.pause();
+  //   innerAudioContext.stop();
+  //   // CONSTANT.InnerAudioContext.pause()
+  //   console.log("????");
+  // },
   QGOnAudioInterruptionBegin: function () {
     qg.onAudioInterruptionBegin(function () {
-      console.log("onAudioInterruptionBegin success: " + new Date().toLocaleString());
-    })
+      console.log(
+        "onAudioInterruptionBegin success: " + new Date().toLocaleString()
+      );
+    });
     console.log("??qg.onAudioInterruptionBegin");
   },
 
   QGOffAudioInterruptionBegin: function () {
-    qg.offAudioInterruptionBegin()
+    qg.offAudioInterruptionBegin();
     console.log("????qg.onAudioInterruptionBegin");
   },
 
   QGOnAudioInterruptionEnd: function () {
     qg.onAudioInterruptionEnd(function () {
-      console.log("onAudioInterruptionEnd success: " + new Date().toLocaleString());
-    })
+      console.log(
+        "onAudioInterruptionEnd success: " + new Date().toLocaleString()
+      );
+    });
     console.log("??qg.onAudioInterruptionEnd");
   },
 
   QGOffAudioInterruptionEnd: function () {
-    qg.offAudioInterruptionEnd()
+    qg.offAudioInterruptionEnd();
     console.log("????qg.onAudioInterruptionEnd");
   },
 
   QGOnError: function () {
     qg.onError(function (res) {
       console.log("onError success: " + res.message.slice(0, 149));
-    })
+    });
     console.log("????????");
   },
 
   QGOffError: function () {
-    qg.offError()
+    qg.offError();
     console.log("??????????");
   },
 
   QGDispatchError: function () {
     console.log("????Error");
-    throw Error('dispatch Error')
+    throw Error("dispatch Error");
   },
 
   QGLogin: function (success, fail) {
@@ -765,7 +973,7 @@ var QgGameBridge = {
             },
           });
         } else {
-          console.log('???????')
+          console.log("???????");
         }
       },
       fail: function (err) {
@@ -895,8 +1103,7 @@ var QgGameBridge = {
   //       this.bannerAd = null;
   //   }
   // },
-  
-  
+
   // RewardedVideoAd
   QGCreateRewardedVideoAd: function (adId, adUnitId) {
     if (typeof qg == "undefined") {
@@ -1035,6 +1242,7 @@ var QgGameBridge = {
     });
     if (customAd) {
       mAdMap.set(adIdStr, customAd);
+      customAd.show();
       customAd.onLoad(function (rec) {
         var json = JSON.stringify({
           callbackId: adIdStr,
@@ -1171,6 +1379,15 @@ var QgGameBridge = {
         .catch(function (error) {
           console.log("load fail with:" + error.errCode + "," + error.errMsg);
         });
+
+      gamePortalAd
+        .show()
+        .then(function () {
+          console.log("show success");
+        })
+        .catch(function (error) {
+          console.log("show fail with:" + error.errCode + "," + error.errMsg);
+        });
       gamePortalAd.onLoad(function () {
         console.log("gamePortalAd onload success");
         gamePortalAd
@@ -1181,9 +1398,9 @@ var QgGameBridge = {
           .catch(function (error) {
             console.log(
               "gamePortalAd show fail with:" +
-              error.errCode +
-              "," +
-              error.errMsg
+                error.errCode +
+                "," +
+                error.errMsg
             );
           });
         var json = JSON.stringify({
@@ -1308,8 +1525,8 @@ var QgGameBridge = {
           var errCodeValue = !err
             ? ""
             : err.data
-              ? err.data.errCode
-              : err.errCode;
+            ? err.data.errCode
+            : err.errCode;
           var json = JSON.stringify({
             callbackId: failID,
             errMsg: errMsgStr,
@@ -1352,35 +1569,45 @@ var QgGameBridge = {
     var ad = mAdMap.get(adIdStr);
 
     if (ad) {
-      ad.hide()
-        .then(function () {
-          var json = JSON.stringify({
-            callbackId: successID,
-          });
-          unityInstance.SendMessage(
-            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-            CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
-            json
-          );
-        })
-        .catch(function (err) {
-          var errMsgStr = !err ? "" : err.data ? err.data.errMsg : err.errMsg;
-          var errCodeValue = !err
-            ? ""
-            : err.data
-              ? err.data.errCode
-              : err.errCode;
-          var json = JSON.stringify({
-            callbackId: failID,
-            errMsg: errMsgStr,
-            errCode: errCodeValue,
-          });
-          unityInstance.SendMessage(
-            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-            CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
-            json
-          );
+      ad.hide();
+      // .then(function () {
+      //   var json = JSON.stringify({
+      //     callbackId: successID,
+      //   });
+      //   unityInstance.SendMessage(
+      //     CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+      //     CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+      //     json
+      //   );
+      // })
+      // .catch(function (err) {
+      //   var errMsgStr = !err ? "" : err.data ? err.data.errMsg : err.errMsg;
+      //   var errCodeValue = !err
+      //     ? ""
+      //     : err.data
+      //     ? err.data.errCode
+      //     : err.errCode;
+      //   var json = JSON.stringify({
+      //     callbackId: failID,
+      //     errMsg: errMsgStr,
+      //     errCode: errCodeValue,
+      //   });
+      //   unityInstance.SendMessage(
+      //     CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+      //     CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+      //     json
+      //   );
+      // });
+      ad.onHide(function () {
+        var json = JSON.stringify({
+          callbackId: adIdStr,
         });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_HIDE,
+          json
+        );
+      });
     } else {
       var json = JSON.stringify({
         callbackId: failID,
@@ -1428,8 +1655,8 @@ var QgGameBridge = {
           var errCodeValue = !err
             ? ""
             : err.data
-              ? err.data.errCode
-              : err.errCode;
+            ? err.data.errCode
+            : err.errCode;
           var json = JSON.stringify({
             callbackId: failID,
             errMsg: errMsgStr,
@@ -1464,11 +1691,8 @@ var QgGameBridge = {
     if (!(mAdMap instanceof Map)) {
       mAdMap = new Map();
     }
-
     var adIdStr = UTF8ToString(adId);
-
     var ad = mAdMap.get(adIdStr);
-
     if (ad) {
       ad.destroy();
       mAdMap.delete(adIdStr);
@@ -1529,35 +1753,102 @@ var QgGameBridge = {
     var paramStr = UTF8ToString(param);
     var successID = UTF8ToString(success);
     var failID = UTF8ToString(fail);
-    var paramObj = JSON.parse(paramStr)
+    var paramObj = JSON.parse(paramStr);
 
-    qg.pay({
-      appId: paramObj.appId,
-      token: paramObj.token,
-      timestamp: paramObj.timestamp,
-      orderNo: paramObj.orderNo,
-      paySign: paramObj.paySign,
-      success: function (res) {
-        var json = JSON.stringify({
-          callbackId: successID,
-          data: res.data,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "PayResponseCallback",
-          json
-        );
-        console.log("?????" + JSON.stringify(res));
+    qg.getSystemInfo({
+      success: (res) => {
+        console.log(`System information: ${JSON.stringify(res)}`);
+        if (
+          !res.platformVersionCode ||
+          res.platformVersionCode == null ||
+          res.platformVersionCode == "undefined"
+        ) {
+          var json = JSON.stringify({
+            errMsg:
+              "Failed to obtain the fast application engine version. Procedure",
+          });
+          unityInstance.SendMessage(
+            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+            "PayResponseFailCallback",
+            json
+          );
+        } else {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", paramObj.payUrl);
+          xhr.setRequestHeader("Accept", "application/json");
+          xhr.setRequestHeader("charset", "UTF-8");
+
+          var dataObject = {
+            openId: paramObj.token,
+            deviceInfo: paramObj.deviceInfo,
+            model: res.model,
+            ip: paramObj.ip,
+            productName: paramObj.productName,
+            productDesc: paramObj.productDesc,
+            count: paramObj.count,
+            price: paramObj.price,
+            currency: paramObj.currency,
+            cpOrderId: paramObj.cpOrderId,
+            attach: paramObj.attach,
+            appVersion: paramObj.appVersion,
+            engineVersion: res.platformVersionCode.toString(),
+            callBackUrl: paramObj.callBackUrl,
+          };
+
+          console.log("xhr.send::: ", JSON.stringify(dataObject));
+          xhr.send(JSON.stringify(dataObject));
+          xhr.onreadystatechange = () => {
+            console.log("readyState: ", xhr.readyState);
+            console.log("status: ", xhr.status);
+            console.log("response: ", JSON.stringify(xhr.response));
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              var data = JSON.parse(xhr.response).data;
+              qg.pay({
+                appId: paramObj.appId,
+                token: paramObj.token,
+                timestamp: data.timestamp,
+                orderNo: data.orderNo,
+                paySign: data.paySign,
+                success: function (res) {
+                  var json = JSON.stringify({
+                    callbackId: successID,
+                    data: res.data,
+                  });
+                  unityInstance.SendMessage(
+                    CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+                    "PayResponseCallback",
+                    json
+                  );
+                  console.log("?????" + JSON.stringify(res));
+                },
+                fail: function (err) {
+                  var json = JSON.stringify({
+                    callbackId: failID,
+                    errMsg: err.errMsg,
+                    errCode: err.errCode,
+                    data: err,
+                  });
+                  console.log(json);
+                  console.log("fail json" + json);
+                  unityInstance.SendMessage(
+                    CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+                    "PayResponseFailCallback",
+                    json
+                  );
+                  console.log("?????" + JSON.stringify(err));
+                },
+              });
+            }
+          };
+        }
       },
-      fail: function (err) {
+      fail: (err) => {
+        console.log(
+          `Error Obtaining system information: ${JSON.stringify(err)}`
+        );
         var json = JSON.stringify({
-          callbackId: failID,
-          errMsg: err.errMsg,
-          errCode: err.errCode,
-          data: err
+          errMsg: err,
         });
-        console.log(json);
-        console.log("fail json" + json);
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
           "PayResponseFailCallback",
@@ -1566,6 +1857,204 @@ var QgGameBridge = {
         console.log("?????" + JSON.stringify(err));
       },
     });
+  },
+
+  QGPlayMedia: function (playerId) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    console.log("playerId: ", playerId);
+    var pdIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(pdIdStr);
+    if (!pd || pd == null || pd == "undefined") {
+      console.log("innerAudioContext is null");
+      return;
+    }
+
+    pd.play();
+    pd.onCanplay(function () {
+      console.log("onCanplay success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_CANPLAY,
+        json
+      );
+    });
+
+    pd.onPlay(function () {
+      console.log("onPlay success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_PLAY,
+        json
+      );
+    });
+
+    pd.onPause(function () {
+      console.log("onPause success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_PAUSE,
+        json
+      );
+    });
+
+    pd.onStop(function () {
+      console.log("onStop success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_STOP,
+        json
+      );
+    });
+
+    pd.onEnded(function () {
+      console.log("onEndedfunction success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_ENDED,
+        json
+      );
+    });
+
+    pd.onTimeUpdate(function () {
+      console.log("onTimeUpdate success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_TIMEUPDATE,
+        json
+      );
+    });
+
+    pd.onError(function () {
+      console.log("onError success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_ERROR,
+        json
+      );
+    });
+
+    pd.onWaiting(function () {
+      console.log("onWaiting success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_WAITING,
+        json
+      );
+    });
+
+    pd.onSeeking(function () {
+      console.log("onSeeking success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_SEEKING,
+        json
+      );
+    });
+
+    pd.onSeeked(function () {
+      console.log("onSeeked success");
+      var json = JSON.stringify({
+        callbackId: pdIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_PD_SEEKED,
+        json
+      );
+    });
+  },
+
+  QGPauseMedia: function (playerId) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    var pdIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(pdIdStr);
+    if (pd) {
+      pd.pause();
+    }
+  },
+
+  QGStopMedia: function (playerId) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    var pdIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(pdIdStr);
+    if (pd) {
+      pd.stop();
+    }
+  },
+
+  QGDestroyMedia: function (playerId) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    var pdIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(pdIdStr);
+    if (pd) {
+      pd.destroy();
+    }
+  },
+
+  QGSeekMedia: function (playerId, time) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+    var pdIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(pdIdStr);
+    if (pd) {
+      pd.seek(time);
+    }
   },
 };
 

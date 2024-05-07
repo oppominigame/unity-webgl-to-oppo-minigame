@@ -2,55 +2,66 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System;
-using System.Text.RegularExpressions;
 using UnityEngine.Rendering;
 using System.Diagnostics;
 using System.Threading;
-using System.Net;
-using System.Collections;
-using ICSharpCode.SharpZipLib.Zip;
-using static System.Net.Mime.MediaTypeNames;
 using System.Threading.Tasks;
+using UnityEditor.Build.Reporting;
+
 namespace QGMiniGame
 {
-
-
-    public class QGGameTools
+    public static class QGGameTools
     {
+        private const string EDITOR_CONFIG_PATH = "Assets/OPPO-GAME-SDK/Editor/BuildTool/QGBuildConfig.asset";
+
         //构建小游戏
-        public static void ConvetWebGl(string buildSrc, string webglSrc)
+        public static void ConvetWebGL(string buildSrc, string webglSrc)
         {
             QGLog.Log("[BuildMiniGame] Start: Please Waitting");
 
             /*         CopyDirectory(Path.Combine(UnityEngine.Application.dataPath, "OPPO-GAME-SDK/Default"), buildSrc, true);*/
 
             //拼接打包命令
-            string commandStr ="quickgame unity";
-            var getConfig = GetEditorConfig();
+            string commandStr = "quickgame unity";
 
-            if (getConfig.useAddressable)
+            if (BuildConfigAsset.Fundamentals.useRemoteStreamingAssets && BuildConfigAsset.Fundamentals.streamingAssetsURL.IsValid())
             {
-                commandStr += (" --addressable=" + getConfig.envConfig.streamingAssetsUrl);
+                commandStr += (" --addressable=" + BuildConfigAsset.Fundamentals.streamingAssetsURL);
             }
 
-            commandStr += (" --gameName=" + getConfig.projectName);
-            commandStr += (" --unityVer=" + UnityEngine.Application.unityVersion);
-            commandStr += (" --icon=" + getConfig.iconPath);
+            commandStr += (" --gameName=" + BuildConfigAsset.Fundamentals.projectName);
+            commandStr += (" --unityVer=" + Application.unityVersion);
+            commandStr += (" --icon=" + BuildConfigAsset.Fundamentals.iconPath);
 
-            commandStr += (" --packageName=" + getConfig.packageName);
- 
+            commandStr += (" --packageName=" + BuildConfigAsset.Fundamentals.packageName);
+
             var orientationArr = new[] { "portrait", "landscape" };
-            commandStr += (" --orientation=" + orientationArr[getConfig.orientation]);
-            commandStr += (" --versionName=" + getConfig.projectVersionName);
-            commandStr += (" --versionCode=" + getConfig.projectVersion);
-            commandStr += (" --minPlatformVersion=" + getConfig.minPlatVersion);
+            commandStr += (" --orientation=" + orientationArr[BuildConfigAsset.Fundamentals.orientation]);
+            commandStr += (" --versionName=" + BuildConfigAsset.Fundamentals.projectVersionName);
+            commandStr += (" --versionCode=" + BuildConfigAsset.Fundamentals.projectVersion);
+            commandStr += (" --minPlatformVersion=" + BuildConfigAsset.Fundamentals.minPlatformVersion);
 
-            if (getConfig.useSign)
+            //AssetBundle
+            if (BuildConfigAsset.AssetCache.available)
             {
-                commandStr += (" --signCertificate=" + getConfig.signCertificate);
-                commandStr += (" --signPrivate=" + getConfig.signPrivate);
+                if (!BuildConfigAsset.AssetCache.enableBundleCache)
+                {
+                    commandStr += (" --disableBundleCache=true");
+                }
+                commandStr += (" --keepOldVersion=" + BuildConfigAsset.AssetCache.keepOldVersion);
+                commandStr += (" --enableCacheLog=" + BuildConfigAsset.AssetCache.enableCacheLog);
+                commandStr += (" --bundlePathIdentifier=" + BuildConfigAsset.AssetCache.bundlePathIdentifier);
+                commandStr += (" --excludeFileExtensions=" + BuildConfigAsset.AssetCache.excludeFileExtensions);
+                commandStr += (" --excludeClearFiles=" + BuildConfigAsset.AssetCache.excludeClearFiles);
+                commandStr += (" --bundleHashLength=" + BuildConfigAsset.AssetCache.bundleHashLength);
+                commandStr += (" --defaultReleaseSize=" + BuildConfigAsset.AssetCache.defaultReleaseSize);
+            }
+
+            if (BuildConfigAsset.Fundamentals.useCustomSign)
+            {
+                commandStr += (" --signCertificate=" + BuildConfigAsset.Fundamentals.signCertificate);
+                commandStr += (" --signPrivate=" + BuildConfigAsset.Fundamentals.signPrivate);
                 commandStr += " release";
             }
 
@@ -147,108 +158,14 @@ namespace QGMiniGame
             }
         }
 
-        private static bool CopyDirectory(string SourcePath, string DestinationPath, bool overwriteexisting)
-        {
-            bool ret = false;
-            var separator = Path.DirectorySeparatorChar;
-            var ignoreFiles = new List<string>() { "webgl.loader.js", "webgl.wasm.framework.unityweb", "webgl.framework.js", "UnityLoader.js" };
-
-            RenameFile[] renameFiles = {
-                new RenameFile()
-                {
-                    oldName = "webgl.data",
-                    newName = "webgl.data.unityweb"
-                },
-                 new RenameFile()
-                {
-                    oldName = "webgl.wasm",
-                    newName = "webgl.wasm.code.unityweb"
-                }
-            };
-            var ignoreDirs = new List<string>() { };
-            try
-            {
-
-                if (Directory.Exists(SourcePath))
-                {
-                    if (Directory.Exists(DestinationPath) == false)
-                    {
-                        Directory.CreateDirectory(DestinationPath);
-                    }
-                    else
-                    {
-                        // 已经存在，删掉目录下无用的文件
-                        foreach (string filename in ignoreFiles)
-                        {
-                            var filepath = Path.Combine(DestinationPath, filename);
-                            if (File.Exists(filepath))
-                            {
-                                File.Delete(filepath);
-                            }
-                        }
-                        foreach (string dir in ignoreDirs)
-                        {
-                            var dirpath = Path.Combine(DestinationPath, dir);
-                            if (Directory.Exists(dirpath))
-                            {
-                                Directory.Delete(dirpath);
-                            }
-                        }
-                    }
-
-                    foreach (string fls in Directory.GetFiles(SourcePath))
-                    {
-
-                        FileInfo flinfo = new FileInfo(fls);
-                        if (flinfo.Extension == ".meta" || ignoreFiles.Contains(flinfo.Name))
-                        {
-                            continue;
-                        }
-
-                        string targetFileName = flinfo.Name;
-                        foreach (RenameFile renameFile in renameFiles)
-                        {
-                            if (renameFile.oldName.Equals(flinfo.Name))
-                            {
-                                targetFileName = renameFile.newName;
-                                break;
-                            }
-                        }
-
-                        flinfo.CopyTo(Path.Combine(DestinationPath, targetFileName), overwriteexisting);
-
-                    }
-                    foreach (string drs in Directory.GetDirectories(SourcePath))
-                    {
-                        DirectoryInfo drinfo = new DirectoryInfo(drs);
-                        if (ignoreDirs.Contains(drinfo.Name))
-                        {
-                            continue;
-                        }
-                        if (CopyDirectory(drs, Path.Combine(DestinationPath, drinfo.Name), overwriteexisting) == false)
-                            ret = false;
-                    }
-                }
-                ret = true;
-            }
-            catch (Exception ex)
-            {
-                ret = false;
-                UnityEngine.Debug.LogError(ex);
-            }
-            return ret;
-        }
-
         //构建WebGL
-        public static void BuildWebGL(string srcPath,string buildSrc)
+        public static BuildReport BuildWebGL(string path)
         {
-            string webglPath = Path.Combine(buildSrc, "webgl");
-            DelectDir(webglPath);
-
             QGLog.Log("[BuildWebGL] Start: Please Waitting");
             BuildOptions option = BuildOptions.None;
-            BuildPipeline.BuildPlayer(GetScenePaths(), srcPath, BuildTarget.WebGL, option);
-            QGLog.Log("[BuildWebGL] Done: " + srcPath);
+            var report = BuildPipeline.BuildPlayer(GetScenePaths(), path, BuildTarget.WebGL, option);
+            QGLog.Log("[BuildWebGL] Done: " + path);
+            return report;
         }
 
         // 设置打包成 webgl的参数 
@@ -286,19 +203,6 @@ namespace QGMiniGame
             return scenes.ToArray();
         }
 
-        //配置文件获取
-        public static QGGameConfig GetEditorConfig()
-        {
-            var config = AssetDatabase.LoadAssetAtPath("Assets/OPPO-GAME-SDK/Editor/QGGameConfig.asset", typeof(QGGameConfig)) as QGGameConfig;
-            if (config == null)
-            {
-                AssetDatabase.CreateAsset(EditorWindow.CreateInstance<QGGameConfig>(), "Assets/OPPO-GAME-SDK/Editor/QGGameConfig.asset");
-                config = AssetDatabase.LoadAssetAtPath("Assets/OPPO-GAME-SDK/Editor/QGGameConfig.asset", typeof(QGGameConfig)) as QGGameConfig;
-            }
-            return config;
-        }
-
-
         //打开指定的文件 
         public static void ShowInExplorer(string path)
         {
@@ -314,58 +218,6 @@ namespace QGMiniGame
             {
                 QGLog.LogError("ShowInExplorer error not mac and win");
             }
-        }
-
-        //配置文件设置
-        public static void setEditorConfig(string buildSrc, string packageName, string projectName, int orientation, string projectVersionName, string projectVersion, string minPlatVersion,bool useAddressable, string streamingAssetsUrl,string iconPath,bool useSign,string signCertificate,string signPrivate)
-        {
-            var config = GetEditorConfig();
-            if (buildSrc != String.Empty)
-            {
-                config.buildSrc = buildSrc;
-            }
-            if (packageName != String.Empty)
-            {
-                config.packageName = packageName;
-            }
-            if (projectName != String.Empty)
-            {
-                config.projectName = projectName;
-            }
-            config.orientation = orientation;
-
-            if (projectVersionName != String.Empty)
-            {
-                config.projectVersionName = projectVersionName;
-            }
-            if (projectVersion != String.Empty)
-            {
-                config.projectVersion = projectVersion;
-            }
-            if (minPlatVersion != String.Empty)
-            {
-                config.minPlatVersion = minPlatVersion;
-            }
-            if (streamingAssetsUrl != String.Empty)
-            {
-                config.envConfig.streamingAssetsUrl = streamingAssetsUrl;
-            }
-            if (iconPath != String.Empty)
-            {
-                config.iconPath = iconPath;
-            }
-            if (signCertificate != String.Empty)
-            {
-                config.signCertificate = signCertificate;
-            }
-            if (signPrivate != String.Empty)
-            {
-                config.signPrivate = signPrivate;
-            }
-            config.useAddressable = useAddressable;
-            config.useSign = useSign;
-            EditorUtility.SetDirty(config);
-            AssetDatabase.SaveAssets();
         }
 
         private static bool IsInMacOS
@@ -437,6 +289,14 @@ namespace QGMiniGame
             {
                 e.HelpLink = "";
             }
+        }
+
+        public static void ShaderTestTool()
+        {
+
+            string shaderTestToolUrl = "https://ie-activity-cn.heytapimage.com/static/minigame/hall/example123456/assets/com.oppo.ShaderDemo.rpk";
+
+            UnityEngine.Application.OpenURL(shaderTestToolUrl);
         }
     }
 }

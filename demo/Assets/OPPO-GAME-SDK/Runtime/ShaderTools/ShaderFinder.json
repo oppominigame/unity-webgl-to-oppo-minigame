@@ -1,0 +1,9 @@
+{
+  "ShaderApi": [
+    "geometry",
+    "CustomTessellation.cginc",
+    "Tessellation",
+    "addshadow",
+    "#pragma kernel"
+  ]
+}

@@ -1,0 +1,639 @@
+﻿using System;
+using UnityEngine;
+
+
+namespace QGMiniGame
+{
+    public class QG
+    {
+        public static int SDK_VERSION = 5;
+
+        #region Login  登录
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/account
+        //QG.Login(
+        //(msg) => { Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg)); },
+        //(msg) => { Debug.Log("QG.Login fail = " + msg.errMsg); }
+        ///);
+        public static void Login(Action<QGCommonResponse<QGLoginBean>> successCallback = null, Action<QGCommonResponse<QGLoginBean>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.Login(successCallback, failCallback);
+        }
+        #endregion
+
+        #region HasShortcutInstalled  获取创建桌面图标是否创建
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/install-shortcut
+        //QG.HasShortcutInstalled(
+        //(msg) => { Debug.Log("QG.HasShortcutInstalled success = " + JsonUtility.ToJson(msg)); },
+        //(msg) => { Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg); }
+        //);
+        // public static void HasShortcutInstalled(Action<QGCommonResponse<QGShortcutBean>> succCallback = null, Action<QGCommonResponse<QGShortcutBean>> failCallback = null)
+        public static void HasShortcutInstalled(Action<QGCommonResponse<QGHasShortcutInstalled>> succCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.HasShortcutInstalled(succCallback, failCallback);
+        }
+        #endregion
+
+        // #region InstallShortcut  创建桌面图标
+        // // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/install-shortcut
+        // //QG.InstallShortcut(
+        // //"我来自Unity",
+        // //(msg) => { Debug.Log("QG.InstallShortcut success = " + JsonUtility.ToJson(msg)); },
+        // //(msg) => { Debug.Log("QG.InstallShortcut fail = " + msg.errMsg); }
+        // //);
+        public static void InstallShortcut(Action<QGCommonResponse<QGHasShortcutInstalled>> succCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.InstallShortcut(succCallback, failCallback);
+        }
+        // #endregion
+
+        #region CreateBannerAd  创建Banner广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/banner-ad
+        // var bannerAd = QG.CreateBannerAd(new QGCreateBannerAdParam()
+        // {
+        // adUnitId = "xxxxxx"
+        // });
+        // Debug.Log("创建Banner广告开始运行");
+        // bannerAd.OnLoad(() => {
+        //     Debug.Log("banner广告加载成功");
+        // });
+        // bannerAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.bannerAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        public static QGBannerAd CreateBannerAd(QGCreateBannerAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateBannerAd(param);
+        }
+        #endregion
+
+        #region CreateRewardedVideoAd  创建激励视频广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/video-ad
+        // var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
+        // {
+        // adUnitId = "xxxxxx"
+        // });
+        // Debug.Log("创建激励视频开始运行");
+        // rewardedVideoAd.OnLoad(() => {
+        //   Debug.Log("激励视频广告加载成功");
+        // rewardedVideoAd.Show();
+        // });
+        // rewardedVideoAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.rewardedVideoAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        // rewardedVideoAd.OnClose((QGRewardedVideoResponse msg) =>
+        // {
+        // if (msg.isEnded) {
+        //       Debug.Log("激励视频广告完成，发放奖励");
+        //     } else {
+        //       Debug.Log("激励视频广告取消关闭，不发放奖励");
+        //     }
+        // });
+        public static QGRewardedVideoAd CreateRewardedVideoAd(QGCommonAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateRewardedVideoAd(param);
+        }
+        #endregion
+
+        #region CreateInterstitialAd  创建插屏广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/insert-ad
+        // var interstitialAd = QG.CreateInterstitialAd(new QGCommonAdParam()
+        // {
+        // adUnitId = "xxxxxx"
+        // });
+        // Debug.Log("创建插屏广告开始运行");
+        // interstitialAd.OnLoad(() => {
+        //     Debug.Log("插屏广告加载成功");
+        //     interstitialAd.Show();
+        // });
+        // interstitialAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.interstitialAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        public static QGInterstitialAd CreateInterstitialAd(QGCommonAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateInterstitialAd(param);
+        }
+        #endregion
+
+        #region CreateCustomAd  创建原生模板广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/native-template-ad
+        // var customAd = QG.CreateCustomAd(new QGCreateCustomAdParam()
+        // {
+        // adUnitId = "xxxxxx"  //上文下图
+        // });
+        // Debug.Log("创建原生模板广告开始运行");
+        // customAd.OnLoad(() => {
+        // Debug.Log("原生模板广告加载成功");
+        // });
+        // customAd.Show(
+        // (msg) => { Debug.Log("原生模板广告展示成功 = " + JsonUtility.ToJson(msg)); },
+        // (msg) => { Debug.Log("原生模板广告展示失败 = " + msg.errMsg); }
+        // );
+        // customAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.customAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        // customAd.OnHide(() =>
+        // {
+        // Debug.Log("QG.customAd.OnHide success ");
+        // });
+        public static QGCustomAd CreateCustomAd(QGCreateCustomAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateCustomAd(param);
+        }
+        #endregion
+
+        #region CreateGameBannerAd    创建互推盒子横幅广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/mutual-push-box-ad?id=qgcreategamebanneradobject
+        // var gameBannerAd = QG.CreateGameBannerAd(new QGCommonAdParam()
+        // {
+        // adUnitId = "xxxxxx"
+        // });
+        // Debug.Log("创建互推盒子横幅广告开始运行");
+        // gameBannerAd.OnLoad(() => {
+        // Debug.Log("QG.gameBannerAd.OnLoad success = ");
+        // gameBannerAd.Show(
+        // (msg) => { Debug.Log("互推盒子横幅广告展示成功 = " + JsonUtility.ToJson(msg)); },
+        // (msg) => { Debug.Log("互推盒子横幅广告展示失败 = " + msg.errMsg); }
+        // );
+        // });
+        // gameBannerAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.gameBannerAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        public static QGGameBannerAd CreateGameBannerAd(QGCommonAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateGameBannerAd(param);
+        }
+        #endregion
+
+        #region CreateGamePortalAd  创建互推盒子九宫格广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/mutual-push-box-ad?id=qgcreategameportaladobject
+        // var gamePortalAd = QG.CreateGamePortalAd(new QGCommonAdParam()
+        // {
+        // adUnitId = "xxxxxx"
+        // });
+        // Debug.Log("创建互推盒子横幅广告开始运行");
+        // gamePortalAd.OnLoad(() => {
+        // gamePortalAd.Show(
+        // (msg) => { Debug.Log("互推盒子九宫格广告展示成功 = " + JsonUtility.ToJson(msg)); },
+        // (msg) => { Debug.Log("互推盒子九宫格广告展示失败 = " + msg.errMsg); }
+        // );
+        // });
+        // gamePortalAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.gamePortalAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        public static QGGamePortalAd CreateGamePortalAd(QGCommonAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateGamePortalAd(param);
+        }
+        #endregion
+
+        #region CreateGameDrawerAd  创建互推盒子抽屉广告
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/ad/mutual-push-box-ad?id=qgcreategamedraweradobject
+        // var GameDrawerAd  = QG.CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
+        // {
+        // adUnitId = "xxxxxx"
+        // });
+        // Debug.Log("创建互推盒子抽屉广告开始运行");
+        // GameDrawerAd.Show(
+        // (msg) => { Debug.Log("互推盒子抽屉广告展示成功 = " + JsonUtility.ToJson(msg)); },
+        // (msg) => { Debug.Log("互推盒子抽屉广告展示失败 = " + msg.errMsg); }
+        // );
+        // GameDrawerAd.OnError((QGBaseResponse msg) =>
+        // {
+        // Debug.Log("QG.gamePortalAd.OnError success = " + JsonUtility.ToJson(msg));
+        // });
+        public static QGGameDrawerAd CreateGameDrawerAd(QGCreateGameDrawerAdParam param)
+        {
+            return QGMiniGameManager.Instance.CreateGameDrawerAd(param);
+        }
+        #endregion
+
+        #region storage 
+        // 数据存储
+        public static void StorageSetItem(string keyName, string keyValue)
+        {
+            QGMiniGameManager.StorageSetItem(keyName, keyValue);
+        }
+        // 数据读取  
+        public static string StorageGetItem(string keyName)
+        {
+            return QGMiniGameManager.Instance.StorageGetItem(keyName);
+        }
+        // 清除数据 
+        public static void StorageRemoveItem(string keyName)
+        {
+            QGMiniGameManager.StorageRemoveItem(keyName);
+        }
+        #endregion
+
+        #region Pay 支付
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/pay-introduction
+        // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/pay
+        // PayParam param = new PayParam()
+        // {
+        //     appId = "123", 
+        //     token = "xxxxxxxxxxxxxxxxxxxx",
+        //     timestamp = 1682244531643,  
+        //     orderNo = "111111",
+        //     paySign = "xxxxxxxxxxxxxxxxxxxx",
+        //     // paySign 由 CP 服务端使用 appKey (不是 appId )、orderNo、timestamp 进行签名算法生成返回
+        // };
+        // QG.Pay(
+        //     param,
+        //     (msg) => { Debug.Log("QG.Pay success = " + JsonUtility.ToJson(msg)); },
+        //     (msg) => { Debug.Log("QG.Pay fail = " + JsonUtility.ToJson(msg)); },
+        //     (msg) => { Debug.Log("QG.Pay complete = " + JsonUtility.ToJson(msg)); }
+        // );
+        public static void Pay(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.Pay(param, successCallback, failCallback);
+        }
+        #endregion
+
+        #region GetNetworkType 获取网络类型
+
+        public static void GetNetworkType(Action<QGCommonResponse<QGGetNetworkType>> succCallback = null, Action<QGCommonResponse<QGGetNetworkType>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.GetNetworkType(succCallback, failCallback);
+        }
+
+        #endregion
+
+        #region OnNetworkStatusChange 监听网络状态变化事件
+
+        public static void OnNetworkStatusChange(Action<QGOnNetworkStatus> callback)
+        {
+            QGMiniGameManager.Instance.OnNetworkStatusChange(callback);
+        }
+
+        #endregion
+
+
+        #region VibrateShort 短振动
+
+        public static void VibrateShort()
+        {
+            QGMiniGameManager.Instance.VibrateShort();
+        }
+
+        #endregion
+
+        #region VibrateLong 长振动
+
+        public static void VibrateLong()
+        {
+            QGMiniGameManager.Instance.VibrateLong();
+        }
+
+        #endregion
+
+        #region GetSystemInfo 异步获取系统信息
+
+        public static void GetSystemInfo(Action<QGCommonResponse<QGSystemInfo>> successCallback = null, Action<QGCommonResponse<QGSystemInfo>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.GetSystemInfo(successCallback, failCallback);
+        }
+
+        #endregion
+
+        #region GetSystemInfoSync 同步获取系统信息
+
+        public static string GetSystemInfoSync()
+        {
+            return QGMiniGameManager.Instance.GetSystemInfoSync();
+        }
+
+        #endregion
+
+        #region SetEnableDebugTrue 打开vConsole
+
+        public static void SetEnableDebugTrue()
+        {
+            QGMiniGameManager.Instance.SetEnableDebugTrue();
+        }
+
+        #endregion
+
+        #region SetEnableDebugFalse 关闭vConsole
+
+        public static void SetEnableDebugFalse()
+        {
+            QGMiniGameManager.Instance.SetEnableDebugFalse();
+        }
+
+        #endregion
+
+        #region ShowModal 显示对话框
+
+        public static void ShowModal()
+        {
+            QGMiniGameManager.Instance.ShowModal();
+        }
+
+        #endregion
+
+        #region 键盘
+        public static void ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.ShowKeyboard(param, successCallback, failCallback, completeCallback);
+        }
+
+        public static void OnKeyboardInput(Action<QGResKeyBoardponse> callback)
+        {
+            QGMiniGameManager.Instance.OnKeyboardInput(callback);
+        }
+
+        public static void OffKeyboardInput()
+        {
+            QGMiniGameManager.Instance.OffKeyboardInput();
+        }
+
+        public static void OnKeyboardConfirm(Action<QGResKeyBoardponse> callback)
+        {
+            QGMiniGameManager.Instance.OnKeyboardConfirm(callback);
+        }
+
+        public static void OffKeyboardConfirm()
+        {
+            QGMiniGameManager.Instance.OffKeyboardConfirm();
+        }
+
+        public static void OnKeyboardComplete(Action<QGResKeyBoardponse> callback)
+        {
+            QGMiniGameManager.Instance.OnKeyboardComplete(callback);
+        }
+
+        public static void OffKeyboardComplete()
+        {
+            QGMiniGameManager.Instance.OffKeyboardComplete();
+        }
+
+        public static void HideKeyboard()
+        {
+            QGMiniGameManager.Instance.HideKeyboard();
+        }
+
+        #endregion
+
+
+        // 文件系统
+        #region Mkdir 创建目录
+
+        public static void Mkdir()
+        {
+            QGMiniGameManager.Instance.Mkdir();
+        }
+
+        #endregion
+
+        #region Rmdir 删除目录
+
+        public static void Rmdir()
+        {
+            QGMiniGameManager.Instance.Rmdir();
+        }
+
+        #endregion
+
+        #region IsExist 是否是目录/文件
+
+        public static void IsExist()
+        {
+            QGMiniGameManager.Instance.IsExist();
+        }
+
+        #endregion
+
+        #region Rename 重命名目录
+
+        public static void Rename()
+        {
+            QGMiniGameManager.Instance.Rename();
+        }
+
+        #endregion
+
+        #region SaveFile 保存临时文件到本地
+
+        public static void SaveFile()
+        {
+            QGMiniGameManager.Instance.SaveFile();
+        }
+
+        #endregion
+
+        #region ReadDir 读取目录内文件列表
+
+        public static void ReadDir()
+        {
+            QGMiniGameManager.Instance.ReadDir();
+        }
+
+        #endregion
+
+        #region WriteFile 写入文件
+
+        public static void WriteFile()
+        {
+            QGMiniGameManager.Instance.WriteFile();
+        }
+
+        #endregion
+
+        #region ReadFile 读取文件
+
+        public static void ReadFile()
+        {
+            QGMiniGameManager.Instance.ReadFile();
+        }
+
+        #endregion
+
+        #region AppendFile 追加文件
+
+        public static void AppendFile()
+        {
+            QGMiniGameManager.Instance.AppendFile();
+        }
+
+        #endregion
+
+        #region CopyFile 复制文件
+
+        public static void CopyFile()
+        {
+            QGMiniGameManager.Instance.CopyFile();
+        }
+
+        #endregion
+
+        #region RemoveSavedFile 删除文件
+
+        public static void RemoveSavedFile()
+        {
+            QGMiniGameManager.Instance.RemoveSavedFile();
+        }
+
+        #endregion
+
+        #region Stat 获取文件信息
+
+        public static void Stat()
+        {
+            QGMiniGameManager.Instance.Stat();
+        }
+
+        #endregion
+
+        #region Unzip 解压文件
+
+        public static void Unzip()
+        {
+            QGMiniGameManager.Instance.Unzip();
+        }
+
+        #endregion
+
+        #region GetFileInfo 获取本地临时文件或本地用户文件的文件信息
+
+        public static void GetFileInfo()
+        {
+            QGMiniGameManager.Instance.GetFileInfo();
+        }
+
+        #endregion
+
+        #region DownLoadIcon 下载图片
+
+        public static void DownLoadFile(DownLoadFileParam param,Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            QGMiniGameManager.Instance.DownLoadFile(param,successCallback, failCallback);
+        }
+
+        #endregion
+
+        #region UploadFile 上传图片
+
+        public static void UploadFile(UpLoadFileParam param,Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            QGMiniGameManager.Instance.UploadFile(param,successCallback, failCallback);
+        }
+
+        #endregion
+
+        #region PlayVideo 播放远程视频
+
+        public static QGVideoPlayer CreateVideo(VideoParam param)
+        {
+            return QGMiniGameManager.Instance.CreateVideo(param);
+        }
+
+        #endregion
+
+        #region PlayAudio 播放远程音频
+
+        public static QGAudioPlayer PlayAudio(AudioParam param)
+        {
+            return QGMiniGameManager.Instance.PlayAudio(param);
+        }
+
+        #endregion
+
+
+
+        // #region PauseAudio 暂停音频
+
+        // public static void PauseAudio()
+        // {
+        //     QGMiniGameManager.Instance.PauseAudio();
+        // }
+
+        // #endregion 
+
+        #region OnAudioInterruptionBegin 监听qg.onAudioInterruptionBegin
+
+        public static void OnAudioInterruptionBegin()
+        {
+            QGMiniGameManager.Instance.OnAudioInterruptionBegin();
+        }
+
+        #endregion 
+
+        #region OffAudioInterruptionBegin 取消监听qg.onAudioInterruptionBegin
+
+        public static void OffAudioInterruptionBegin()
+        {
+            QGMiniGameManager.Instance.OffAudioInterruptionBegin();
+        }
+
+        #endregion 
+
+        #region OnAudioInterruptionEnd 监听qg.onAudioInterruptionEnd
+
+        public static void OnAudioInterruptionEnd()
+        {
+            QGMiniGameManager.Instance.OnAudioInterruptionEnd();
+        }
+
+        #endregion 
+
+        #region OffAudioInterruptionEnd 取消监听qg.onAudioInterruptionEnd
+
+        public static void OffAudioInterruptionEnd()
+        {
+            QGMiniGameManager.Instance.OffAudioInterruptionEnd();
+        }
+
+        #endregion 
+
+        #region OnError 监听全局错误事件
+
+        public static void OnError()
+        {
+            QGMiniGameManager.Instance.OnError();
+        }
+
+        #endregion 
+
+        #region OffError 取消监听全局错误事件
+
+        public static void OffError()
+        {
+            QGMiniGameManager.Instance.OffError();
+        }
+
+        #endregion 
+
+        #region DispatchError 模拟触发Error
+
+        public static void DispatchError()
+        {
+            QGMiniGameManager.Instance.DispatchError();
+        }
+
+        #endregion 
+
+        #region ShowToast 提示框
+
+        public static void ShowToast(ShowToastParam param)
+        {
+            QGMiniGameManager.Instance.ShowToast(param);
+        }
+
+        #endregion 
+        public static void Log()
+        {
+             QGMiniGameManager.Instance.Log();
+        }
+
+        public static void LogClose()
+        {
+             QGMiniGameManager.Instance.LogClose();
+        }
+    }
+}
+

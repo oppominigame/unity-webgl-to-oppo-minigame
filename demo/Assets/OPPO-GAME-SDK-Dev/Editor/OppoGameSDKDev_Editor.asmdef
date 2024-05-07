@@ -1,0 +1,19 @@
+{
+    "name": "OppoGameSDKDev_Editor",
+    "rootNamespace": "QGMiniGame",
+    "references": [
+        "GUID:4f07a863d6a06924589ff792f0d14301",
+        "GUID:0bf4606b40483d24dbf83b6deec7e04e"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
