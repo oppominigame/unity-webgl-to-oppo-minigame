@@ -38,20 +38,16 @@ OPPO 小游戏打包工具：2.1.8-beta.0 及以上
 缓存系统通过哈希值来判定更新，出于性能考虑不会对内容做额外计算来验证，因此 hash 在资源命名中起到至关重要的作用。通过 Unity `BuildAssetBundleOptions.AppendHashToAssetBundleName` 或在 `Addressables` 面板中进行配置，会生成默认为 32 位的 hash 拼接在资源名末尾</span>
 - <span style="font-size:12px">**defaultReleaseSize**  
 清理缓存时默认额外清理的大小，单位 MB，默认 30MB  
-Unity 小游戏默认有 500MB 的用户存储空间，若缓存写入时超过此值，则缓存系统会按照 LRU 规则清理出当前配置的空间大小，防止后续写入时频繁进行清理
-</span>
+Unity 小游戏默认有 500MB 的用户存储空间，若缓存写入时超过此值，则缓存系统会按照 LRU 规则清理出当前配置的空间大小，防止后续写入时频繁进行清理</span>
 - <span style="font-size:12px">**keepOldVersion**  
 资源更新后是否保留旧版本资源，默认删除不保留  
-若保留旧版本资源，则未来需要回滚资源时，能够命中缓存，不触发网络下载
-</span>
+若保留旧版本资源，则未来需要回滚资源时，能够命中缓存，不触发网络下载</span>
 - <span style="font-size:12px">**excludeClearFiles**  
 自动清理时忽略的文件，支持纯 hash 或名称，使用分号分隔，例如 8d265a9dfd6cb7669cdb8b726f0afb1e;asset1  
-缓存系统进行 LRU 清理时，在配置范围内所有已缓存的资源文件版本都会被保留
-</span>
+缓存系统进行 LRU 清理时，在配置范围内所有已缓存的资源文件版本都会被保留</span>
 - <span style="font-size:12px">**enableCacheLog**  
 是否将缓存信息输出到控制台，便于调试  
-自测时建议开启，缓存系统的关键操作及耗时会输出到控制台，方便进行调试和耗时统计
-</span>
+自测时建议开启，缓存系统的关键操作及耗时会输出到控制台，方便进行调试和耗时统计</span>
 
 ### 命名规则
 

@@ -220,7 +220,9 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
       durationTime = 2000,         //延迟时间
       });
 ```
+
 ## 数据储存
+
 ```c#
      QG.StorageSetItem(Key, Value); //存储
      QG.StorageGetItem(Key); //读取
@@ -228,6 +230,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 ```
 
 ## 创建桌面图标
+
 ```c#
     QG.HasShortcutInstalled((msg) =>
     {
@@ -240,7 +243,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 
 ## 自定义拓展
 
-- 可参考 Unity 提供的 C# 调用 JS 方法的代码示例 https://docs.unity.cn/cn/2019.4/Manual/webgl-interactingwithbrowserscripting.html
+- 可参考 Unity 提供的 C# 调用 JS 方法的 [代码示例](https://docs.unity.cn/cn/2019.4/Manual/webgl-interactingwithbrowserscripting.html)
 - 主要在 `Plugins/qg.minigame.jslib` 中编写 JS 代码以及在 QGMiniGameManager 中封装调用入口，可依据 [OPPO 小游戏文档](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/account) 自行添加能力
 - 以登录功能举例
 
