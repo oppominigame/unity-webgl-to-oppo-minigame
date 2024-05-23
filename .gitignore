@@ -20,3 +20,4 @@
 /demo/*.csproj.user
 /demo/*.sln
 /tools/version
+mklink.bat

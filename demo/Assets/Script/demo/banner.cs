@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using QGMiniGame;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using System.Text.RegularExpressions;
+
 public class banner : MonoBehaviour
 {
     public Button comebackbtn;
@@ -19,6 +22,10 @@ public class banner : MonoBehaviour
     public Button destroyBannerAdbtn;
 
     public QGBannerAd qGBannerAd;
+
+    public InputField inputField;
+
+    private string inputAdUnitId;
     void Start()
     {
         comebackbtn.onClick.AddListener(comebackfunc);
@@ -27,6 +34,32 @@ public class banner : MonoBehaviour
         showBannerAdbtn.onClick.AddListener(showBannerAdfunc);
         hideBannerAdbtn.onClick.AddListener(hideBannerAdfunc);
         destroyBannerAdbtn.onClick.AddListener(destroyBannerAdfunc);
+
+        EventTrigger trigger = inputField.gameObject.AddComponent<EventTrigger>();
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+        entry.callback.AddListener((eventData) => { OnInputFieldClicked(); });
+        trigger.triggers.Add(entry);
+        inputAdUnitId = "114131";
+        inputField.text = "adUnitId: " + inputAdUnitId;
+    }
+
+    private void OnInputFieldClicked()
+    {
+        // 在这里处理InputField被点击的逻辑
+        QG.ShowKeyboard(new KeyboardParam()
+        {
+            defaultValue = "",
+            maxLength = 100,
+            multiple = true,
+            confirmHold = true
+        });
+        QG.OnKeyboardInput((msg) =>
+        {
+            QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
+            inputField.text = "adUnitId: " + data.value;
+            inputAdUnitId = data.value;
+        });
     }
 
     public void comebackfunc()
@@ -37,11 +70,30 @@ public class banner : MonoBehaviour
 
     public void createBannerAdfunc()
     {
+        bool isNumeric = Regex.IsMatch(inputAdUnitId, @"^\d+$");
+        Debug.Log("inputAdUnitId：：："+ inputAdUnitId+ isNumeric);
+        if (!isNumeric)
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "adUnitId 必须是数字",
+                iconType = "none",
+                durationTime = 1500,
+            });
+            return;
+        }
+
         qGBannerAd =
             QG
                 .CreateBannerAd(new QGCreateBannerAdParam()
-                { adUnitId = "114131" });
+                { adUnitId = inputAdUnitId });
         Debug.Log("创建Banner广告开始运行");
+        QG.ShowToast(new ShowToastParam()
+        {
+            title = "创建Banner广告,adUnitId = " + inputAdUnitId,
+            iconType = "none",
+            durationTime = 1500,
+        });
         qGBannerAd
             .OnLoad(() =>
             {

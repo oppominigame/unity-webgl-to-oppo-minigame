@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using QGMiniGame;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using System.Text.RegularExpressions;
 
 public class customAd : MonoBehaviour
 {
@@ -18,6 +20,10 @@ public class customAd : MonoBehaviour
     public Button hidecustomAdbtn;
 
     private QGCustomAd qGCustomAd;
+
+    public InputField inputField;
+
+    private string inputAdUnitId;
     void Start()
     {
         comebackbtn.onClick.AddListener(comebackfunc);
@@ -25,6 +31,31 @@ public class customAd : MonoBehaviour
         showcustomAdbtn.onClick.AddListener(showcustomAdfunc);
         hidecustomAdbtn.onClick.AddListener(hidecustomAdfunc);
         destroycustomAdbtn.onClick.AddListener(destroycustomAdfunc);
+
+        EventTrigger trigger = inputField.gameObject.AddComponent<EventTrigger>();
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+        entry.callback.AddListener((eventData) => { OnInputFieldClicked(); });
+        trigger.triggers.Add(entry);
+        inputAdUnitId = "1193999";
+        inputField.text = "adUnitId: " + inputAdUnitId;
+    }
+    private void OnInputFieldClicked()
+    {
+        // 在这里处理InputField被点击的逻辑
+        QG.ShowKeyboard(new KeyboardParam()
+        {
+            defaultValue = "",
+            maxLength = 100,
+            multiple = true,
+            confirmHold = true
+        });
+        QG.OnKeyboardInput((msg) =>
+        {
+            QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
+            inputField.text = "adUnitId: " + data.value;
+            inputAdUnitId = data.value;
+        });
     }
 
     public void comebackfunc()
@@ -35,13 +66,33 @@ public class customAd : MonoBehaviour
 
     public void createcustomAdfunc()
     {
+        bool isNumeric = Regex.IsMatch(inputAdUnitId, @"^\d+$");
+        Debug.Log("inputAdUnitId：：：" + inputAdUnitId + isNumeric);
+        if (!isNumeric)
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "adUnitId 必须是数字",
+                iconType = "none",
+                durationTime = 1500,
+            });
+            return;
+        }
+
         qGCustomAd =
          QG
              .CreateCustomAd(new QGCreateCustomAdParam()
              {
-                 adUnitId = "1193999" //上文下图
+                 adUnitId = inputAdUnitId //上文下图
              });
         Debug.Log("创建原生模板广告开始运行");
+        QG.ShowToast(new ShowToastParam()
+        {
+            title = "创建原生模板广告,adUnitId = "+ inputAdUnitId,
+            iconType = "none",
+            durationTime = 1500,
+        });
+
         // qGCustomAd.Load(); 不支持 报错
         qGCustomAd
             .OnLoad(() =>
@@ -52,27 +103,6 @@ public class customAd : MonoBehaviour
                     iconType = "none",
                     durationTime = 1500,
                 });
-            });
-        qGCustomAd
-            .Show((msg) =>
-            {
-                QG.ShowToast(new ShowToastParam()
-                {
-                    title = "原生模板广告展示成功",
-                    iconType = "none",
-                    durationTime = 1500,
-                });
-                Debug.Log("原生模板广告展示成功 = " + JsonUtility.ToJson(msg));
-            },
-            (msg) =>
-            {
-                QG.ShowToast(new ShowToastParam()
-                {
-                    title = "原生模板广告展示失败",
-                    iconType = "none",
-                    durationTime = 1500,
-                });
-                Debug.Log("原生模板广告展示失败 = " + msg.errMsg);
             });
         qGCustomAd
             .OnError((QGBaseResponse msg) =>
@@ -108,7 +138,27 @@ public class customAd : MonoBehaviour
         }
         else
         {
-            qGCustomAd.Show();
+            qGCustomAd
+            .Show((msg) =>
+            {
+                QG.ShowToast(new ShowToastParam()
+                {
+                    title = "原生模板广告展示成功",
+                    iconType = "none",
+                    durationTime = 1500,
+                });
+                Debug.Log("原生模板广告展示成功 = " + JsonUtility.ToJson(msg));
+            },
+            (msg) =>
+            {
+                QG.ShowToast(new ShowToastParam()
+                {
+                    title = "原生模板广告展示失败",
+                    iconType = "none",
+                    durationTime = 1500,
+                });
+                Debug.Log("原生模板广告展示失败 = " + msg.errMsg);
+            });
         }
     }
 

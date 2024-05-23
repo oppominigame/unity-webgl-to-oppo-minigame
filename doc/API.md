@@ -46,8 +46,8 @@ QG.Login(
                          {
                              appId = 30173650,  //CP游戏在开放平台申请的appId
                              token = parameterToken,//QG.Login 传入
-                             payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder",  //测试接口(必填)
-                             //payUrl =  "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder", //正式接口(必填)
+                             //payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder",  //测试接口(可不传)
+                             //payUrl =  "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder", //正式接口(可不传，不传默认正式接口)
                              productName = "测试礼包",//商品名称(必填)
                              productDesc = "测试支付",//商品说明(必填)
                              count = 1, //商品数量（只能传1）(必填)
@@ -241,6 +241,68 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
     });
 ```
 
+## <a id="退出当前 OPPO 小游戏"></a>退出当前 OPPO 小游戏
+
+使用此接口可以让玩家在游戏中退出当前 OPPO 小游戏
+
+```c#
+        QG.ExitApplication();
+        QG.ExitApplication(null);
+        QG.ExitApplication(new ExitApplicationParam(){data = null});
+        QG.ExitApplication(new ExitApplicationParam(){data = "发送到客户端"});
+        //以上退出传参皆可
+```
+
+## <a id="键盘"></a>键盘
+
+使用此接口可以让玩家在游戏中使用键盘
+
+```c#
+        //显示键盘
+        string keyboardId = QG.ShowKeyboard(new KeyboardParam() //keyboardId 创建键盘返回唯一标识 用于判断多键盘场景
+        {
+            defaultValue = "", //键盘输入框显示的默认值 默认为空字符串
+            maxLength = 100,   //键盘中文本的最大长度 默认值为 100
+            multiple = true,  //是否为多行输入 默认值为 false
+            confirmHold = true //当点击完成时键盘是否收起 默认值为 true
+        });
+        //隐藏键盘
+        QG.HideKeyboard();
+        //监听键盘输入事件
+        QG.OnKeyboardInput((msg) =>
+        {
+            QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
+                if (data.keyboardId == keyboardId)
+                {
+                    InputObject.text = data.value;
+                }
+        });
+        //取消监听键盘输入事件
+        QG.OffKeyboardInput();
+        //监听用户点击键盘 Confirm 按钮时的事件
+        QG.OnKeyboardConfirm((msg) =>
+        {
+            QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
+               if (data.keyboardId == keyboardId)
+               {
+                    InputObject.text = data.value;
+               }
+        });
+        //取消监听用户点击键盘 Confirm 按钮时的事件
+        QG.OffKeyboardConfirm();
+        //监听监听键盘收起的事件
+        QG.OnKeyboardComplete((msg) =>
+        {
+            QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
+               if (data.keyboardId == keyboardId)
+               {
+                    InputObject.text = data.value;
+               }            
+        });
+        //取消监听监听键盘收起的事件
+        QG.OffKeyboardComplete();
+```
+
 ## <a id="自定义拓展"></a>自定义拓展
 
 - 可参考 Unity 提供的 C# 调用 JS 方法的 [代码示例](https://docs.unity.cn/cn/2019.4/Manual/webgl-interactingwithbrowserscripting.html)
@@ -249,102 +311,102 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 
 1. 先在 qg.minigame.jslib 文件中写入 oppo 小游戏登录 API（qg.login）
 
-    ```js
-    QGLogin: function (success, fail) {
-        if (typeof qg == "undefined") {
-        console.log("qg.minigame.jslib  qg is undefined");
-        return;
-        }
+   ```js
+   QGLogin: function (success, fail) {
+       if (typeof qg == "undefined") {
+       console.log("qg.minigame.jslib  qg is undefined");
+       return;
+       }
 
-        var successID = UTF8ToString(success);
-        var failID = UTF8ToString(fail);
+       var successID = UTF8ToString(success);
+       var failID = UTF8ToString(fail);
 
-        qg.login({
-        success: function (res) {
-            var json = JSON.stringify({
-            callbackId: successID,
-            data: res.data,
-            });
-            unityInstance.SendMessage(
-            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-            "LoginResponseCallback",
-            json
-            );
-        },
-        fail: function (res) {
-            var json = JSON.stringify({
-            callbackId: failID,
-            errMsg: res.errMsg,
-            errCode: res.errCode,
-            });
-            unityInstance.SendMessage(
-            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-            "LoginResponseCallback",
-            json
-            );
-        },
-        });
-    },
-    ```
+       qg.login({
+       success: function (res) {
+           var json = JSON.stringify({
+           callbackId: successID,
+           data: res.data,
+           });
+           unityInstance.SendMessage(
+           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+           "LoginResponseCallback",
+           json
+           );
+       },
+       fail: function (res) {
+           var json = JSON.stringify({
+           callbackId: failID,
+           errMsg: res.errMsg,
+           errCode: res.errCode,
+           });
+           unityInstance.SendMessage(
+           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+           "LoginResponseCallback",
+           json
+           );
+       },
+       });
+   },
+   ```
 
 2. 在 QGMiniGameManager.cs 中注册
 
-    ```c#
-    #region 登录
+   ```c#
+   #region 登录
 
-            public void Login(Action<QGCommonResponse<QGLoginBean>> successCallback = null, Action<QGCommonResponse<QGLoginBean>> failCallback = null)
-            {
-                QGLogin(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
-            }
+           public void Login(Action<QGCommonResponse<QGLoginBean>> successCallback = null, Action<QGCommonResponse<QGLoginBean>> failCallback = null)
+           {
+               QGLogin(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+           }
 
-            #endregion
-    ```
+           #endregion
+   ```
 
 3. 在 QGModel.cs 写入 API 中的实体类（请求参和返回参）
 
-    ```c#
-    [Serializable]
-        public class QGLoginBean
-        {
-            public string avatar;
-            public string sex;
-            public string age;
-            public string token; //调用接口获取登录凭证（token）。通过凭证进而换取用户登录态信息，包括用户的唯一标识（openid）
-            public string nickName;
-            public string uid;
-            public string time;
-            public string code;
-            public string phoneNum;
-        }
-    ```
+   ```c#
+   [Serializable]
+       public class QGLoginBean
+       {
+           public string avatar;
+           public string sex;
+           public string age;
+           public string token; //调用接口获取登录凭证（token）。通过凭证进而换取用户登录态信息，包括用户的唯一标识（openid）
+           public string nickName;
+           public string uid;
+           public string time;
+           public string code;
+           public string phoneNum;
+       }
+   ```
 
 4. 在 QG.cs 文件中写入调用
 
-    ```js
-    #region Login  登录
-            // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/account
-            //QG.Login(
-            //(msg) => { Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg)); },
-            //(msg) => { Debug.Log("QG.Login fail = " + msg.errMsg); }
-            ///);
-            public static void Login(Action<QGCommonResponse<QGLoginBean>> successCallback = null, Action<QGCommonResponse<QGLoginBean>> failCallback = null)
-            {
-                QGMiniGameManager.Instance.Login(successCallback, failCallback);
-            }
-            #endregion
-    ```
+   ```js
+   #region Login  登录
+           // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/account
+           //QG.Login(
+           //(msg) => { Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg)); },
+           //(msg) => { Debug.Log("QG.Login fail = " + msg.errMsg); }
+           ///);
+           public static void Login(Action<QGCommonResponse<QGLoginBean>> successCallback = null, Action<QGCommonResponse<QGLoginBean>> failCallback = null)
+           {
+               QGMiniGameManager.Instance.Login(successCallback, failCallback);
+           }
+           #endregion
+   ```
 
 5. 引用 QGMiniGame 名空间并调用方法
 
-    ```c#
-    // 1、登录
-            QG
-                .Login((msg) =>
-                {
-                    Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg));
-                },
-                (msg) =>
-                {
-                    Debug.Log("QG.Login fail = " + msg.errMsg);
-                });
-    ```
+   ```c#
+   // 1、登录
+           QG
+               .Login((msg) =>
+               {
+                   Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg));
+               },
+               (msg) =>
+               {
+                   Debug.Log("QG.Login fail = " + msg.errMsg);
+               });
+   ```

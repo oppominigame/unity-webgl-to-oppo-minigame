@@ -35,7 +35,11 @@ namespace QGMiniGame
     [Serializable]
     public class QGResKeyBoardponse : QGBaseResponse
     {
+        public string callbackId;
+        public string errMsg;
+        public string errCode;
         public string value;
+        public string keyboardId;
     }
 
     [Serializable]
@@ -197,7 +201,8 @@ namespace QGMiniGame
         //必填
         public int appId; // 平台分配的游戏 appId
         public string token; // qg.login 成功时获得的用户 token
-        public string payUrl;   //支付接口
+        public string payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder";   //支付接口
+        //public string payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder";   //测试接口
         public string productName; //商品名称 
         public string productDesc; //商品描述 
         public int count; //商品数量（只能传1） 
@@ -303,5 +308,11 @@ namespace QGMiniGame
 
         public float volume;
 
+    }
+
+    [Serializable]
+    public class ExitApplicationParam
+    {
+        public string data; 
     }
 }

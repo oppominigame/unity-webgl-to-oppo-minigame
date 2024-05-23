@@ -1,5 +1,16 @@
 # 更新日志
 
+## 2024-5-20 【重要更新】
+
+### Feature
+- 重要：上线新版本 Unity SDK，版本号 V8.0.1，位于 `tools/unity_webgl_rpk_oppo_v8.0.1.unitypackage`
+- 重要：新增 `qg.exitApplication` 游戏退出接口
+
+### Fix
+- 普通：修改 `qg.pay` 默认支付订单地址payUrl, 开发者无需传参
+- 普通：修复 `qg.showKeyboard` 等键盘接口报错
+- 普通：修复广告创建后自动展示的问题，详情参考 [OPPO SDK API 激励视频广告](doc/API.md#激励视频广告)
+
 ## 2024-5-7 【重要更新】
 ### Feature
 
@@ -19,3 +30,4 @@
 ### Fix
 
 - 普通：修复 `qg.pay` 无支付回调的问题
+

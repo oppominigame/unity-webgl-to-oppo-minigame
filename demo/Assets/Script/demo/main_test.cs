@@ -292,8 +292,7 @@ public class main_test : MonoBehaviour
                          {
                              appId = 30173650,
                              token = parameterToken,
-                             payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder",  //测试接口
-                            //  payUrl =  "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder", //正式接口
+                             payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder",
                              productName = "测试礼包",
                              productDesc = "测试支付",
                              count = 1, //商品数量（只能传1） 
@@ -342,5 +341,14 @@ public class main_test : MonoBehaviour
     {
         SceneManager.LoadScene("audio");
         Debug.Log("打开音频");
+    }
+
+    public void exitApplication()
+    {
+        QG.ExitApplication();
+        //QG.ExitApplication(null);
+        //QG.ExitApplication(new ExitApplicationParam(){data = null});
+        //以上退出传参皆可
+        Debug.Log("退出游戏");
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using UnityEngine.Networking;
+using System.Timers;
 
 namespace QGMiniGame
 {
@@ -22,11 +23,22 @@ namespace QGMiniGame
             Success
         }
 
+        private enum ImportStatus : int
+        {
+            FirstInjection = 0, //首次注入
+            Importimg = 1,      //正常注入
+            UpgradeCompleted = 2, //升级完成
+        }
+
         private const string WEBGL_BUILD_DIR = "webgl";
         private const string ASSET_CACHE_SYSTEM_MIN_VERSION = "2.1.8-beta.0";
         private const string SDK_SERVER_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/OPPO-GAME-SDK/tools";
         private const string UPDATE_LOG_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/CHANGELOG.md";
         private const string CONTACT_US_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/doc/IssueAndContact.md.md";
+        private static float ImportPackagTime = 0;      //导入计时   
+        private static float ImportPackagOvertime = 10; //导入超时
+        private static Timer timer;
+        private static string ImportingClass = $"{nameof(BuildEditorWindow)}.ImportingStatus";
 
         private static BuildEditorWindow instance;
         private static bool HasOpenInstances
@@ -1066,9 +1078,9 @@ namespace QGMiniGame
                 {
                     useRuntimeShaderDetection = EditorGUILayout.Toggle(new GUIContent("启用Shader真机检测", "仅供自测，正式打包请勿使用"), useRuntimeShaderDetection);
 
-                    if (useRuntimeShaderDetection  && ShaderRuntimeDetector.checkAddShaderSence())
+                    if (useRuntimeShaderDetection && ShaderRuntimeDetector.checkAddShaderSence())
                     {
-                        string checkShaderSence = ShaderRuntimeDetector.checkLocalShaderSence() ? "导入" :"下载";
+                        string checkShaderSence = ShaderRuntimeDetector.checkLocalShaderSence() ? "导入" : "下载";
                         if (EditorUtility.DisplayDialog("提示", $"{"需要"}{checkShaderSence}{"Shader场景包"}", checkShaderSence, "取消"))
                         {
                             ShaderRuntimeDetector.StartDownload();
@@ -1076,7 +1088,7 @@ namespace QGMiniGame
                         }
                         useRuntimeShaderDetection = false;
                     }
-                    if(isDownLoadShaderScenes && !ShaderRuntimeDetector.checkAddShaderSence())
+                    if (isDownLoadShaderScenes && !ShaderRuntimeDetector.checkAddShaderSence())
                     {
                         isDownLoadShaderScenes = false;
                         useRuntimeShaderDetection = true;
@@ -1221,10 +1233,14 @@ namespace QGMiniGame
                             isUpgradingSDK = false;
                             return;
                         }
+                        EditorUtility.ClearProgressBar();
                     }
                     // 导入安装包
+                    EditorPrefs.SetInt(ImportingClass, (int)ImportStatus.Importimg);
                     AssetDatabase.ImportPackage(LatestSDKPackageTempPath, false);
                     isUpgradingSDK = false;
+                    // 导入超时处理
+                    ImportTiming();
                     break;
                 case 1:
                     break;
@@ -1451,6 +1467,45 @@ namespace QGMiniGame
                 Application.OpenURL(CONTACT_US_URL);
             }
             Debug.LogError(errorMessage);
+        }
+
+        public static void ImportTiming()
+        {
+            timer = new Timer(1000);
+            timer.Elapsed += TimerElapsed;
+            timer.AutoReset = true;
+            timer.Start();
+        }
+
+        public static void StopImportTiming()
+        {
+            timer.Stop();
+            timer.Elapsed -= TimerElapsed;
+            timer.Dispose();
+        }
+
+        private static void TimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            ImportPackagTime++;
+            // Debug.Log("监控导入 耗时:" + ImportPackagTime + ",是否编译完成: " + !EditorApplication.isCompiling);
+            if (ImportPackagTime > ImportPackagOvertime || !EditorApplication.isCompiling) //超时 或 编译完成
+            {
+                EditorUtility.ClearProgressBar();   //关闭导入进度条
+                ImportPackagTime = 0;
+                StopImportTiming();
+            }
+        }
+
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void OnScriptReload()
+        {
+            bool isBuildEditorWindowRunning = EditorWindow.HasOpenInstances<BuildEditorWindow>();
+            if (isBuildEditorWindowRunning && (EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.Importimg
+                || EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.FirstInjection))
+            {
+                EditorUtility.ClearProgressBar();
+                EditorPrefs.SetInt(ImportingClass, (int)ImportStatus.UpgradeCompleted);
+            }
         }
     }
 }

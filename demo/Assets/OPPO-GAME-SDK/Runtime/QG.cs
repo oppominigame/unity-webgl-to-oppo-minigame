@@ -337,9 +337,9 @@ namespace QGMiniGame
         #endregion
 
         #region 键盘
-        public static void ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        public static string ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.ShowKeyboard(param, successCallback, failCallback, completeCallback);
+            return QGMiniGameManager.Instance.ShowKeyboard(param, successCallback, failCallback, completeCallback);
         }
 
         public static void OnKeyboardInput(Action<QGResKeyBoardponse> callback)
@@ -509,18 +509,18 @@ namespace QGMiniGame
 
         #region DownLoadIcon 下载图片
 
-        public static void DownLoadFile(DownLoadFileParam param,Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        public static void DownLoadFile(DownLoadFileParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            QGMiniGameManager.Instance.DownLoadFile(param,successCallback, failCallback);
+            QGMiniGameManager.Instance.DownLoadFile(param, successCallback, failCallback);
         }
 
         #endregion
 
         #region UploadFile 上传图片
 
-        public static void UploadFile(UpLoadFileParam param,Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        public static void UploadFile(UpLoadFileParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            QGMiniGameManager.Instance.UploadFile(param,successCallback, failCallback);
+            QGMiniGameManager.Instance.UploadFile(param, successCallback, failCallback);
         }
 
         #endregion
@@ -627,13 +627,25 @@ namespace QGMiniGame
         #endregion 
         public static void Log()
         {
-             QGMiniGameManager.Instance.Log();
+            QGMiniGameManager.Instance.Log();
         }
 
         public static void LogClose()
         {
-             QGMiniGameManager.Instance.LogClose();
+            QGMiniGameManager.Instance.LogClose();
         }
+
+        #region ExitApplication 退出游戏
+        public static void ExitApplication(ExitApplicationParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null,Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.ExitApplication(param, successCallback, failCallback, completeCallback);
+        }
+
+        public static void ExitApplication()
+        {
+            QGMiniGameManager.Instance.ExitApplication(null, null, null, null);
+        }
+        #endregion
     }
 }
 

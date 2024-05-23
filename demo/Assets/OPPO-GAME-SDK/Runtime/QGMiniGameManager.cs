@@ -148,11 +148,13 @@ namespace QGMiniGame
         #endregion
 
         #region 键盘
-        public void ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        public string ShowKeyboard(KeyboardParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGShowKeyboard(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback),
+            var keyboardId = QGCallBackManager.getKey();
+            QGShowKeyboard(keyboardId, JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback),
             QGCallBackManager.Add(failCallback),
-             QGCallBackManager.Add(completeCallback));
+            QGCallBackManager.Add(completeCallback));
+            return keyboardId;
         }
 
         public void OnKeyboardInput(Action<QGResKeyBoardponse> successCallback = null)
@@ -844,7 +846,16 @@ namespace QGMiniGame
         {
             QGLogClose();
         }
-        
+        public void ExitApplication(ExitApplicationParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            string exitData = param == null ? null : param.data;
+            QGExitApplication(exitData, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void ExitApplicationSuCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGGetNetworkType>>(msg);
+        }
 
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
@@ -933,7 +944,7 @@ namespace QGMiniGame
         private static extern void QGShowModal();
 
         [DllImport("__Internal")]
-        private static extern void QGShowKeyboard(string p, string s, string f, string o);
+        private static extern void QGShowKeyboard(string a,string p, string s, string f, string o);
 
         [DllImport("__Internal")]
         private static extern void QGOnKeyboardInput(string p);
@@ -1047,5 +1058,7 @@ namespace QGMiniGame
         private static extern void QGLog();
         [DllImport("__Internal")]
         private static extern void QGLogClose();
+        [DllImport("__Internal")]
+        private static extern void QGExitApplication(string a, string b, string c,string d);
     }
 }

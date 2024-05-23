@@ -25,6 +25,8 @@ var QgGameBridge = {
 
   $mFileData: {},
 
+  $mKeyBoardData: null,
+
   QGLog: function () {
     var originalConsoleLog = console.log;
 
@@ -309,7 +311,7 @@ var QgGameBridge = {
     });
   },
 
-  QGShowKeyboard: function (param, success, fail, complete) {
+  QGShowKeyboard: function (id, param, success, fail, complete) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
@@ -320,6 +322,12 @@ var QgGameBridge = {
     var successID = UTF8ToString(success);
     var failID = UTF8ToString(fail);
     var completeID = UTF8ToString(complete);
+
+    if (!(mAdMap instanceof Map)) {
+      mAdMap = new Map();
+    }
+
+    mKeyBoardData = UTF8ToString(id);
 
     qg.showKeyboard({
       defaultValue: paramData.defaultValue,
@@ -359,12 +367,13 @@ var QgGameBridge = {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
-    var callbackID = Pointer_stringify(callback);
-
+    // var callbackID = Pointer_stringify(callback);
+    var callbackID = UTF8ToString(callback);
     var func = function (data) {
       var json = JSON.stringify({
         callbackId: callbackID,
         value: data.value,
+        keyboardId : mKeyBoardData,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -372,7 +381,6 @@ var QgGameBridge = {
         json
       );
     };
-
     qg.onKeyboardInput(func);
   },
 
@@ -389,12 +397,14 @@ var QgGameBridge = {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
-    var callbackID = Pointer_stringify(callback);
+    // var callbackID = Pointer_stringify(callback);
+    var callbackID = UTF8ToString(callback);
 
     var func = function (data) {
       var json = JSON.stringify({
         callbackId: callbackID,
         value: data.value,
+        keyboardId : mKeyBoardData,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -418,12 +428,14 @@ var QgGameBridge = {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
-    var callbackID = Pointer_stringify(callback);
+    // var callbackID = Pointer_stringify(callback);
+    var callbackID = UTF8ToString(callback);
 
     var func = function (data) {
       var json = JSON.stringify({
         callbackId: callbackID,
         value: data.value,
+        keyboardId : mKeyBoardData,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -1077,7 +1089,7 @@ var QgGameBridge = {
           json
         );
       });
-      bannerAd.show();
+      // bannerAd.show();
     }
   },
   // showBannerAd
@@ -1124,10 +1136,10 @@ var QgGameBridge = {
     });
     if (rewardedVideoAd) {
       mAdMap.set(adIdStr, rewardedVideoAd);
-      rewardedVideoAd.load();
+
       rewardedVideoAd.onLoad(function () {
         console.log("rewardedVideoAd onload success");
-        rewardedVideoAd.show();
+        // rewardedVideoAd.show();
         var json = JSON.stringify({
           callbackId: adIdStr,
         });
@@ -1186,7 +1198,7 @@ var QgGameBridge = {
       mAdMap.set(adIdStr, interstitialAd);
       interstitialAd.onLoad(function () {
         console.log("Interstitial onload success");
-        interstitialAd.show();
+        // interstitialAd.show();
         var json = JSON.stringify({
           callbackId: adIdStr,
         });
@@ -1242,7 +1254,7 @@ var QgGameBridge = {
     });
     if (customAd) {
       mAdMap.set(adIdStr, customAd);
-      customAd.show();
+      // customAd.show();
       customAd.onLoad(function (rec) {
         var json = JSON.stringify({
           callbackId: adIdStr,
@@ -1308,14 +1320,14 @@ var QgGameBridge = {
     });
     if (gameBannerAd) {
       mAdMap.set(adIdStr, gameBannerAd);
-      gameBannerAd
-        .show()
-        .then(function () {
-          console.log("show success");
-        })
-        .catch(function (error) {
-          console.log("show fail with:" + error.errCode + "," + error.errMsg);
-        });
+      // gameBannerAd
+      //   .show()
+      //   .then(function () {
+      //     console.log("show success");
+      //   })
+      //   .catch(function (error) {
+      //     console.log("show fail with:" + error.errCode + "," + error.errMsg);
+      //   });
       gameBannerAd.onLoad(function () {
         var json = JSON.stringify({
           callbackId: adIdStr,
@@ -1371,38 +1383,38 @@ var QgGameBridge = {
     });
     if (gamePortalAd) {
       mAdMap.set(adIdStr, gamePortalAd);
-      gamePortalAd
-        .load()
-        .then(function () {
-          console.log("load success");
-        })
-        .catch(function (error) {
-          console.log("load fail with:" + error.errCode + "," + error.errMsg);
-        });
+      // gamePortalAd
+      //   .load()
+      //   .then(function () {
+      //     console.log("load success");
+      //   })
+      //   .catch(function (error) {
+      //     console.log("load fail with:" + error.errCode + "," + error.errMsg);
+      //   });
 
-      gamePortalAd
-        .show()
-        .then(function () {
-          console.log("show success");
-        })
-        .catch(function (error) {
-          console.log("show fail with:" + error.errCode + "," + error.errMsg);
-        });
+      // gamePortalAd
+      //   .show()
+      //   .then(function () {
+      //     console.log("show success");
+      //   })
+      //   .catch(function (error) {
+      //     console.log("show fail with:" + error.errCode + "," + error.errMsg);
+      //   });
       gamePortalAd.onLoad(function () {
         console.log("gamePortalAd onload success");
-        gamePortalAd
-          .show()
-          .then(function () {
-            console.log("gamePortalAd show success");
-          })
-          .catch(function (error) {
-            console.log(
-              "gamePortalAd show fail with:" +
-                error.errCode +
-                "," +
-                error.errMsg
-            );
-          });
+        // gamePortalAd
+        //   .show()
+        //   .then(function () {
+        //     console.log("gamePortalAd show success");
+        //   })
+        //   .catch(function (error) {
+        //     console.log(
+        //       "gamePortalAd show fail with:" +
+        //         error.errCode +
+        //         "," +
+        //         error.errMsg
+        //     );
+        //   });
         var json = JSON.stringify({
           callbackId: adIdStr,
         });
@@ -1465,15 +1477,15 @@ var QgGameBridge = {
     }
     if (GameDrawerAd) {
       mAdMap.set(adIdStr, GameDrawerAd);
-      GameDrawerAd.show()
-        .then(function () {
-          console.log("GameDrawerAd show success");
-        })
-        .catch(function (error) {
-          console.log(
-            "GameDrawerAd show fail with:" + error.errCode + "," + error.errMsg
-          );
-        });
+      // GameDrawerAd.show()
+      //   .then(function () {
+      //     console.log("GameDrawerAd show success");
+      //   })
+      //   .catch(function (error) {
+      //     console.log(
+      //       "GameDrawerAd show fail with:" + error.errCode + "," + error.errMsg
+      //     );
+      //   });
       GameDrawerAd.onShow(function () {
         console.log("GameDrawerAd onShow success");
       });
@@ -1598,16 +1610,16 @@ var QgGameBridge = {
       //     json
       //   );
       // });
-      ad.onHide(function () {
-        var json = JSON.stringify({
-          callbackId: adIdStr,
-        });
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_HIDE,
-          json
-        );
-      });
+      // ad.onHide(function () {
+      //   var json = JSON.stringify({
+      //     callbackId: adIdStr,
+      //   });
+      //   unityInstance.SendMessage(
+      //     CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+      //     CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_HIDE,
+      //     json
+      //   );
+      // });
     } else {
       var json = JSON.stringify({
         callbackId: failID,
@@ -1773,8 +1785,10 @@ var QgGameBridge = {
             json
           );
         } else {
+          console.log("payUrl:::", paramObj.payUrl);
           var xhr = new XMLHttpRequest();
           xhr.open("POST", paramObj.payUrl);
+          // xhr.open("POST", "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder");
           xhr.setRequestHeader("Accept", "application/json");
           xhr.setRequestHeader("charset", "UTF-8");
 
@@ -2055,6 +2069,52 @@ var QgGameBridge = {
     if (pd) {
       pd.seek(time);
     }
+  },
+  QGExitApplication: function (data, success, fail, complete) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+
+    qg.exitApplication({
+      data: data,
+      success: function () {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        console.log("exitApplication success: ");
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function () {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        console.log("exitApplication fail: ");
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function () {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        console.log("exitApplication complete: ");
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
   },
 };
 

@@ -29,18 +29,20 @@ public class storageItem : MonoBehaviour
         storageRemoveItemBtn.onClick.AddListener(StorageRemoveItem);
         comebackbtn.onClick.AddListener(comebackfunc);
         // 添加点击事件的监听器
-        /*
+
         EventTrigger trigger = storageSetItemKey.gameObject.AddComponent<EventTrigger>();
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = EventTriggerType.PointerClick;
         entry.callback.AddListener((eventData) => { OnInputFieldClicked(); });
         trigger.triggers.Add(entry);
 
+
         EventTrigger trigger2 = storageSetItemValue.gameObject.AddComponent<EventTrigger>();
         EventTrigger.Entry entry2 = new EventTrigger.Entry();
         entry2.eventID = EventTriggerType.PointerClick;
         entry2.callback.AddListener((eventData) => { OnInputFieldClicked2(); });
         trigger2.triggers.Add(entry2);
+
 
         EventTrigger trigger3 = storageGetItemKey.gameObject.AddComponent<EventTrigger>();
         EventTrigger.Entry entry3 = new EventTrigger.Entry();
@@ -53,83 +55,88 @@ public class storageItem : MonoBehaviour
         entry4.eventID = EventTriggerType.PointerClick;
         entry4.callback.AddListener((eventData) => { OnInputFieldClicked4(); });
         trigger4.triggers.Add(entry4);
-        */
     }
 
-    /*
-     * 
+
     private void OnInputFieldClicked()
     {
         // 在这里处理InputField被点击的逻辑
-        Debug.Log("InputField Clicked");
-        QG.ShowKeyboard(new KeyboardParam()
+        string keyboardId = QG.ShowKeyboard(new KeyboardParam()
         {
-            defaultValue = "请输入要存储的Key...",
-            maxLength = 20,
+            defaultValue = "Key-",
+            maxLength = 100,
             multiple = true,
             confirmHold = true
         });
+
         QG.OnKeyboardInput((msg) =>
         {
             QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
-            storageSetItemKey.text = data.value;
+            if (data.keyboardId == keyboardId)
+            {
+                storageSetItemKey.text = data.value;
+            }
         });
     }
 
     private void OnInputFieldClicked2()
     {
         // 在这里处理InputField被点击的逻辑
-        Debug.Log("InputField Clicked2");
-        QG.ShowKeyboard(new KeyboardParam()
+        string keyboardId = QG.ShowKeyboard(new KeyboardParam()
         {
-            defaultValue = "请输入要存储的Value...",
-            maxLength = 20,
+            defaultValue = "Value-",
+            maxLength = 100,
             multiple = true,
             confirmHold = true
         });
         QG.OnKeyboardInput((msg) =>
         {
             QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
-            storageSetItemValue.text = data.value;
+            if (data.keyboardId == keyboardId)
+            {
+                storageSetItemValue.text = data.value;
+            }
         });
     }
-
     private void OnInputFieldClicked3()
     {
         // 在这里处理InputField被点击的逻辑
-        Debug.Log("InputField Clicked3");
-        QG.ShowKeyboard(new KeyboardParam()
+        string keyboardId = QG.ShowKeyboard(new KeyboardParam()
         {
-            defaultValue = "请输入要获取的Key...",
-            maxLength = 20,
+            defaultValue = "Key-",
+            maxLength = 100,
             multiple = true,
             confirmHold = true
         });
         QG.OnKeyboardInput((msg) =>
         {
             QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
-            storageGetItemKey.text = data.value;
+            if (data.keyboardId == keyboardId)
+            {
+                storageGetItemKey.text = data.value;
+            }
         });
     }
 
     private void OnInputFieldClicked4()
     {
         // 在这里处理InputField被点击的逻辑
-        Debug.Log("InputField Clicked4");
-        QG.ShowKeyboard(new KeyboardParam()
+        string keyboardId = QG.ShowKeyboard(new KeyboardParam()
         {
-            defaultValue = "请输入要删除的Key",
-            maxLength = 20,
+            defaultValue = "Key-",
+            maxLength = 100,
             multiple = true,
             confirmHold = true
         });
         QG.OnKeyboardInput((msg) =>
         {
             QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
-            storageRemoveItemKey.text = data.value;
+            if (data.keyboardId == keyboardId)
+            {
+                storageRemoveItemKey.text = data.value;
+            }
         });
     }
-    */
 
     void StorageSetItem()
     {

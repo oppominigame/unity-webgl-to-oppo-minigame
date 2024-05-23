@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using QGMiniGame;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using System.Text.RegularExpressions;
 
 public class gameDrawer : MonoBehaviour
 {
@@ -18,6 +20,10 @@ public class gameDrawer : MonoBehaviour
     public Button hideGameDrawerAdbtn;
 
     private QGGameDrawerAd qGGameDrawerAd;
+
+    public InputField inputField;
+
+    private string inputAdUnitId;
     void Start()
     {
         comebackbtn.onClick.AddListener(comebackfunc);
@@ -25,6 +31,31 @@ public class gameDrawer : MonoBehaviour
         showGameDrawerAdbtn.onClick.AddListener(showGameDrawerAdfunc);
         destroyGameDrawerAdbtn.onClick.AddListener(destroyGameDrawerAdfunc);
         hideGameDrawerAdbtn.onClick.AddListener(hideGameDrawerfunc);
+
+        EventTrigger trigger = inputField.gameObject.AddComponent<EventTrigger>();
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+        entry.callback.AddListener((eventData) => { OnInputFieldClicked(); });
+        trigger.triggers.Add(entry);
+        inputAdUnitId = "336614";
+        inputField.text = "adUnitId: " + inputAdUnitId;
+    }
+    private void OnInputFieldClicked()
+    {
+        // 在这里处理InputField被点击的逻辑
+        QG.ShowKeyboard(new KeyboardParam()
+        {
+            defaultValue = "",
+            maxLength = 100,
+            multiple = true,
+            confirmHold = true
+        });
+        QG.OnKeyboardInput((msg) =>
+        {
+            QGResKeyBoardponse data = JsonUtility.FromJson<QGResKeyBoardponse>(JsonUtility.ToJson(msg));
+            inputField.text = "adUnitId: " + data.value;
+            inputAdUnitId = data.value;
+        });
     }
 
     public void comebackfunc()
@@ -35,34 +66,31 @@ public class gameDrawer : MonoBehaviour
 
     public void createGameDrawerAdfunc()
     {
+        bool isNumeric = Regex.IsMatch(inputAdUnitId, @"^\d+$");
+        Debug.Log("inputAdUnitId：：：" + inputAdUnitId + isNumeric);
+        if (!isNumeric)
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "adUnitId 必须是数字",
+                iconType = "none",
+                durationTime = 1500,
+            });
+            return;
+        }
+
         qGGameDrawerAd =
             QG
                 .CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
-                { adUnitId = "336614" });
+                { adUnitId = inputAdUnitId });
         Debug.Log("创建互推盒子抽屉广告开始运行");
-        qGGameDrawerAd
-            .Show((msg) =>
-            {
-                QG.ShowToast(new ShowToastParam()
-                {
-                    title = "互推盒子抽屉广告展示成功",
-                    iconType = "none",
-                    durationTime = 1500,
-                });
-                Debug
-                    .Log("互推盒子抽屉广告展示成功 = " +
-                    JsonUtility.ToJson(msg));
-            },
-            (msg) =>
-            {
-                QG.ShowToast(new ShowToastParam()
-                {
-                    title = "互推盒子抽屉广告展示失败",
-                    iconType = "none",
-                    durationTime = 1500,
-                });
-                Debug.Log("互推盒子抽屉广告展示失败 = " + msg.errMsg);
-            });
+        QG.ShowToast(new ShowToastParam()
+        {
+            title = "创建互推盒子抽屉广告,adUnitId = "+ inputAdUnitId,
+            iconType = "none",
+            durationTime = 1500,
+        });
+
         qGGameDrawerAd
        .OnLoad(() =>
        {
@@ -91,12 +119,34 @@ public class gameDrawer : MonoBehaviour
 
     public void showGameDrawerAdfunc()
     {
+        Debug.Log("qGGameDrawerAd:::"+qGGameDrawerAd);
         if (qGGameDrawerAd == null)
         {
             return;
         }
-        qGGameDrawerAd.Show();
-
+        qGGameDrawerAd
+          .Show((msg) =>
+          {
+              QG.ShowToast(new ShowToastParam()
+              {
+                  title = "互推盒子抽屉广告展示成功",
+                  iconType = "none",
+                  durationTime = 1500,
+              });
+              Debug
+                  .Log("互推盒子抽屉广告展示成功 = " +
+                  JsonUtility.ToJson(msg));
+          },
+          (msg) =>
+          {
+              QG.ShowToast(new ShowToastParam()
+              {
+                  title = "互推盒子抽屉广告展示失败",
+                  iconType = "none",
+                  durationTime = 1500,
+              });
+              Debug.Log("互推盒子抽屉广告展示失败 = " + msg.errMsg);
+          });
     }
 
     public void destroyGameDrawerAdfunc()
@@ -119,12 +169,6 @@ public class gameDrawer : MonoBehaviour
         {
             return;
         }
-        // qGGameDrawerAd.Hide();
-        QG.ShowToast(new ShowToastParam()
-        {
-            title = "隐藏失败",
-            iconType = "error",
-            durationTime = 1500,
-        });
+        qGGameDrawerAd.Hide();
     }
 }
