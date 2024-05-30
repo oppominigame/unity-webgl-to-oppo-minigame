@@ -1,5 +1,10 @@
 # 更新日志
 
+## 2024-5-30 【普通更新】
+
+### Fix
+- 普通：更新打包工具版本至 `2.1.8-beta.1`，修复配置项 `bundleHashLength`，`defaultReleaseSize` 类型错误导致的缓存系统失效
+
 ## 2024-5-20 【重要更新】
 
 ### Feature
