@@ -44,9 +44,9 @@ public class gameAudio : MonoBehaviour
         qGAudioPlayer = QG.PlayAudio(new AudioParam()
         {
             url = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3", //播放链接
-            startTime = 1.5f,
+            startTime = 0f,
             loop = true,
-            volume = 0.75f
+            volume = 1f
         });
 
         qGAudioPlayer

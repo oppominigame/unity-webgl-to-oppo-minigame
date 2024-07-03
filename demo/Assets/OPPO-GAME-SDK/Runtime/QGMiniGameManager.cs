@@ -140,9 +140,9 @@ namespace QGMiniGame
 
         #region 显示对话框
 
-        public void ShowModal()
+        public void ShowModal(ShowModalParam showModalParam, Action<QGCommonResponse<ShowModalResponse>> successCallback = null, Action<QGCommonResponse<ShowModalResponse>> failCallback = null, Action<QGCommonResponse<ShowModalResponse>> completeCallback = null)
         {
-            QGShowModal();
+            QGShowModal(JsonUtility.ToJson(showModalParam), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
         #endregion
@@ -574,6 +574,11 @@ namespace QGMiniGame
         {
             QGPay(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
+
+        public void PayTest(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
+        {
+            QGPayTest(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
         #endregion
 
         #region JS回调
@@ -637,6 +642,16 @@ namespace QGMiniGame
         public void SystemInfo(string msg)
         {
             QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGSystemInfo>>(msg);
+        }
+
+        public void ManifestInfo(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGManifestInfoRponse>>(msg);
+        }
+
+        public void ProviderInfo(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGProviderRponse>>(msg);
         }
 
         // 广告通用回调 
@@ -828,10 +843,21 @@ namespace QGMiniGame
             QGDestroyMedia(playerId);
         }
 
-        public void SeekMedia(string playerId,float time)
+        public void SeekMedia(string playerId, float time)
         {
-            QGSeekMedia(playerId,time);
+            QGSeekMedia(playerId, time);
         }
+
+        public void AudioPlayerVolume(string playerId, float volume)
+        {
+            QGAudioPlayerVolume(playerId, volume);
+        }
+
+        public void AudioPlayerLoop(string playerId, bool bl)
+        {
+            QGAudioPlayerLoop(playerId, bl);
+        }
+
         #endregion
         public List<string> LogMessage = new List<string>();
         public void HandleLogMessage(string message)
@@ -856,6 +882,188 @@ namespace QGMiniGame
         {
             QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGGetNetworkType>>(msg);
         }
+        public void GetManifestInfo(Action<QGCommonResponse<QGManifestInfoRponse>> successCallback = null, Action<QGCommonResponse<QGManifestInfoRponse>> failCallback = null)
+        {
+            QGGetManifestInfo(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+        public void GetProvider(Action<QGCommonResponse<QGProviderRponse>> callback = null)
+        {
+            QGGetProvider(QGCallBackManager.Add(callback));
+        }
+        public void SetPreferredFramesPerSecond(int fps)
+        {
+            QGSetPreferredFramesPerSecond(fps);
+        }
+        public void ShowLoading(string title)
+        {
+            QGShowLoading(title);
+        }
+        public void HideLoading(Action<QGBaseResponse> success = null)
+        {
+            QGHideLoading(QGCallBackManager.Add(success));
+        }
+        public void SetTimeout(int times, Action<QGBaseResponse> action = null)
+        {
+            QGSetTimeout(times, QGCallBackManager.Add(action));
+        }
+
+        public void ShowModalCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<ShowModalResponse>>(msg);
+        }
+
+        #region 数据云储存
+
+        public void SetUserCloudStorage(UserCloudStorageParam userCloudStorageParam, Action<QGCommonResponse<string>> successCallback = null, Action<QGCommonResponse<string>> failCallback = null, Action<QGCommonResponse<string>> completeCallback = null)
+        {
+            QGSetUserCloudStorage(JsonUtility.ToJson(userCloudStorageParam), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void SetUserCloudStorageCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<string>>(msg);
+        }
+
+        public void GetUserCloudStorage(string storageKey, Action<QGCommonResponse<UserCloudStorageParam>> successCallback = null, Action<QGCommonResponse<UserCloudStorageParam>> failCallback = null, Action<QGCommonResponse<UserCloudStorageParam>> completeCallback = null)
+        {
+            QGGetUserCloudStorage(storageKey, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetUserCloudStorageCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<UserCloudStorageParam>>(msg);
+        }
+
+        public void RemoveUserCloudStorage(string storageKey)
+        {
+            QGRemoveUserCloudStorage(storageKey);
+        }
+        #endregion
+
+        #region 设备信息 电量 
+
+        public void GetBatteryInfo(Action<QGCommonResponse<BatteryInfoParam>> successCallback = null, Action<QGCommonResponse<BatteryInfoParam>> failCallback = null, Action<QGCommonResponse<BatteryInfoParam>> completeCallback = null)
+        {
+            QGGetBatteryInfo(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetBatteryInfoCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<BatteryInfoParam>>(msg);
+        }
+
+        public string GetBatteryInfoSync()
+        {
+            string str = QGGetBatteryInfoSync();
+            return QGGetBatteryInfoSync();
+        }
+        #endregion
+
+        #region 设备信息 设备号 
+        public void GetDeviceId(Action<QGCommonResponse<DeviceIdParam>> successCallback = null, Action<QGCommonResponse<DeviceIdParam>> failCallback = null, Action<QGCommonResponse<DeviceIdParam>> completeCallback = null)
+        {
+            QGGetDeviceId(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetDeviceIdCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<DeviceIdParam>>(msg);
+        }
+        #endregion
+
+        #region 设备信息 屏幕亮度 
+        public void GetScreenBrightness(Action<QGCommonResponse<ScreenBrightnessParam>> successCallback = null, Action<QGCommonResponse<ScreenBrightnessParam>> failCallback = null, Action<QGCommonResponse<ScreenBrightnessParam>> completeCallback = null)
+        {
+            QGGetScreenBrightness(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetScreenBrightnessCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<ScreenBrightnessParam>>(msg);
+        }
+
+        public void SetScreenBrightness(float param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGSetScreenBrightness(param, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void SetKeepScreenOn(bool param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGSetKeepScreenOn(param, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+        #endregion
+
+        #region 设备信息 地理位置 
+        public void GetLocation(Action<QGCommonResponse<GetLocationParam>> successCallback = null, Action<QGCommonResponse<GetLocationParam>> failCallback = null, Action<QGCommonResponse<GetLocationParam>> completeCallback = null)
+        {
+            QGGetLocation(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetLocationCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<GetLocationParam>>(msg);
+        }
+        #endregion
+
+        #region 设备信息 加速计 
+        public void OnAccelerometerChange(Action<QGCommonResponse<onAccelerometerChangeParam>> successCallback = null)
+        {
+            QGOnAccelerometerChange(QGCallBackManager.Add(successCallback));
+        }
+
+        public void OnAccelerometerChangeCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<onAccelerometerChangeParam>>(msg);
+        }
+
+        public void StartAccelerometer(string param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGStartAccelerometer(param, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void StopAccelerometer(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGStopAccelerometer(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+        #endregion
+
+        #region 设备信息 剪切板 
+        public void SetClipboardData(string param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGSetClipboardData(param, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetClipboardData(Action<QGCommonResponse<string>> successCallback = null, Action<QGCommonResponse<string>> failCallback = null, Action<QGCommonResponse<string>> completeCallback = null)
+        {
+            QGGetClipboardData(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void GetClipboardDataCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<string>>(msg);
+        }
+        #endregion
+
+        #region 设备信息 罗盘 
+        public void OnCompassChange(Action<QGCommonResponse<float>> successCallback = null)
+        {
+            QGOnCompassChange(QGCallBackManager.Add(successCallback));
+        }
+        public void OnCompassChangeCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<float>>(msg);
+        }
+
+        public void StartCompass(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGStartCompass(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public void StopCompass(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGStopCompass(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+        #endregion
 
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
@@ -917,6 +1125,9 @@ namespace QGMiniGame
         private static extern void QGPay(string p, string s, string f);
 
         [DllImport("__Internal")]
+        private static extern void QGPayTest(string p, string s, string f);
+
+        [DllImport("__Internal")]
         private static extern void QGGetNetworkType(string s, string f);
 
         [DllImport("__Internal")]
@@ -941,10 +1152,10 @@ namespace QGMiniGame
         private static extern void QGSetEnableDebugFalse();
 
         [DllImport("__Internal")]
-        private static extern void QGShowModal();
+        private static extern void QGShowModal(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGShowKeyboard(string a,string p, string s, string f, string o);
+        private static extern void QGShowKeyboard(string a, string p, string s, string f, string o);
 
         [DllImport("__Internal")]
         private static extern void QGOnKeyboardInput(string p);
@@ -1053,12 +1264,64 @@ namespace QGMiniGame
         [DllImport("__Internal")]
         private static extern void QGDestroyMedia(string a);
         [DllImport("__Internal")]
-        private static extern void QGSeekMedia(string a,float time);
-         [DllImport("__Internal")]
+        private static extern void QGSeekMedia(string a, float time);
+        [DllImport("__Internal")]
         private static extern void QGLog();
         [DllImport("__Internal")]
         private static extern void QGLogClose();
         [DllImport("__Internal")]
-        private static extern void QGExitApplication(string a, string b, string c,string d);
+        private static extern void QGExitApplication(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGGetManifestInfo(string a, string b);
+        [DllImport("__Internal")]
+        private static extern void QGGetProvider(string a);
+        [DllImport("__Internal")]
+        private static extern void QGSetPreferredFramesPerSecond(int a);
+        [DllImport("__Internal")]
+        private static extern void QGShowLoading(string a);
+        [DllImport("__Internal")]
+        private static extern void QGHideLoading(string a);
+        [DllImport("__Internal")]
+        private static extern void QGSetTimeout(int a, string b);
+        [DllImport("__Internal")]
+        private static extern void QGAudioPlayerVolume(string a, float b);
+        [DllImport("__Internal")]
+        private static extern void QGAudioPlayerLoop(string a, bool b);
+        [DllImport("__Internal")]
+        private static extern void QGSetUserCloudStorage(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGGetUserCloudStorage(string k, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGRemoveUserCloudStorage(string k);
+        [DllImport("__Internal")]
+        private static extern void QGGetBatteryInfo(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern string QGGetBatteryInfoSync();
+        [DllImport("__Internal")]
+        private static extern void QGGetDeviceId(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGGetScreenBrightness(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGSetScreenBrightness(float a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGSetKeepScreenOn(bool a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGGetLocation(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGOnAccelerometerChange(string a);
+        [DllImport("__Internal")]
+        private static extern void QGStartAccelerometer(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGStopAccelerometer(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGSetClipboardData(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGGetClipboardData(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGOnCompassChange(string a);
+        [DllImport("__Internal")]
+        private static extern void QGStartCompass(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGStopCompass(string a, string b, string c);
     }
 }

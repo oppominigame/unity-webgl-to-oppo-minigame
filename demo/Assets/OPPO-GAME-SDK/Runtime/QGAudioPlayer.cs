@@ -10,5 +10,17 @@ namespace QGMiniGame
         {
 
         }
+
+
+        //volume 0~1
+        public virtual void SetVolume(float volume)
+        {
+            QGMiniGameManager.Instance.AudioPlayerVolume(playerId, volume);
+        }
+
+        public virtual void SetLoop(bool bl)
+        {
+            QGMiniGameManager.Instance.AudioPlayerLoop(playerId, bl);
+        }
     }
 }

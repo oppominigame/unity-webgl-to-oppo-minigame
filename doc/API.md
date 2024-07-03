@@ -26,7 +26,8 @@ QG.Login(
               Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg));
               if (msg.data.token != string.Empty)
               {
-                  PayOrder(msg.data.token);
+                  PayOrder(msg.data.token); //正式接口，参数详见 https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/order
+                  //PayOrderTest(msg.data.token); OPPO示例，非正式接口，仅供参考
               }
               else
               {
@@ -39,15 +40,14 @@ QG.Login(
           });
     }
 
-    public void PayOrder(string parameterToken)
+    //OPPO示例demo,非正式订单接口,仅供参考.
+    public void PayOrderTest(string parameterToken)
     {
         PayParam param =
                           new PayParam()
                          {
                              appId = 30173650,  //CP游戏在开放平台申请的appId
                              token = parameterToken,//QG.Login 传入
-                             //payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder",  //测试接口(可不传)
-                             //payUrl =  "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder", //正式接口(可不传，不传默认正式接口)
                              productName = "测试礼包",//商品名称(必填)
                              productDesc = "测试支付",//商品说明(必填)
                              count = 1, //商品数量（只能传1）(必填)
@@ -59,6 +59,38 @@ QG.Login(
                              deviceInfo = "", //设备号(可不填)
                              ip = "", //终端IP(可不填)
                              attach = ""//附加信息(可不填)
+                         };
+        QG
+            .PayTest(param,
+            (msg) =>
+            {
+                Debug.Log("QG.Pay success = " + JsonUtility.ToJson(msg));
+            },
+            (msg) =>
+            {
+                Debug.Log("QG.Pay fail = " + JsonUtility.ToJson(msg));
+            });
+    }
+
+    //正式订单接口,该统一下单接口只针对 https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder
+    public void PayOrder(string parameterToken)
+    {
+        PayParam param =
+                          new PayParam()
+                         {
+                             appId = 0,        //平台分配的游戏 appId
+                             openId = "",      //qg.login 成功时获得的用户 token
+                             timestamp = 0,    //时间戳，当前计算机时间和GMT时间(格林威治时间)1970年1月1号0时0分0秒所差的毫秒数
+                             productName = "", //商品名称
+                             productDesc = "", //商品描述
+                             count = 1,        //商品数量（只能传1）
+                             currency = "CNY", //币种，人民币如：CNY
+                             price = 1,        //商品价格，以分为单位
+                             callBackUrl = "", //服务器接收平台返回数据的接口回调地址
+                             appVersion = "1.0.0", //游戏版本
+                             cpOrderId = "1",  //CP自己的订单号
+                             sign = "" //签名详细见 https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/order
+                                       //辅助工具选择代码生成 https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/pay-tool
                          };
         QG
             .Pay(param,
@@ -201,7 +233,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
                     .Log("监听音频播放成功");
   });
 // 新增视频音频通用监听:OnPlay,OnCanPlay,OnPause,OnStop,OnEnded,OnTimeUpdate,OnError,OnWaiting,OnSeeking,OnSeeked.
-// 新增视频音频通用方法:Play(),Pause(),Stop(),Seek(Time),Destroy.
+// 新增视频音频通用方法:Play(),Pause(),Stop(),Seek(Time),Destroy,SetVolume,SetLoop.
 ```
 
 ## <a id="消息框"></a>消息框
@@ -297,10 +329,432 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
                if (data.keyboardId == keyboardId)
                {
                     InputObject.text = data.value;
-               }            
+               }
         });
         //取消监听监听键盘收起的事件
         QG.OffKeyboardComplete();
+```
+
+## <a id="对话框"></a>对话框
+
+使用此接口可以让玩家在游戏中使用对话框
+
+```c#
+     QG.ShowModal(new ShowModalParam()
+        {
+            title = "对话标题",
+            content = "对话内容",
+            showCancel = true  //是否显示取消按钮，默认为 true
+        },
+        (success) =>
+        {
+            if (success.data.confirm)
+            {
+                Debug.Log("确认");
+            }
+            if (success.data.cancel)
+            {
+                Debug.Log("取消");
+            }
+        },
+        (fail) =>
+        {
+            Debug.Log("失败返回");
+        },
+        (complete) =>
+        {
+            Debug.Log("跳过返回");
+        });
+```
+
+## <a id="进度条"></a>进度条
+
+使用此接口可以让玩家在游戏中使用进度条
+
+```c#
+     QG.ShowLoading("进度提示文本");
+        QG.SetTimeout(2000, (msg) =>
+        {
+            QG.HideLoading((msg) =>
+            {
+                Debug.Log("关闭进度成功");
+            });
+        });
+```
+
+## <a id="定时器"></a>定时器
+
+使用此接口可以让玩家在游戏中使用定时器
+
+```c#
+        QG.SetTimeout(2000, (msg) =>
+        {
+            Debug.Log("2000毫秒后执行");
+        });
+```
+
+## <a id="云存储"></a>云存储
+
+使用此接口可以让玩家在游戏中使用云存储
+
+```c#
+       //云存储key value
+       QG.SetUserCloudStorage("key", "value",
+       (success) =>
+       {
+           Debug.Log("云存储成功" + success.data);
+       },
+       (fail) =>
+       {
+           Debug.Log("云存储失败" + fail);
+       },
+       (complete) =>
+       {
+           Debug.Log("云存储跳过");
+       });
+
+        //获取value
+        QG.GetUserCloudStorage("key",
+        (success) =>
+        {
+            Debug.Log("云数据读取,Key: " + success.data.key + ",Value: " + success.data.value);
+        },
+        (fail) =>
+        {
+            Debug.Log("获取miniKey fail");
+        },
+        (complete) =>
+        {
+            Debug.Log("获取获取miniKey complete");
+        });
+
+        //通过key删除
+        QG.RemoveUserCloudStorage("key");
+```
+
+## <a id="系统信息"></a>系统信息
+
+使用此接口可以让玩家在游戏中使用系统信息
+
+```c#
+    //系统信息(异步)
+     QG.GetSystemInfo((msg) =>
+        {
+        string brand = msg.brand; // 手机品牌
+        string language = msg.language; // 系统语言
+        string model = msg.model; // 手机型号
+        string statusBarHeight = msg.statusBarHeight; // 状态栏/异形缺口高度
+        string pixelRatio = msg.pixelRatio; // 设备像素比
+        string platformVersionName = msg.platformVersionName; // 客户端平台
+        string platformVersionCode = msg.platformVersionCode; // 网络类型
+        string screenHeight = msg.screenHeight; // 屏幕高度
+        string screenWidth = msg.screenWidth; // 屏幕宽度
+        string system = msg.system; // 系统版本
+        string windowHeight = msg.windowHeight; // 可使用窗口高度
+        string windowWidth = msg.windowWidth; // 可使用窗口宽度
+        string theme = msg.theme; // 系统当前主题
+        string deviceOrientation = msg.deviceOrientation; // 设备方向
+        string COREVersion = msg.COREVersion; // 版本号
+        },
+         (err) =>
+         {
+             Debug.Log("QG.GetSystemInfo fail = " + JsonUtility.ToJson(err));
+         });
+
+    //系统信息(同步)
+    string systemStr = QG.GetSystemInfoSync();
+    Debug.Log("QG.GetSystemInfoSyncFunc = " + systemStr);
+```
+
+## <a id="获取渠道的名称"></a>获取渠道的名称
+
+使用此接口可以让玩家在游戏中获取渠道的名称
+
+```c#
+        QG.GetProvider((msg) =>
+        {
+            Debug.Log("渠道信息: " + msg.data.provider);
+        });   
+```
+
+## <a id="获取配置文件Manifest"></a>获取配置文件Manifest
+
+使用此接口可以让玩家在游戏中获取配置文件Manifest
+
+```c#
+        QG.GetManifestInfo((msg) =>
+        {
+        string package = msg.data.package;  //游戏包名
+        string name = msg.data.name;     //游戏名
+        string versionName = msg.data.versionName; //游戏版本名
+        string versionCode = msg.data.versionCode; //游戏版本号
+        string minPlatformVersion = msg.data.minPlatformVersion; //最小平台版本号
+        string icon = msg.data.icon; //桌面图标
+        string orientation = msg.data.orientation; //设备方向
+        string type = msg.data.type; //不填或者默认值为 app，取值为 app 或 game
+        object config = msg.data.config; //logLevel 取值
+        object subpackages = msg.data.subpackages; //分包功能，有分包时才需要，可选字段
+        },
+         (err) =>
+         {
+             Debug.Log("QG.GetManifestInfo fail = " + JsonUtility.ToJson(err));
+         }
+        );
+```
+
+## <a id="修改渲染帧率"></a>修改渲染帧率
+
+使用此接口可以让玩家在游戏中修改渲染帧率
+
+```c#
+   int fps = 30; //默认渲染帧率为 60 帧每秒
+   QG.SetPreferredFramesPerSecond(fps);
+```
+
+## <a id="电量"></a>电量
+
+使用此接口可以让玩家在游戏中获取电量
+
+```c#
+        //电量(异步)
+        QG.GetBatteryInfo(
+        (success) =>
+        {
+        float level = success.data.level; //设备电量，范围 1 - 100
+        bool isCharging = success.data.isCharging; //是否正在充电中
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.GetBatteryInfo fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+
+        //电量(同步)
+        BatteryInfoParam batteryInfoParam = QG.GetBatteryInfoSync();
+        Debug.Log("同步电量信息: level: " + batteryInfoParam.level + "isCharging:" + batteryInfoParam.isCharging);
+```
+
+## <a id="获取设备唯一标识"></a>获取设备唯一标识
+
+使用此接口可以让玩家在游戏中获取设备唯一标识
+
+```c#
+        QG.GetDeviceId(
+        (success) =>
+        {
+            string deviceId = success.data.deviceId; //设备唯一标识
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.GetDeviceId fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+```
+
+## <a id="获取设备亮度"></a>获取设备亮度
+
+使用此接口可以让玩家在游戏中获取设备亮度
+
+```c#
+        //亮度(获取)
+        QG.GetScreenBrightness(
+       (success) =>
+       {
+            float value = success.data.value; //亮度
+       },
+       (fail) =>
+       {
+           Debug.Log("QG.GetScreenBrightness fail = " + JsonUtility.ToJson(fail));
+       },
+       (complete) =>
+       {
+       });
+
+       //亮度(设置)
+       float num = 0.5f; //亮度取值范围 0~1
+       QG.SetScreenBrightness(num,
+       (success) =>
+       {
+           Debug.Log("QG.SetScreenBrightness success = " + JsonUtility.ToJson(success));
+       },
+       (fail) =>
+       {
+           Debug.Log("QG.SetScreenBrightness fail = " + JsonUtility.ToJson(fail));
+       },
+       (complete) =>
+       {
+       });
+
+       //亮度(设置常亮)
+       bool bl = true; //常亮true
+       QG.SetKeepScreenOn(bl,
+       (success) =>
+       {
+           Debug.Log("QG.SetKeepScreenOn success = " + JsonUtility.ToJson(success));
+       },
+       (fail) =>
+       {
+           Debug.Log("QG.SetKeepScreenOn fail = " + JsonUtility.ToJson(fail));
+       },
+       (complete) =>
+       {
+       });
+```
+
+## <a id="获取当前的地理位置、速度"></a>获取当前的地理位置、速度
+
+使用此接口可以让玩家在游戏中获取当前的地理位置、速度
+
+```c#
+       QG.GetLocation(
+       (success) =>
+       {
+           float latitude = success.data.latitude; //纬度，范围为 -90~90，负数表示南纬
+           float longitude = success.data.longitude; //经度，范围为 -180~180，负数表示西经
+           float speed = success.data.speed; //速度，单位 m/s          
+           float accuracy = success.data.accuracy; //位置的精确度
+           float altitude = success.data.altitude; //高度，单位 m     
+           float verticalAccuracy = success.data.verticalAccuracy; //垂直精度，单位 m（Android 无法获取，返回 0）
+           float horizontalAccuracy = success.data.horizontalAccuracy; //水平精度，单位 m
+           },
+       (fail) =>
+       {
+           Debug.Log("QG.GetLocation fail = " + JsonUtility.ToJson(fail));
+       },
+       (complete) =>
+       {
+       });
+```
+
+## <a id="监听加速度数据"></a>监听加速度数据
+
+使用此接口可以让玩家在游戏中监听加速度数据
+
+```c#
+        //开始监听加速度数据
+        //game   适用于更新游戏的回调频率，在 20ms/次 左右
+        //ui     适用于更新 UI 的回调频率，在 60ms/次 左右
+        //normal 普通的回调频率，在 200ms/次 左右
+        string type = "game"; 
+        QG.StartAccelerometer(
+        type,
+        (success) =>
+        {
+            Debug.Log("QG.StartAccelerometer success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.StartAccelerometer fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+
+        //停止监听加速度数据
+        QG.StopAccelerometer(
+        (success) =>
+        {
+            Debug.Log("QG.StopAccelerometer success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.StopAccelerometer fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+
+        //监听加速度数据
+        QG.OnAccelerometerChange(
+        (success) =>
+        {
+            float x = success.data.QgParamX;
+            float y = success.data.QgParamY;
+            float z = success.data.QgParamZ;
+        });
+```
+
+## <a id="获取系统剪贴板的内容"></a>获取系统剪贴板的内容
+
+使用此接口可以让玩家在游戏中获取系统剪贴板的内容
+
+```c#
+        //设置系统剪贴板的内容
+        string context = "测试剪切板"; //设置内容
+        QG.SetClipboardData(
+        context,
+        (success) =>
+        {
+            Debug.Log("QG.SetClipboardData success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.SetClipboardData fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+
+        //获取系统剪贴板的内容
+        QG.GetClipboardData(
+        (success) =>
+        {
+            string context = success.data; //内容
+            Debug.Log("QG.GetClipboardData success = " + context);
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.GetClipboardData fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+```
+
+## <a id="监听罗盘数据"></a>监听罗盘数据
+
+使用此接口可以让玩家在游戏中监听罗盘数据
+
+```c#
+        //开始监听罗盘数据
+        QG.StartCompass(
+        (success) =>
+        {
+            Debug.Log("QG.StartCompass success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.StartCompass fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+
+        //停止监听罗盘数据
+        QG.StopCompass(
+        (success) =>
+        {
+            Debug.Log("QG.StopCompass success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.StopCompass fail = " + JsonUtility.ToJson(fail));
+        },
+        (complete) =>
+        {
+        });
+
+        //监听罗盘数据
+        QG.OnCompassChange(
+        (success) =>
+        {
+            float direction = success.data;
+            Debug.Log("面对的方向度数 = " + direction);
+        });
 ```
 
 ## <a id="自定义拓展"></a>自定义拓展

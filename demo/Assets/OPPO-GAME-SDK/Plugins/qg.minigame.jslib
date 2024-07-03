@@ -27,6 +27,14 @@ var QgGameBridge = {
 
   $mKeyBoardData: null,
 
+  $property: {
+    cameraObj: null,
+    cameraImageCallback: null,
+    cameraData: null,
+    cameraArPoseCallback: null,
+    cameraArPose: null,
+  },
+
   QGLog: function () {
     var originalConsoleLog = console.log;
 
@@ -54,32 +62,72 @@ var QgGameBridge = {
     }
   },
 
-  QGShowModal: function () {
+  QGShowModal: function (param, success, fail, complete) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     qg.showModal({
-      title: "??",
-      content: "??????API???????????????vConsole???vConsole?????",
-      showCancel: false,
+      title: paramData.title,
+      content: paramData.content,
+      showCancel: paramData.showCancel,
+      cancelText: paramData.cancelText,
+      cancelColor: paramData.cancelColor,
+      confirmText: paramData.confirmText,
+      confirmColor: paramData.confirmColor,
       success: function (res) {
         if (res.confirm) {
-          console.log("??????");
+          console.log("??????", JSON.stringify(res.confirm));
         } else if (res.cancel) {
-          console.log("??????");
+          console.log("??????", JSON.stringify(res.cancel));
         }
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ShowModalCallback",
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          data: res,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ShowModalCallback",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: res,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ShowModalCallback",
+          json
+        );
       },
     });
   },
 
   QGShowToast: function (param) {
-    var paramStr = UTF8ToString(param);
-    var paramData = JSON.parse(paramStr);
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
     qg.showToast({
       title: paramData.title,
       icon: paramData.iconType,
@@ -88,6 +136,56 @@ var QgGameBridge = {
 
     var qgDir = qg.env.USER_DATA_PATH;
     console.log("qgDir::" + qgDir);
+  },
+
+  QGShowLoading: function (param) {
+    var paramStr = UTF8ToString(param);
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    qg.showLoading({
+      title: paramStr,
+    });
+  },
+
+  QGHideLoading: function (success) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var successID = UTF8ToString(success);
+    qg.hideLoading({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGSetTimeout: function (times, callback) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var callbackID = UTF8ToString(callback);
+    var func = function () {
+      var json = JSON.stringify({
+        callbackId: callbackID,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+    };
+    setTimeout(func, times);
   },
 
   QGGetNetworkType: function (success, fail) {
@@ -373,7 +471,7 @@ var QgGameBridge = {
       var json = JSON.stringify({
         callbackId: callbackID,
         value: data.value,
-        keyboardId : mKeyBoardData,
+        keyboardId: mKeyBoardData,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -404,7 +502,7 @@ var QgGameBridge = {
       var json = JSON.stringify({
         callbackId: callbackID,
         value: data.value,
-        keyboardId : mKeyBoardData,
+        keyboardId: mKeyBoardData,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -415,7 +513,7 @@ var QgGameBridge = {
     qg.onKeyboardConfirm(func);
   },
 
-  QGOffKeyboardConfirm: function (callback) {
+  QGOffKeyboardConfirm: function () {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
@@ -435,7 +533,7 @@ var QgGameBridge = {
       var json = JSON.stringify({
         callbackId: callbackID,
         value: data.value,
-        keyboardId : mKeyBoardData,
+        keyboardId: mKeyBoardData,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -832,6 +930,10 @@ var QgGameBridge = {
   },
 
   QGPlayAudio: function (playerId, param) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
     var paramStr = UTF8ToString(param);
     var paramData = JSON.parse(paramStr);
     var innerAudioContext = qg.createInnerAudioContext();
@@ -851,6 +953,30 @@ var QgGameBridge = {
     }
     var pdIdStr = UTF8ToString(playerId);
     mAdMap.set(pdIdStr, innerAudioContext);
+  },
+
+  QGAudioPlayerVolume: function (playerId, param) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var playerIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(playerIdStr);
+    if (pd) {
+      pd.volume = param;
+    }
+  },
+
+  QGAudioPlayerLoop: function (playerId, param) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var playerIdStr = UTF8ToString(playerId);
+    var pd = mAdMap.get(playerIdStr);
+    if (pd) {
+      pd.loop = param;
+    }
   },
   // QGPauseAudio: function () {
   //   var innerAudioContext = qg.createInnerAudioContext();
@@ -1740,10 +1866,12 @@ var QgGameBridge = {
   QGStorageGetItem: function (keyName) {
     var keyNameStr = UTF8ToString(keyName);
     var returnStr = localStorage.getItem(keyNameStr);
+    console.log("QGStorageGetItem", typeof returnStr);
     if (returnStr) {
       var bufferSize = lengthBytesUTF8(returnStr) + 1;
       var buffer = _malloc(bufferSize);
       stringToUTF8(returnStr, buffer, bufferSize);
+      console.log("QGStorageGetItem -js", buffer);
       return buffer;
     } else {
       console.log("????");
@@ -1785,15 +1913,138 @@ var QgGameBridge = {
             json
           );
         } else {
+          var xhr = new XMLHttpRequest();
+          xhr.open(
+            "POST",
+            "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder"
+          );
+
+          xhr.withCredentials = true;
+          // xhr.setRequestHeader("Accept", "application/json");
+          xhr.setRequestHeader("Content-Type", "application/json");
+          xhr.setRequestHeader("charset", "UTF-8");
+
+          var dataObject = {
+            appId: paramObj.appId,
+            openId: paramObj.openId,
+            timestamp: paramObj.timestamp,
+            sign: paramObj.sign,
+            productName: paramObj.productName,
+            productDesc: paramObj.productDesc,
+            count: paramObj.count,
+            price: paramObj.price,
+            attach: paramObj.attach,
+            currency: paramObj.currency,
+            cpOrderId: paramObj.cpOrderId,
+            appVersion: paramObj.appVersion,
+            engineVersion: res.platformVersionCode.toString(),
+            callBackUrl: paramObj.callBackUrl,
+          };
+
+          console.log("xhr.send::: ", JSON.stringify(dataObject));
+          xhr.send(JSON.stringify(dataObject));
+          xhr.onreadystatechange = () => {
+            console.log("readyState: ", xhr.readyState);
+            console.log("status: ", xhr.status);
+            console.log("response: ", JSON.stringify(xhr.response));
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              var data = JSON.parse(xhr.response).data;
+              qg.pay({
+                appId: paramObj.appId,
+                token: paramObj.openId,
+                timestamp: data.timestamp,
+                orderNo: data.orderNo,
+                paySign: data.paySign,
+                success: function (res) {
+                  var json = JSON.stringify({
+                    callbackId: successID,
+                    data: res.data,
+                  });
+                  unityInstance.SendMessage(
+                    CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+                    "PayResponseCallback",
+                    json
+                  );
+                  console.log("?????" + JSON.stringify(res));
+                },
+                fail: function (err) {
+                  var json = JSON.stringify({
+                    callbackId: failID,
+                    errMsg: err.errMsg,
+                    errCode: err.errCode,
+                    data: err,
+                  });
+                  console.log(json);
+                  console.log("fail json" + json);
+                  unityInstance.SendMessage(
+                    CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+                    "PayResponseFailCallback",
+                    json
+                  );
+                  console.log("?????" + JSON.stringify(err));
+                },
+              });
+            }
+          };
+        }
+      },
+      fail: (err) => {
+        console.log(
+          `Error Obtaining system information: ${JSON.stringify(err)}`
+        );
+        var json = JSON.stringify({
+          errMsg: err,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "PayResponseFailCallback",
+          json
+        );
+        console.log("?????" + JSON.stringify(err));
+      },
+    });
+  },
+
+  QGPayTest: function (param, success, fail) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+
+    var paramStr = UTF8ToString(param);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var paramObj = JSON.parse(paramStr);
+
+    qg.getSystemInfo({
+      success: (res) => {
+        console.log(`System information: ${JSON.stringify(res)}`);
+        if (
+          !res.platformVersionCode ||
+          res.platformVersionCode == null ||
+          res.platformVersionCode == "undefined"
+        ) {
+          var json = JSON.stringify({
+            errMsg:
+              "Failed to obtain the fast application engine version. Procedure",
+          });
+          unityInstance.SendMessage(
+            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+            "PayResponseFailCallback",
+            json
+          );
+        } else {
           console.log("payUrl:::", paramObj.payUrl);
           var xhr = new XMLHttpRequest();
-          xhr.open("POST", paramObj.payUrl);
-          // xhr.open("POST", "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder");
+          xhr.open(
+            "POST",
+            "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder"
+          );
           xhr.setRequestHeader("Accept", "application/json");
           xhr.setRequestHeader("charset", "UTF-8");
 
           var dataObject = {
-            openId: paramObj.token,
+            openId: paramObj.openId,
             deviceInfo: paramObj.deviceInfo,
             model: res.model,
             ip: paramObj.ip,
@@ -1819,7 +2070,7 @@ var QgGameBridge = {
               var data = JSON.parse(xhr.response).data;
               qg.pay({
                 appId: paramObj.appId,
-                token: paramObj.token,
+                token: paramObj.openId,
                 timestamp: data.timestamp,
                 orderNo: data.orderNo,
                 paySign: data.paySign,
@@ -2116,10 +2367,820 @@ var QgGameBridge = {
       },
     });
   },
+
+  QGGetManifestInfo: function (success, fail) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    qg.getManifestInfo({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+          data: JSON.parse(res.manifest),
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ManifestInfo",
+          json
+        );
+        console.log("QGGetManifestInfo -js ", json);
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "ManifestInfo",
+          json
+        );
+        console.log("getManifestInfo err", JSON.stringify(err));
+      },
+    });
+  },
+
+  QGGetProvider: function (callback) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var callbackID = UTF8ToString(callback);
+    var provider = qg.getProvider();
+    var tempData = { provider: provider };
+    var json = JSON.stringify({
+      callbackId: callbackID,
+      data: tempData,
+    });
+    unityInstance.SendMessage(
+      CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+      "ProviderInfo",
+      json
+    );
+    console.log("QGGetProvider", provider);
+  },
+
+  QGSetPreferredFramesPerSecond: function (fps) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (typeof fps == "number") {
+      qg.setPreferredFramesPerSecond(fps);
+      console.log("Change the render frame rate to ", fps);
+    }
+  },
+
+  QGStartARCamera: function (imageCallback) {
+    property.cameraObj = qg.createARCamera();
+    property.cameraObj
+      .start()
+      .then(function (data) {
+        property.cameraData = data;
+      })
+      .catch(function (err) {});
+    property.cameraImageCallback = imageCallback;
+  },
+
+  QGDestroyARCamera: function () {
+    if (property.cameraObj != null) {
+      property.cameraObj.destroy();
+    }
+    property.cameraObj = null;
+    property.cameraData = null;
+    property.cameraImageCallback = null;
+  },
+
+  QGRequireARCameraImage: function () {
+    if (!property.cameraImageCallback) {
+      return;
+    }
+    if (!property.cameraData) {
+      return;
+    }
+    var dataView = new Uint8Array(property.cameraData.data);
+    var dataLen = dataView.length;
+    if (!dataLen) {
+      return;
+    }
+    var buffer = _malloc(dataLen);
+    HEAPU8.set(dataView, buffer);
+    dynCall("viiii", property.cameraImageCallback, [
+      buffer,
+      dataLen,
+      property.cameraData.width,
+      property.cameraData.height,
+    ]);
+    _free(buffer);
+  },
+
+  QGCreateOppoARPose: function (ArPoseCallback) {
+    qg.createARPoseDetector()
+      .then(function (res) {
+        console.log("createARPoseDetector-js", JSON.stringify(res));
+        property.cameraArPose = res;
+      })
+      .catch(function (err) {});
+    property.cameraArPoseCallback = ArPoseCallback;
+  },
+
+  QGRequireARPose: function () {
+    if (!property.cameraArPoseCallback) {
+      return;
+    }
+    if (!property.cameraArPose) {
+      return;
+    }
+
+    var posStr = property.cameraArPose.positionMatrix.join(",");
+    var rotStr = property.cameraArPose.rotationMatrix.join(",");
+
+    let posString = allocateUTF8(posStr);
+    let rotSring = allocateUTF8(rotStr);
+    dynCall("vii", property.cameraArPoseCallback, [posString, rotSring]);
+  },
+
+  QGSetUserCloudStorage: function (param, success, fail, complete) {
+    var paramStr = UTF8ToString(param);
+    var paramData = JSON.parse(paramStr);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var tempKey = paramData.key;
+    var tempValue = paramData.value;
+    const userSymbol = Symbol("user");
+    qg.setUserCloudStorage({
+      KVDataList: [
+        {
+          [tempKey]: tempValue,
+        },
+      ],
+      success: function (res) {
+        console.log("QGSetUserCloudStorage success -js", res);
+
+        var json = JSON.stringify({
+          callbackId: successID,
+          errMsg: res.errMsg,
+          code: res.code,
+          errCode: res.errCode,
+          data: res.data,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "SetUserCloudStorageCallBack",
+          json
+        );
+      },
+      fail: function (res) {
+        console.log("QGSetUserCloudStorage fail -js", res);
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: res.errMsg,
+          code: res.code,
+          errCode: res.errCode,
+          data: res.data,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "SetUserCloudStorageCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "SetUserCloudStorageCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGGetUserCloudStorage: function (param, success, fail, complete) {
+    var paramStr = UTF8ToString(param);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.getUserCloudStorage({
+      keyList: [paramStr],
+      success: function (res) {
+        var tempKVDataList = JSON.parse(res.KVDataList);
+        var cloudStorageValue = tempKVDataList[0][paramStr];
+        if (cloudStorageValue) {
+          var keyValue = {
+            key: paramStr,
+            value: cloudStorageValue,
+          };
+          var json = JSON.stringify({
+            callbackId: successID,
+            data: keyValue,
+          });
+          unityInstance.SendMessage(
+            CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+            "GetUserCloudStorageCallBack",
+            json
+          );
+        } else {
+          console.log("There is no such value");
+        }
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetUserCloudStorageCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetUserCloudStorageCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGRemoveUserCloudStorage: function (param) {
+    var paramStr = UTF8ToString(param);
+    qg.removeUserCloudStorage({
+      keyList: [paramStr],
+      success: function (res) {},
+      fail: function (res) {},
+      complete: function (res) {},
+    });
+  },
+
+  QGGetBatteryInfo: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.getBatteryInfo({
+      success: function (res) {
+        var BatteryInfo = {
+          level: res.level,
+          isCharging: res.isCharging,
+        };
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: BatteryInfo,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetBatteryInfoCallBack",
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetBatteryInfoCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetBatteryInfoCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGGetBatteryInfoSync: function () {
+    var batteryInfo = qg.getBatteryInfoSync();
+    var json = JSON.stringify({
+      level: batteryInfo.level,
+      isCharging: batteryInfo.isCharging,
+    });
+
+    if (json) {
+      var bufferSize = lengthBytesUTF8(json) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(json, buffer, bufferSize);
+      return buffer;
+    } else {
+      console.log("??????????");
+    }
+  },
+
+  QGGetDeviceId: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.getDeviceId({
+      success: function (res) {
+        var DeviceId = {
+          deviceId: res.deviceId,
+        };
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: DeviceId,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetDeviceIdCallBack",
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetDeviceIdCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetDeviceIdCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGGetScreenBrightness: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.getScreenBrightness({
+      success: function (res) {
+        var value = {
+          value: res.value,
+        };
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: value,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetScreenBrightnessCallBack",
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: res.errMsg,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetScreenBrightnessCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetScreenBrightnessCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGSetScreenBrightness: function (param, success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.setScreenBrightness({
+      value: param,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGSetKeepScreenOn: function (param, success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.setKeepScreenOn({
+      keepScreenOn: param,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGGetLocation: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.getLocation({
+      success: function (res) {
+        var data = {
+          latitude: res["latitude"],
+          longitude: res["longitude"],
+          speed: res["speed"],
+          accuracy: res["accuracy"],
+          altitude: res["altitude"],
+          verticalAccuracy: res["verticalAccuracy"],
+          horizontalAccuracy: res["horizontalAccuracy"],
+        };
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: data,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetLocationCallBack",
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: res.errMsg,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetLocationCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          data: null,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetLocationCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGOnAccelerometerChange: function (success) {
+    var successID = UTF8ToString(success);
+    qg.onAccelerometerChange(function (x, y, z) {
+      var param = {
+        QgParamX: x,
+        QgParamY: y,
+        QgParamZ: z,
+      };
+      var json = JSON.stringify({
+        callbackId: successID,
+        data: param,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnAccelerometerChangeCallBack",
+        json
+      );
+      console.log("QGOnAccelerometerChange -js:", json);
+    });
+  },
+
+  QGStartAccelerometer: function (param, success, fail, complete) {
+    var paramStr = UTF8ToString(param);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.startAccelerometer({
+      interval: paramStr,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGStopAccelerometer: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.stopAccelerometer({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGSetClipboardData: function (param, success, fail, complete) {
+    var paramStr = UTF8ToString(param);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.setClipboardData({
+      data: paramStr,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGGetClipboardData: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.getClipboardData({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res.data,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetClipboardDataCallBack",
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetClipboardDataCallBack",
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "GetClipboardDataCallBack",
+          json
+        );
+      },
+    });
+  },
+
+  QGStartCompass: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.startCompass({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGStopCompass: function (success, fail, complete) {
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.stopCompass({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (res) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGOnCompassChange: function (success) {
+    var successID = UTF8ToString(success);
+    qg.onCompassChange(function (res) {
+      var json = JSON.stringify({
+        callbackId: successID,
+        data: res.direction,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnCompassChangeCallBack",
+        json
+      );
+      console.log("QGOnCompassChange -js:", json);
+    });
+  },
 };
 
 autoAddDeps(QgGameBridge, "$mAdMap");
 autoAddDeps(QgGameBridge, "$CONSTANT");
 autoAddDeps(QgGameBridge, "$mFileData");
+autoAddDeps(QgGameBridge, "$property");
 
 mergeInto(LibraryManager.library, QgGameBridge);

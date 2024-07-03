@@ -7,7 +7,7 @@ namespace QGMiniGame
     public class QG
     {
         public static int SDK_VERSION = 5;
-
+        public static UserCloudStorageParam userCloudStorageParam = new UserCloudStorageParam();
         #region Login  登录
         // https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/feature/account
         //QG.Login(
@@ -252,6 +252,11 @@ namespace QGMiniGame
         {
             QGMiniGameManager.Instance.Pay(param, successCallback, failCallback);
         }
+
+        public static void PayTest(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.PayTest(param, successCallback, failCallback);
+        }
         #endregion
 
         #region GetNetworkType 获取网络类型
@@ -329,9 +334,9 @@ namespace QGMiniGame
 
         #region ShowModal 显示对话框
 
-        public static void ShowModal()
+        public static void ShowModal(ShowModalParam showModalParam, Action<QGCommonResponse<ShowModalResponse>> successCallback = null, Action<QGCommonResponse<ShowModalResponse>> failCallback = null, Action<QGCommonResponse<ShowModalResponse>> completeCallback = null)
         {
-            QGMiniGameManager.Instance.ShowModal();
+            QGMiniGameManager.Instance.ShowModal(showModalParam, successCallback, failCallback, completeCallback);
         }
 
         #endregion
@@ -636,7 +641,7 @@ namespace QGMiniGame
         }
 
         #region ExitApplication 退出游戏
-        public static void ExitApplication(ExitApplicationParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null,Action<QGBaseResponse> completeCallback = null)
+        public static void ExitApplication(ExitApplicationParam param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
             QGMiniGameManager.Instance.ExitApplication(param, successCallback, failCallback, completeCallback);
         }
@@ -646,6 +651,140 @@ namespace QGMiniGame
             QGMiniGameManager.Instance.ExitApplication(null, null, null, null);
         }
         #endregion
+        #region 系统信息
+        public static void GetManifestInfo(Action<QGCommonResponse<QGManifestInfoRponse>> successCallback = null, Action<QGCommonResponse<QGManifestInfoRponse>> failCallback = null)
+        {
+            QGMiniGameManager.Instance.GetManifestInfo(successCallback, failCallback);
+        }
+
+        public static void GetProvider(Action<QGCommonResponse<QGProviderRponse>> callback = null)
+        {
+            QGMiniGameManager.Instance.GetProvider(callback);
+        }
+
+        public static void SetPreferredFramesPerSecond(int fps)
+        {
+            QGMiniGameManager.Instance.SetPreferredFramesPerSecond(fps);
+        }
+        #endregion
+
+        #region ShowLoading 进度条
+
+        public static void ShowLoading(string title)
+        {
+            QGMiniGameManager.Instance.ShowLoading(title);
+        }
+
+        public static void HideLoading(Action<QGBaseResponse> success = null)
+        {
+            QGMiniGameManager.Instance.HideLoading(success);
+        }
+
+        public static void SetTimeout(int times, Action<QGBaseResponse> action = null)
+        {
+            QGMiniGameManager.Instance.SetTimeout(times, action);
+        }
+        #endregion 
+
+        #region UserCloudStorage 云存储
+
+        public static void SetUserCloudStorage(string key, string value, Action<QGCommonResponse<string>> successCallback = null, Action<QGCommonResponse<string>> failCallback = null, Action<QGCommonResponse<string>> completeCallback = null)
+        {
+            userCloudStorageParam.key = key;
+            userCloudStorageParam.value = value;
+            QGMiniGameManager.Instance.SetUserCloudStorage(userCloudStorageParam, successCallback, failCallback, completeCallback);
+        }
+
+        public static void GetUserCloudStorage(string key, Action<QGCommonResponse<UserCloudStorageParam>> successCallback = null, Action<QGCommonResponse<UserCloudStorageParam>> failCallback = null, Action<QGCommonResponse<UserCloudStorageParam>> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.GetUserCloudStorage(key, successCallback, failCallback, completeCallback);
+        }
+
+        public static void RemoveUserCloudStorage(string key)
+        {
+            QGMiniGameManager.Instance.RemoveUserCloudStorage(key);
+        }
+
+        #endregion 
+
+        #region 设备信息 电量 设备号
+
+        public static void GetBatteryInfo(Action<QGCommonResponse<BatteryInfoParam>> successCallback = null, Action<QGCommonResponse<BatteryInfoParam>> failCallback = null, Action<QGCommonResponse<BatteryInfoParam>> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.GetBatteryInfo(successCallback, failCallback, completeCallback);
+        }
+
+        public static BatteryInfoParam GetBatteryInfoSync()
+        {
+            string batteryJsonStr = QGMiniGameManager.Instance.GetBatteryInfoSync();
+            BatteryInfoParam batteryInfoParam = JsonUtility.FromJson<BatteryInfoParam>(batteryJsonStr);
+            return batteryInfoParam;
+        }
+
+        public static void GetDeviceId(Action<QGCommonResponse<DeviceIdParam>> successCallback = null, Action<QGCommonResponse<DeviceIdParam>> failCallback = null, Action<QGCommonResponse<DeviceIdParam>> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.GetDeviceId(successCallback, failCallback, completeCallback);
+        }
+
+        public static void GetScreenBrightness(Action<QGCommonResponse<ScreenBrightnessParam>> successCallback = null, Action<QGCommonResponse<ScreenBrightnessParam>> failCallback = null, Action<QGCommonResponse<ScreenBrightnessParam>> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.GetScreenBrightness(successCallback, failCallback, completeCallback);
+        }
+
+        public static void SetScreenBrightness(float param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.SetScreenBrightness(param, successCallback, failCallback, completeCallback);
+        }
+
+        public static void SetKeepScreenOn(bool param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.SetKeepScreenOn(param, successCallback, failCallback, completeCallback);
+        }
+
+        public static void GetLocation(Action<QGCommonResponse<GetLocationParam>> successCallback = null, Action<QGCommonResponse<GetLocationParam>> failCallback = null, Action<QGCommonResponse<GetLocationParam>> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.GetLocation(successCallback, failCallback, completeCallback);
+        }
+
+        public static void OnAccelerometerChange(Action<QGCommonResponse<onAccelerometerChangeParam>> successCallback = null)
+        {
+            QGMiniGameManager.Instance.OnAccelerometerChange(successCallback);
+        }
+
+        public static void StartAccelerometer(string param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.StartAccelerometer(param, successCallback, failCallback, completeCallback);
+        }
+
+        public static void StopAccelerometer(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.StopAccelerometer(successCallback, failCallback, completeCallback);
+        }
+
+        public static void SetClipboardData(string param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.SetClipboardData(param, successCallback, failCallback, completeCallback);
+        }
+        public static void GetClipboardData(Action<QGCommonResponse<string>> successCallback = null, Action<QGCommonResponse<string>> failCallback = null, Action<QGCommonResponse<string>> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.GetClipboardData(successCallback, failCallback, completeCallback);
+        }
+
+        public static void OnCompassChange(Action<QGCommonResponse<float>> successCallback = null)
+        {
+            QGMiniGameManager.Instance.OnCompassChange(successCallback);
+        }
+
+        public static void StartCompass(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.StartCompass(successCallback, failCallback, completeCallback);
+        }
+
+        public static void StopCompass(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.StopCompass(successCallback, failCallback, completeCallback);
+        }
+        #endregion 
     }
 }
 

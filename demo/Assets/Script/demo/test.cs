@@ -164,8 +164,7 @@ public class test : MonoBehaviour
                 PayParam param = new PayParam()
                 {
                     appId = 30173650,
-                    token = msg.data.token,
-                    payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder",
+                    openId = msg.data.token,
                     productName = "688礼包",
                     productDesc = "豪华大礼包",
                     count = 1, //商品数量（只能传1） 
@@ -179,7 +178,7 @@ public class test : MonoBehaviour
                     ip = "", //终端IP 
                     attach = ""//附加信息 
                 };
-                QG.Pay(
+                QG.PayTest(
                     param,
                     (msg) => { Debug.Log("QG.Pay success = " + JsonUtility.ToJson(msg)); },
                     (msg) => { Debug.Log("QG.Pay fail = " + JsonUtility.ToJson(msg)); }

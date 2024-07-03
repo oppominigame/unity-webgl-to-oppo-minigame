@@ -43,6 +43,27 @@ namespace QGMiniGame
     }
 
     [Serializable]
+    public class QGProviderRponse
+    {
+        public string provider;  //渠道信息
+    }
+
+    [Serializable]
+    public class QGManifestInfoRponse
+    {
+        public string package;  //游戏包名
+        public string name;     //游戏名
+        public string versionName; //游戏版本名
+        public string versionCode; //游戏版本号
+        public string minPlatformVersion; //最小平台版本号
+        public string icon; //桌面图标
+        public string orientation; //设备方向
+        public string type; //不填或者默认值为 app，取值为 app 或 game
+        public object config; //logLevel 取值
+        public object subpackages; //分包功能，有分包时才需要，可选字段
+    }
+
+    [Serializable]
     public class QGLoginBean
     {   //public string userId;   //无返回
         //public string userName;  //无返回
@@ -196,13 +217,20 @@ namespace QGMiniGame
         public int top;
     }
 
+
+    //该统一下单接口只针对 https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder
     public class PayParam
     {
         //必填
         public int appId; // 平台分配的游戏 appId
-        public string token; // qg.login 成功时获得的用户 token
-        public string payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder";   //支付接口
-        //public string payUrl = "https://jits.open.oppomobile.com/jitsopen/api/pay/demo/preOrder";   //测试接口
+        public string openId; // qg.login 成功时获得的用户 token
+        public long timestamp; //时间戳，当前计算机时间和GMT时间(格林威治时间)1970年1月1号0时0分0秒所差的毫秒数
+        /// <summary>
+        /// sign 签名详细见
+        /// https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/order
+        /// 辅助工具选择代码生成 https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/pay-tool
+        /// </summary>
+        public string sign; //签名 
         public string productName; //商品名称 
         public string productDesc; //商品描述 
         public int count; //商品数量（只能传1） 
@@ -212,18 +240,13 @@ namespace QGMiniGame
         public string cpOrderId; //CP自己的订单号
         public string appVersion; //游戏版本
         //public string engineVersion; //快应用引擎版本(通过 getSystemInfo 获取 platformVersionCode)
+
         //可不填
         public string deviceInfo; //设备号 
-        // public string model; //机型 
+        public string model; //机型 
         public string ip; //终端IP 
-        public string attach;//附加信息 
+        public string attach; //附加信息
     }
-    // 数据存储
-    // public class StorageParam
-    // {
-    //   public string keyName; // 字符串，要创建或更新的键名
-    //   public string keyValue; // 要创建或更新的键名对应的值。
-    // }
 
     public class QGAccessFileParam
     {
@@ -313,6 +336,104 @@ namespace QGMiniGame
     [Serializable]
     public class ExitApplicationParam
     {
-        public string data; 
+        public string data;
+    }
+
+    [Serializable]
+    public class ShowModalParam
+    {
+        public string title;
+        public string content;
+        public bool showCancel = true;
+        public string cancelText = "取消";
+        public string cancelColor = "#FFCB1B";
+        public string confirmText = "确定";
+        public string confirmColor = "#FFCB1B";
+    }
+
+    [Serializable]
+    public class ShowModalResponse
+    {
+        public bool confirm; //确定
+        public bool cancel; //取消
+    }
+
+    [Serializable]
+    public class ARCameraParam
+    {
+        public IntPtr ptr;  //Ar相机返回对象内存地址
+        public int length;  //byte数组长度
+        public int width;   //摄像头画面宽度
+        public int height;  //摄像头画面高度
+    }
+
+    [Serializable]
+    public class ARPostParam
+    {
+        public IntPtr arpost;  //位姿坐标内存地址
+        public IntPtr arrotation;   //位姿旋转内存地址
+        public int modelMatrixArrayLen;  //位姿坐标数组长度
+        public int modelViewMatrixArrayLen; //位姿旋转数组长度
+        public string aRPotStr;    //JS数据转成的字符串
+        public string aRRotStr;    //JS数据转成的字符串
+    }
+
+    [Serializable]
+    public class ARPostData
+    {
+        public float posX = 0;  //坐标X
+        public float posY = 0;   //坐标Y
+        public float posZ = 0;  //坐标Z
+        public float rotX = 0; //四元数X
+        public float rotY = 0; //四元数Y
+        public float rotZ = 0; //四元数Z
+        public float rotW = 0; //四元数W
+    }
+
+    [Serializable]
+    public class UserCloudStorageParam
+    {
+        public string key;  //云储存 key
+        public string value;//云储存 value
+    }
+
+    [Serializable]
+    public class BatteryInfoParam
+    {
+        public float level; //设备电量，范围 1 - 100
+        public bool isCharging; //是否正在充电中
+    }
+
+    [Serializable]
+    public class DeviceIdParam
+    {
+        public string deviceId; //设备唯一标识
+    }
+
+    [Serializable]
+    public class ScreenBrightnessParam
+    {
+        public float value; //屏幕亮度
+    }
+
+    [Serializable]
+    public class GetLocationParam
+    {
+        public float latitude;  //纬度，范围为 -90~90，负数表示南纬
+        public float longitude; //经度，范围为 -180~180，负数表示西经
+        public float speed;     //速度，单位 m/s
+        public float accuracy;  //位置的精确度
+        public float altitude;  //高度，单位 m
+        public float verticalAccuracy;  //垂直精度，单位 m（Android 无法获取，返回 0）
+        public float horizontalAccuracy;//水平精度，单位 m
+    }
+
+    [Serializable]
+    public class onAccelerometerChangeParam
+    {
+        public float QgParamX;  //x 轴
+        public float QgParamY;  //y 轴
+        public float QgParamZ;  //z 轴
+
     }
 }
