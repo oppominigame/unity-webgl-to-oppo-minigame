@@ -409,6 +409,24 @@ public class main_test : MonoBehaviour
         Debug.Log("设备信息2");
     }
 
+    public void vibrateShort()
+    {
+        SceneManager.LoadScene("vibrateShort");
+        Debug.Log("设备震动");
+    }
+    public void deviceMotion()
+    {
+        SceneManager.LoadScene("deviceMotion");
+        Debug.Log("设备方向");
+    }
+
+    public void filemanager()
+    {
+        SceneManager.LoadScene("filemanager");
+        Debug.Log("文件管理");
+    }
+
+
     public void showModal()
     {
         SceneManager.LoadScene("showModal");

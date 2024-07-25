@@ -161,7 +161,7 @@ public class test : MonoBehaviour
             Debug.Log("QG.Login success = " + JsonUtility.ToJson(msg));
             if (msg.data.token != string.Empty)
             {
-                PayParam param = new PayParam()
+                PayTestParam param = new PayTestParam()
                 {
                     appId = 30173650,
                     openId = msg.data.token,

@@ -68,8 +68,8 @@ public class qgpay : MonoBehaviour
 
     public void qgPaytestFunc(string parameterToken)
     {
-        PayParam param =
-                  new PayParam()
+        PayTestParam param =
+                  new PayTestParam()
                   {
                       appId = 30173650,
                       openId = parameterToken,
@@ -106,15 +106,8 @@ public class qgpay : MonoBehaviour
                              appId = 0,
                              openId = "",
                              timestamp = 0,
-                             productName = "",
-                             productDesc = "",
-                             count = 1,
-                             currency = "CNY",
-                             price = 1,
-                             callBackUrl = "",
-                             appVersion = "1.0.0",
-                             cpOrderId = "1",
-                             sign = ""
+                             orderNo = "",
+                             paySign = ""
                          };
         QG
             .Pay(param,

@@ -15,7 +15,7 @@ namespace QGMiniGame
         public delegate void CameraImageCallback(IntPtr ptr, int length, int width, int height);
 
         //public delegate void CameraArPoseCallback(IntPtr ptr, int modelMatrixArrayLen);
-        public delegate void CameraArPoseCallback(string posStr,string rotStr);
+        public delegate void CameraArPoseCallback(string posStr, string rotStr);
         public static ARCameraParam CameraParam = new ARCameraParam();
         public static ARPostParam PostParam = new ARPostParam();
         public static ARPostData PostData = new ARPostData();
@@ -52,7 +52,7 @@ namespace QGMiniGame
         }
         */
 
-        [MonoPInvokeCallback(typeof(Action<string,string>))]
+        [MonoPInvokeCallback(typeof(Action<string, string>))]
         public static void OnARPostCallback(string posStr, string rotStr)
         {
             PostParam.aRPotStr = posStr;
@@ -61,8 +61,9 @@ namespace QGMiniGame
         }
 
         //Ar相机接口(初始化)
-        public static void StartARCamera()
+        public static void StartARCamera(Action<string> successCallback, Action<string> failCallback)
         {
+            QGMiniGameManager.Instance.AddARCameraCallBack(successCallback, failCallback);
             QGStartARCamera(OnARCameraImageCallback);
         }
 

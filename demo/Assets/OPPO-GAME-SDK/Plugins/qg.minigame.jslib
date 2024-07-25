@@ -887,19 +887,38 @@ var QgGameBridge = {
     });
   },
 
-  QGGetFileInfo: function () {
+  QGGetFileInfo: function (filename, success, fail) {
+    var filePath = UTF8ToString(filename);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
+    var localFilePath = qgDir + filePath;
     var fs = qg.getFileSystemManager();
     fs.getFileInfo({
       filePath: localFilePath,
       success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
         console.log(
           "success: " + localFilePath + "?" + "?????" + res.size + "??"
         );
       },
-      fail: function (res) {
-        console.log("error?" + localFilePath + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+        });
+        console.log("error?" + localFilePath + "?" + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
@@ -942,12 +961,10 @@ var QgGameBridge = {
       ? paramData.autoplay
       : false;
     innerAudioContext.loop = paramData.loop ? paramData.loop : false;
-    innerAudioContext.autoplay = paramData.autoplay
-      ? paramData.autoplay
-      : false;
-    innerAudioContext.volume = paramData.volume ? paramData.volume : 1;
     innerAudioContext.src = paramData.url;
     innerAudioContext.play();
+    console.log("QGPlayAudio -js url: ", paramData.url);
+    innerAudioContext.volume = paramData.volume;
     if (!(mAdMap instanceof Map)) {
       mAdMap = new Map();
     }
@@ -963,6 +980,7 @@ var QgGameBridge = {
     var playerIdStr = UTF8ToString(playerId);
     var pd = mAdMap.get(playerIdStr);
     if (pd) {
+      console.log("QGAudioPlayerVolume", param);
       pd.volume = param;
     }
   },
@@ -1884,7 +1902,7 @@ var QgGameBridge = {
   },
 
   // pay
-  QGPay: function (param, success, fail) {
+  QGPayOld: function (param, success, fail) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
@@ -1952,9 +1970,9 @@ var QgGameBridge = {
               qg.pay({
                 appId: paramObj.appId,
                 token: paramObj.openId,
-                timestamp: data.timestamp,
+                timestamp: paramObj.timestamp,
                 orderNo: data.orderNo,
-                paySign: data.paySign,
+                paySign: paramObj.paySign,
                 success: function (res) {
                   var json = JSON.stringify({
                     callbackId: successID,
@@ -2005,6 +2023,54 @@ var QgGameBridge = {
     });
   },
 
+  QGPay: function (param, success, fail) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+
+    var paramStr = UTF8ToString(param);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var paramObj = JSON.parse(paramStr);
+
+    qg.pay({
+      appId: paramObj.appId,
+      token: paramObj.openId,
+      timestamp: paramObj.timestamp,
+      paySign: paramObj.paySign,
+      orderNo: paramObj.orderNo,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res.data,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "PayResponseCallback",
+          json
+        );
+        console.log("?????" + JSON.stringify(res));
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errMsg: err.errMsg,
+          errCode: err.errCode,
+          data: err,
+        });
+        console.log(json);
+        console.log("fail json" + json);
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "PayResponseFailCallback",
+          json
+        );
+        console.log("?????" + JSON.stringify(err));
+      },
+    });
+  },
+
   QGPayTest: function (param, success, fail) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
@@ -2034,7 +2100,6 @@ var QgGameBridge = {
             json
           );
         } else {
-          console.log("payUrl:::", paramObj.payUrl);
           var xhr = new XMLHttpRequest();
           xhr.open(
             "POST",
@@ -2442,9 +2507,22 @@ var QgGameBridge = {
     property.cameraObj
       .start()
       .then(function (data) {
+        console.log("QGStartARCamera -js SuccessCallback: ");
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnARCameraSuccess",
+          "Success"
+        );
         property.cameraData = data;
       })
-      .catch(function (err) {});
+      .catch(function (err) {
+        console.log("QGStartARCamera -js FailCallback: ", JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnARCameraFail",
+          JSON.stringify(err)
+        );
+      });
     property.cameraImageCallback = imageCallback;
   },
 

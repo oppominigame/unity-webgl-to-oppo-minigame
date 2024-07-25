@@ -43,8 +43,8 @@ QG.Login(
     //OPPO示例demo,非正式订单接口,仅供参考.
     public void PayOrderTest(string parameterToken)
     {
-        PayParam param =
-                          new PayParam()
+        PayTestParam param =
+                          new PayTestParam()
                          {
                              appId = 30173650,  //CP游戏在开放平台申请的appId
                              token = parameterToken,//QG.Login 传入
@@ -72,7 +72,7 @@ QG.Login(
             });
     }
 
-    //正式订单接口,该统一下单接口只针对 https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder
+    //正式订单接口,该统一下单接口 https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder 返回 orderNo 预付订单号
     public void PayOrder(string parameterToken)
     {
         PayParam param =
@@ -81,16 +81,9 @@ QG.Login(
                              appId = 0,        //平台分配的游戏 appId
                              openId = "",      //qg.login 成功时获得的用户 token
                              timestamp = 0,    //时间戳，当前计算机时间和GMT时间(格林威治时间)1970年1月1号0时0分0秒所差的毫秒数
-                             productName = "", //商品名称
-                             productDesc = "", //商品描述
-                             count = 1,        //商品数量（只能传1）
-                             currency = "CNY", //币种，人民币如：CNY
-                             price = 1,        //商品价格，以分为单位
-                             callBackUrl = "", //服务器接收平台返回数据的接口回调地址
-                             appVersion = "1.0.0", //游戏版本
-                             cpOrderId = "1",  //CP自己的订单号
-                             sign = "" //签名详细见 https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/order
-                                       //辅助工具选择代码生成 https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/pay/pay-tool
+                             orderNo = "", //下单生成的预付订单号
+                             paySign = ""  //支付签名，CP 服务端生成
+                           
                          };
         QG
             .Pay(param,
@@ -755,6 +748,24 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
             float direction = success.data;
             Debug.Log("面对的方向度数 = " + direction);
         });
+```
+
+## <a id="获取本地临时文件或本地用户文件的文件信息"></a>获取本地临时文件或本地用户文件的文件信息
+
+使用此接口可以让玩家在游戏中获取本地临时文件或本地用户文件的文件信息
+
+```c#
+      //filename 说明: "/"+本地文件名.后缀 
+      string filename = "/BeAttack.ogg"; 
+      QG.GetFileInfo(filename, (success) =>
+      {
+        Debug.Log("本地文件已存在：" + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+        Debug.Log("本地文件不存在：" + JsonUtility.ToJson(fail));
+      }
+     );
 ```
 
 ## <a id="自定义拓展"></a>自定义拓展

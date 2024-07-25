@@ -56,4 +56,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NewScenes/deviceInfo.unity
     guid: 3b390ae58c0c2e442a45b27c1c8833e8
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/vibrateShort.unity
+    guid: 0be1614e7f7d85c47a666d3ee7ad031d
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/filemanager.unity
+    guid: 3fbbdcbf0880dc1459f6aa4bb7655c81
   m_configObjects: {}

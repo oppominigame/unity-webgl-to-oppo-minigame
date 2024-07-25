@@ -1,5 +1,16 @@
 # 更新日志
 
+## 2024-7-23 【重要更新】
+### Feature
+
+- 重要：上线新版本 Unity SDK，版本号 V8.0.3，位于 `tools/unity_webgl_rpk_oppo_v8.0.3.unitypackage`
+
+- 重要：新增 GetFileInfo 获取本地临时文件或本地用户文件的文件信息接口.
+- 重要：修改 QG.Pay,由开发者创建订单.
+- 普通：修改 创建Ar相机支持回调.
+
+
+
 ## 2024-7-3 【重要更新】
 ### Feature
 

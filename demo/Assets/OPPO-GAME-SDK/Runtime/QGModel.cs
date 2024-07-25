@@ -218,8 +218,19 @@ namespace QGMiniGame
     }
 
 
-    //该统一下单接口只针对 https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder
+    //正式支付接口, 该统一下单接口只针对 https://jits.open.oppomobile.com/jitsopen/api/pay/v1.0/preOrder
     public class PayParam
+    {
+        //必填
+        public int appId; // 平台分配的游戏 appId
+        public string openId;  //qg.login 成功时获得的用户 token
+        public long timestamp; //时间戳，当前计算机时间和GMT时间(格林威治时间)1970年1月1号0时0分0秒所差的毫秒数
+        public string orderNo; //下单生成的预付订单号
+        public string paySign; //支付签名，CP 服务端生成
+    }
+
+    //示例参数，CP请勿使用
+    public class PayTestParam
     {
         //必填
         public int appId; // 平台分配的游戏 appId
@@ -239,8 +250,7 @@ namespace QGMiniGame
         public string callBackUrl; // 服务器接收平台返回数据的接口回调地址
         public string cpOrderId; //CP自己的订单号
         public string appVersion; //游戏版本
-        //public string engineVersion; //快应用引擎版本(通过 getSystemInfo 获取 platformVersionCode)
-
+        public string engineVersion; //快应用引擎版本(通过 getSystemInfo 获取 platformVersionCode)
         //可不填
         public string deviceInfo; //设备号 
         public string model; //机型 
@@ -329,7 +339,7 @@ namespace QGMiniGame
 
         public bool loop;
 
-        public float volume;
+        public float volume = 1f;
 
     }
 

@@ -253,7 +253,7 @@ namespace QGMiniGame
             QGMiniGameManager.Instance.Pay(param, successCallback, failCallback);
         }
 
-        public static void PayTest(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
+        public static void PayTest(PayTestParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
         {
             QGMiniGameManager.Instance.PayTest(param, successCallback, failCallback);
         }
@@ -505,9 +505,9 @@ namespace QGMiniGame
 
         #region GetFileInfo 获取本地临时文件或本地用户文件的文件信息
 
-        public static void GetFileInfo()
+        public static void GetFileInfo(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            QGMiniGameManager.Instance.GetFileInfo();
+            QGMiniGameManager.Instance.GetFileInfo(filename, successCallback, failCallback);
         }
 
         #endregion
@@ -784,7 +784,7 @@ namespace QGMiniGame
         {
             QGMiniGameManager.Instance.StopCompass(successCallback, failCallback, completeCallback);
         }
-        #endregion 
+        #endregion
     }
 }
 

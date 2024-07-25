@@ -310,11 +310,12 @@ namespace QGMiniGame
 
         #endregion
 
-        #region 获取本地临时文件或本地用户文件的文件信息
+        #region 获取本地临时文件或本地用户文件的文件信息 filename 例: "/abc/file.txt"
 
-        public void GetFileInfo()
+        public void GetFileInfo(string filename,Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            QGGetFileInfo();
+            QGGetFileInfo(filename,QGCallBackManager.Add(successCallback),
+            QGCallBackManager.Add(failCallback));
         }
 
         #endregion
@@ -575,7 +576,7 @@ namespace QGMiniGame
             QGPay(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
-        public void PayTest(PayParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
+        public void PayTest(PayTestParam param, Action<QGCommonResponse<QGPayBean>> successCallback = null, Action<QGCommonResponse<QGPayBeanFail>> failCallback = null)
         {
             QGPayTest(JsonUtility.ToJson(param), QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
@@ -1065,6 +1066,24 @@ namespace QGMiniGame
         }
         #endregion
 
+        private Action<string> onARCameraSuccess;
+        private Action<string> onARCameraFail;
+        public void AddARCameraCallBack(Action<string> successCallback = null, Action<string> failCallback = null)
+        {
+            onARCameraSuccess = successCallback;
+            onARCameraFail = failCallback;
+        }
+
+        public void OnARCameraSuccess(string msg)
+        {
+            onARCameraSuccess(msg);
+        }
+
+        public void OnARCameraFail(string msg)
+        {
+            onARCameraFail(msg);
+        }
+
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
 
@@ -1218,7 +1237,7 @@ namespace QGMiniGame
         private static extern void QGUnzip();
 
         [DllImport("__Internal")]
-        private static extern void QGGetFileInfo();
+        private static extern void QGGetFileInfo(string a,string b, string c);
 
         [DllImport("__Internal")]
         private static extern void QGPlayAudio(string a, string b);

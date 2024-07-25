@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using QGMiniGame;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using Newtonsoft.Json.Linq;
 
 public class gameAudio : MonoBehaviour
 {
@@ -13,6 +15,8 @@ public class gameAudio : MonoBehaviour
 
     public Button playInnerAudioContextbtn;
 
+    public Button playInnerAudioLianXuContextbtn;
+
     public Button pauseInnerAudioContextbtn;
 
     public Button stopInnerAudioContextbtn;
@@ -21,16 +25,89 @@ public class gameAudio : MonoBehaviour
 
     public Button destroyInnerAudioContextbtn;
 
+    public Button createInnerAudioContextTestbtn;
+
+    public Button downLoadFilebtn;
+
+    public Slider slider;
+    private bool isSliderDragging = false;
+
+    public Text sliderTex;
     QGAudioPlayer qGAudioPlayer;
+
+    private float volumValue = 0f;
     void Start()
     {
         comebackbtn.onClick.AddListener(comebackfunc);
         createInnerAudioContextbtn.onClick.AddListener(createInnerAudioContextfunc);
         playInnerAudioContextbtn.onClick.AddListener(playInnerAudioContextfunc);
+        playInnerAudioLianXuContextbtn.onClick.AddListener(playInnerAudioLianXuContextfunc);
         pauseInnerAudioContextbtn.onClick.AddListener(pauseInnerAudioContextfunc);
         stopInnerAudioContextbtn.onClick.AddListener(stopInnerAudioContextfunc);
         seekInnerAudioContextbtn.onClick.AddListener(seekInnerAudioContextfunc);
         destroyInnerAudioContextbtn.onClick.AddListener(destroyInnerAudioContextfunc);
+
+        downLoadFilebtn.onClick.AddListener(downLoadFilefunc);
+
+        createInnerAudioContextTestbtn.onClick.AddListener(createInnerAudioContextTestfunc);
+        sliderEvent();
+        sliderTex.text = "音量:" + volumValue;
+        slider.value = volumValue;
+    }
+
+    private void sliderEvent()
+    {
+        // 订阅 Slider 的 onPointerDown、onPointerUp 事件
+        EventTrigger eventTrigger = slider.gameObject.AddComponent<EventTrigger>();
+        EventTrigger.Entry pointerDownEntry = new EventTrigger.Entry();
+        pointerDownEntry.eventID = EventTriggerType.PointerDown;
+        pointerDownEntry.callback.AddListener(OnSliderPointerDown);
+        eventTrigger.triggers.Add(pointerDownEntry);
+
+        EventTrigger.Entry pointerUpEntry = new EventTrigger.Entry();
+        pointerUpEntry.eventID = EventTriggerType.PointerUp;
+        pointerUpEntry.callback.AddListener(OnSliderPointerUp);
+        eventTrigger.triggers.Add(pointerUpEntry);
+
+        // 订阅 Slider 的 onValueChanged 事件
+        slider.onValueChanged.AddListener(OnSliderValueChanged);
+    }
+    private void OnSliderPointerDown(BaseEventData data)
+    {
+        // 记录滑块被按下的状态
+        isSliderDragging = true;
+    }
+
+    private void OnSliderPointerUp(BaseEventData data)
+    {
+        // 记录滑块被松开的状态
+        isSliderDragging = false;
+    }
+
+    private void OnSliderValueChanged(float value)
+    {
+        // 检测 Slider 值的变化
+        if (!isSliderDragging)
+        {
+            // Slider 被释放(松开)
+            Debug.Log("Slider released: " + value);
+            sliderTex.text = "音量:" + value.ToString();
+            volumValue = value;
+        }
+    }
+
+    public void createInnerAudioContextTestfunc()
+    {
+        volumValue = 0;
+        sliderTex.text = "音量:" + volumValue;
+        slider.value = volumValue;
+        qGAudioPlayer = QG.PlayAudio(new AudioParam()
+        {
+            url = "https://ocs-cn-south1.heytapcs.com/ar-sdk-store-read/ar_games/sound/BeAttack.ogg", //播放链接
+            startTime = 0f,
+            loop = true,
+            volume = volumValue
+        });
     }
 
     public void comebackfunc()
@@ -41,12 +118,14 @@ public class gameAudio : MonoBehaviour
 
     public void createInnerAudioContextfunc()
     {
+        Debug.Log("volumValue:::" + volumValue);
         qGAudioPlayer = QG.PlayAudio(new AudioParam()
         {
-            url = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3", //播放链接
+            // url = "https://ocs-cn-south1.heytapcs.com/ar-sdk-store-read/ar_games/sound/BeAttack.ogg", //播放链接
+            url = "qgfile://usr/BeAttack.ogg",
             startTime = 0f,
             loop = true,
-            volume = 1f
+            volume = volumValue
         });
 
         qGAudioPlayer
@@ -184,15 +263,23 @@ public class gameAudio : MonoBehaviour
     {
         if (qGAudioPlayer != null)
         {
-        qGAudioPlayer.Play();
+            qGAudioPlayer.Play();
         }
     }
 
+    public void playInnerAudioLianXuContextfunc()
+    {
+        if (qGAudioPlayer != null)
+        {
+            qGAudioPlayer.Stop();
+            qGAudioPlayer.Play();
+        }
+    }
     public void pauseInnerAudioContextfunc()
     {
         if (qGAudioPlayer != null)
         {
-        qGAudioPlayer.Pause();
+            qGAudioPlayer.Pause();
         }
     }
 
@@ -200,7 +287,7 @@ public class gameAudio : MonoBehaviour
     {
         if (qGAudioPlayer != null)
         {
-        qGAudioPlayer.Stop();
+            qGAudioPlayer.Stop();
         }
     }
 
@@ -208,8 +295,8 @@ public class gameAudio : MonoBehaviour
     {
         if (qGAudioPlayer != null)
         {
-        float tempTime = 3.555f;
-        qGAudioPlayer.Seek(tempTime);
+            float tempTime = 3.555f;
+            qGAudioPlayer.Seek(tempTime);
         }
     }
     public void destroyInnerAudioContextfunc()
@@ -224,5 +311,29 @@ public class gameAudio : MonoBehaviour
             });
             qGAudioPlayer.Destroy();
         }
+    }
+
+    public void downLoadFilefunc()
+    {
+        QG.DownLoadFile(new DownLoadFileParam()
+        {
+            path = "/BeAttack.ogg",
+            url = "https://ocs-cn-south1.heytapcs.com/ar-sdk-store-read/ar_games/sound/BeAttack.ogg",
+        }, (success) =>
+        {
+            Debug.Log("QG.DownLoadFile success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.DownLoadFile fail = " + JsonUtility.ToJson(fail));
+        }
+       );
+    }
+
+    public void playLocalAudio()
+    {
+
+
+
     }
 }
