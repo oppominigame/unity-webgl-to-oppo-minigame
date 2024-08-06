@@ -109,6 +109,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
           adUnitId = "114183"
           });
           Debug.Log("创建激励视频开始运行");
+          rewardedVideoAd.Load();
           rewardedVideoAd.OnLoad(() => {
             Debug.Log("激励视频广告加载成功");
           rewardedVideoAd.Show();

@@ -621,7 +621,6 @@ var QgGameBridge = {
     var fs = qg.getFileSystemManager();
     fs.rename({
       oldPath: localDir,
-      // newPath: `${qgDir}/new${Math.random()}`,
       newPath: qgDir + "/new/" + Math.random(),
       success: function () {
         console.log("????????" + localDir + "=>" + qgDir + "/new");
@@ -1914,8 +1913,7 @@ var QgGameBridge = {
     var paramObj = JSON.parse(paramStr);
 
     qg.getSystemInfo({
-      success: (res) => {
-        console.log(`System information: ${JSON.stringify(res)}`);
+      success: function (res) {
         if (
           !res.platformVersionCode ||
           res.platformVersionCode == null ||
@@ -1961,7 +1959,7 @@ var QgGameBridge = {
 
           console.log("xhr.send::: ", JSON.stringify(dataObject));
           xhr.send(JSON.stringify(dataObject));
-          xhr.onreadystatechange = () => {
+          xhr.onreadystatechange = function() {
             console.log("readyState: ", xhr.readyState);
             console.log("status: ", xhr.status);
             console.log("response: ", JSON.stringify(xhr.response));
@@ -2006,10 +2004,7 @@ var QgGameBridge = {
           };
         }
       },
-      fail: (err) => {
-        console.log(
-          `Error Obtaining system information: ${JSON.stringify(err)}`
-        );
+      fail: function (err) {
         var json = JSON.stringify({
           errMsg: err,
         });
@@ -2083,8 +2078,7 @@ var QgGameBridge = {
     var paramObj = JSON.parse(paramStr);
 
     qg.getSystemInfo({
-      success: (res) => {
-        console.log(`System information: ${JSON.stringify(res)}`);
+      success: function (res) {
         if (
           !res.platformVersionCode ||
           res.platformVersionCode == null ||
@@ -2127,7 +2121,7 @@ var QgGameBridge = {
 
           console.log("xhr.send::: ", JSON.stringify(dataObject));
           xhr.send(JSON.stringify(dataObject));
-          xhr.onreadystatechange = () => {
+          xhr.onreadystatechange = function () {
             console.log("readyState: ", xhr.readyState);
             console.log("status: ", xhr.status);
             console.log("response: ", JSON.stringify(xhr.response));
@@ -2172,10 +2166,7 @@ var QgGameBridge = {
           };
         }
       },
-      fail: (err) => {
-        console.log(
-          `Error Obtaining system information: ${JSON.stringify(err)}`
-        );
+      fail: function(err)  {
         var json = JSON.stringify({
           errMsg: err,
         });
@@ -2579,8 +2570,8 @@ var QgGameBridge = {
     var posStr = property.cameraArPose.positionMatrix.join(",");
     var rotStr = property.cameraArPose.rotationMatrix.join(",");
 
-    let posString = allocateUTF8(posStr);
-    let rotSring = allocateUTF8(rotStr);
+    var posString = allocateUTF8(posStr);
+    var rotSring = allocateUTF8(rotStr);
     dynCall("vii", property.cameraArPoseCallback, [posString, rotSring]);
   },
 
@@ -2592,12 +2583,11 @@ var QgGameBridge = {
     var completeID = UTF8ToString(complete);
     var tempKey = paramData.key;
     var tempValue = paramData.value;
-    const userSymbol = Symbol("user");
+    var kvDataItem = {};
+    kvDataItem[tempKey] = tempValue;
     qg.setUserCloudStorage({
       KVDataList: [
-        {
-          [tempKey]: tempValue,
-        },
+        kvDataItem
       ],
       success: function (res) {
         console.log("QGSetUserCloudStorage success -js", res);

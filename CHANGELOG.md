@@ -1,5 +1,13 @@
 # 更新日志
 
+## 2024-8-6 【普通更新】
+### Feature
+
+- 重要：上线新版本 Unity SDK，版本号 V8.0.4，位于 `tools/unity_webgl_rpk_oppo_v8.0.4.unitypackage`
+
+- 普通：修改unity2018,unity2019 js语法适配.
+- 普通：修改激励视频广告示例,新增.load调用.
+
 ## 2024-7-23 【重要更新】
 ### Feature
 
