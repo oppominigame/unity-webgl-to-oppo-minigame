@@ -33,6 +33,11 @@ var QgGameBridge = {
     cameraData: null,
     cameraArPoseCallback: null,
     cameraArPose: null,
+    deviceMotionChangeData: null,
+    deviceMotionChangeCallback: null,
+    cameraObjYuv: null,
+    cameraImageYuvCallback: null,
+    cameraYuvData: null,
   },
 
   QGLog: function () {
@@ -1959,7 +1964,7 @@ var QgGameBridge = {
 
           console.log("xhr.send::: ", JSON.stringify(dataObject));
           xhr.send(JSON.stringify(dataObject));
-          xhr.onreadystatechange = function() {
+          xhr.onreadystatechange = function () {
             console.log("readyState: ", xhr.readyState);
             console.log("status: ", xhr.status);
             console.log("response: ", JSON.stringify(xhr.response));
@@ -2166,7 +2171,7 @@ var QgGameBridge = {
           };
         }
       },
-      fail: function(err)  {
+      fail: function (err) {
         var json = JSON.stringify({
           errMsg: err,
         });
@@ -2517,6 +2522,33 @@ var QgGameBridge = {
     property.cameraImageCallback = imageCallback;
   },
 
+  QGStartARCameraYuv: function (imageCallback) {
+    property.cameraObjYuv = qg.createARCameraYuv();
+    property.cameraObjYuv
+      .start()
+      .then(function (data) {
+        console.log("QGStartARCameraYuv -js SuccessCallback: ");
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnARCameraYuvSuccess",
+          "Success"
+        );
+        property.cameraYuvData = data;
+      })
+      .catch(function (err) {
+        console.log(
+          "QGStartARCameraYuv -js FailCallback: ",
+          JSON.stringify(err)
+        );
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnARCameraYuvFail",
+          JSON.stringify(err)
+        );
+      });
+    property.cameraImageYuvCallback = imageCallback;
+  },
+
   QGDestroyARCamera: function () {
     if (property.cameraObj != null) {
       property.cameraObj.destroy();
@@ -2524,6 +2556,15 @@ var QgGameBridge = {
     property.cameraObj = null;
     property.cameraData = null;
     property.cameraImageCallback = null;
+  },
+
+  QGDestroyARCameraYuv: function () {
+    if (property.cameraObjYuv != null) {
+      property.cameraObjYuv.destroy();
+    }
+    property.cameraObjYuv = null;
+    property.cameraYuvData = null;
+    property.cameraImageYuvCallback = null;
   },
 
   QGRequireARCameraImage: function () {
@@ -2545,6 +2586,28 @@ var QgGameBridge = {
       dataLen,
       property.cameraData.width,
       property.cameraData.height,
+    ]);
+    _free(buffer);
+  },
+
+  QGRequireARCameraImageYuv: function () {
+    if (!property.cameraImageYuvCallback) {
+      return;
+    }
+    if (!property.cameraYuvData) {
+      return;
+    }
+    var dataView = new Uint8Array(property.cameraYuvData.data);
+    var dataLen = dataView.length;
+
+    if (!dataLen) {
+      return;
+    }
+    var buffer = _malloc(dataLen);
+    HEAPU8.set(dataView, buffer);
+    dynCall("vii", property.cameraImageYuvCallback, [
+      buffer,
+      dataLen,
     ]);
     _free(buffer);
   },
@@ -2586,9 +2649,7 @@ var QgGameBridge = {
     var kvDataItem = {};
     kvDataItem[tempKey] = tempValue;
     qg.setUserCloudStorage({
-      KVDataList: [
-        kvDataItem
-      ],
+      KVDataList: [kvDataItem],
       success: function (res) {
         console.log("QGSetUserCloudStorage success -js", res);
 
@@ -3243,6 +3304,85 @@ var QgGameBridge = {
       );
       console.log("QGOnCompassChange -js:", json);
     });
+  },
+
+  QGStartDeviceMotionListening: function (param) {
+    var paramStr = UTF8ToString(param);
+    qg.startDeviceMotionListening({
+      interval: paramStr,
+      success: function (res) {
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "StartDeviceMotionListeningSuccess",
+          "Success"
+        );
+        console.log("startDeviceMotionListening success ", JSON.stringify(res));
+      },
+      fail: function (err) {
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "StartDeviceMotionListeningFail",
+          "Fail"
+        );
+        console.log("startDeviceMotionListening fail ", JSON.stringify(err));
+      },
+      complete: function () {
+        console.log("startDeviceMotionListening complete ");
+      },
+    });
+  },
+
+  QGStopDeviceMotionListening: function () {
+    qg.stopDeviceMotionListening({
+      success: function (res) {
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "StopDeviceMotionListeningSuccess",
+          "Success"
+        );
+        console.log("stopDeviceMotionListening success ", JSON.stringify(res));
+      },
+      fail: function (err) {
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "StopDeviceMotionListeningFail",
+          "Fail"
+        );
+        console.log("stopDeviceMotionListening fail ", JSON.stringify(err));
+      },
+      complete: function () {
+        console.log("stopDeviceMotionListening complete ");
+      },
+    });
+  },
+
+  QGOnDeviceMotionChange: function (deviceMotionChangeCallback) {
+    qg.onDeviceMotionChange(function (res) {
+      // console.log("onDeviceMotionChange", JSON.stringify(res));
+      property.deviceMotionChangeData = res;
+    });
+    property.deviceMotionChangeCallback = deviceMotionChangeCallback;
+  },
+
+  QGGetDeviceMotionChange: function () {
+    if (!property.deviceMotionChangeCallback) {
+      return;
+    }
+    var alphaStr = property.deviceMotionChangeData.alpha.toString();
+    var betaStr = property.deviceMotionChangeData.beta.toString();
+    var gammaStr = property.deviceMotionChangeData.gamma.toString();
+    var alphaString = allocateUTF8(alphaStr);
+    var betaString = allocateUTF8(betaStr);
+    var gammaString = allocateUTF8(gammaStr);
+    dynCall("viii", property.deviceMotionChangeCallback, [
+      alphaString,
+      betaString,
+      gammaString,
+    ]);
+  },
+
+  QGOffDeviceMotionChange: function () {
+    qg.offDeviceMotionChange();
   },
 };
 

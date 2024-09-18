@@ -10,16 +10,19 @@ namespace QGMiniGame
     public class QGArManager
     {
         static bool isGetARCameraData = false;//已获取相机数据?
-
+        static bool isGetARCameraYuvData = false;//已获取Yuv相机数据?
         static bool isGetARPostData = false;//已获取位姿数据?
+        static bool isGetDeviceMotionData = false;//已获取设备方向数据?
         public delegate void CameraImageCallback(IntPtr ptr, int length, int width, int height);
-
+        public delegate void CameraImageYuvCallback(IntPtr ptr, int length);
         //public delegate void CameraArPoseCallback(IntPtr ptr, int modelMatrixArrayLen);
         public delegate void CameraArPoseCallback(string posStr, string rotStr);
+        public delegate void DeviceMotionChangeCallback(string alpha, string beta, string gamma);//设备方向
         public static ARCameraParam CameraParam = new ARCameraParam();
+        public static ARCameraYuvParam CameraYuvParam = new ARCameraYuvParam();
         public static ARPostParam PostParam = new ARPostParam();
         public static ARPostData PostData = new ARPostData();
-
+        public static DeviceMotionChangeParam deviceMotionChangeParam = new DeviceMotionChangeParam();
         [DllImport("__Internal")]
         public static extern void QGStartARCamera(CameraImageCallback callback);
         [DllImport("__Internal")]
@@ -27,9 +30,25 @@ namespace QGMiniGame
         [DllImport("__Internal")]
         public static extern void QGRequireARCameraImage();
         [DllImport("__Internal")]
+        public static extern void QGStartARCameraYuv(CameraImageYuvCallback callback);
+        [DllImport("__Internal")]
+        public static extern void QGDestroyARCameraYuv();
+        [DllImport("__Internal")]
+        public static extern void QGRequireARCameraImageYuv();
+        [DllImport("__Internal")]
         public static extern void QGCreateOppoARPose(CameraArPoseCallback cameraArPoseCallback);
         [DllImport("__Internal")]
         public static extern void QGRequireARPose();
+        [DllImport("__Internal")]
+        private static extern void QGStartDeviceMotionListening(string interval);
+        [DllImport("__Internal")]
+        private static extern void QGStopDeviceMotionListening();
+        [DllImport("__Internal")]
+        private static extern void QGOnDeviceMotionChange(DeviceMotionChangeCallback deviceMotionChangeCallback);
+        [DllImport("__Internal")]
+        private static extern void QGOffDeviceMotionChange();
+        [DllImport("__Internal")]
+        private static extern void QGGetDeviceMotionChange();
 
         [MonoPInvokeCallback(typeof(CameraImageCallback))]
         public static void OnARCameraImageCallback(IntPtr ptr, int length, int width, int height)
@@ -39,6 +58,14 @@ namespace QGMiniGame
             CameraParam.width = width;
             CameraParam.height = height;
             isGetARCameraData = true;
+        }
+
+        [MonoPInvokeCallback(typeof(CameraImageYuvCallback))]
+        public static void OnARCameraImageYuvCallback(IntPtr ptr, int length)
+        {
+            CameraYuvParam.ptr = ptr;
+            CameraYuvParam.length = length;
+            isGetARCameraYuvData = true;
         }
 
         /*
@@ -60,6 +87,14 @@ namespace QGMiniGame
             isGetARPostData = true;
         }
 
+        [MonoPInvokeCallback(typeof(Action<string, string, string>))]
+        public static void OnDeviceMotionChangeCallback(string alpha, string beta, string gamma)
+        {
+            deviceMotionChangeParam.alpha = float.Parse(alpha);
+            deviceMotionChangeParam.beta = float.Parse(beta);
+            deviceMotionChangeParam.gamma = float.Parse(gamma);
+            isGetDeviceMotionData = true;
+        }
         //Ar相机接口(初始化)
         public static void StartARCamera(Action<string> successCallback, Action<string> failCallback)
         {
@@ -71,6 +106,46 @@ namespace QGMiniGame
         {
             QGDestroyARCamera();
         }
+
+        //Ar Yuv相机接口(初始化)
+        public static void StartARCameraYuv(Action<string> successCallback, Action<string> failCallback)
+        {
+            QGMiniGameManager.Instance.AddARCameraYuvCallBack(successCallback, failCallback);
+            QGStartARCameraYuv(OnARCameraImageYuvCallback);
+        }
+
+        public static void DestroyARCameraYuv()
+        {
+            QGDestroyARCameraYuv();
+        }
+
+        //获取Yuv byte数组指针 长度对象
+        public static ARCameraYuvParam GetARCameraYuvParam()
+        {
+            QGRequireARCameraImageYuv();
+            if (!isGetARCameraYuvData)
+            {
+                Debug.LogError("暂无数据, 请开启YUV相机");
+            }
+            isGetARCameraYuvData = false;
+            return CameraYuvParam;
+        }
+
+        //获取Yuv数组
+        public static byte[] GetARCameraYuvData()
+        {
+            QGRequireARCameraImageYuv();
+            if (!isGetARCameraYuvData)
+            {
+                Debug.LogError("暂无数据, 请开启YUV相机");
+                return new byte[0];
+            }
+            isGetARCameraYuvData = false;
+            byte[] managedArray = new byte[CameraYuvParam.length];
+            Marshal.Copy(CameraYuvParam.ptr, managedArray, 0, CameraYuvParam.length);
+            return managedArray;
+        }
+
 
         //调用位姿接口(初始化)
         public static void CreateOppoARPose()
@@ -222,6 +297,43 @@ namespace QGMiniGame
             }
 
             return floats;
+        }
+
+
+        //设备方向接口 interval 监听设备方向的变化回调函数的执行频率 
+        //game	适用于更新游戏的回调频率，在 20ms/次 左右
+        //ui	适用于更新 UI 的回调频率，在 60ms/次 左右
+        //normal	普通的回调频率，在 200ms/次 左右
+        public static void StartDeviceMotionListening(string interval, Action<string> successCallback, Action<string> failCallback)
+        {
+            QGMiniGameManager.Instance.AddStartDeviceMotionListeningCallBack(successCallback, failCallback);
+            QGStartDeviceMotionListening(interval);
+        }
+
+        public static void StopDeviceMotionListening(Action<string> successCallback, Action<string> failCallback)
+        {
+            QGMiniGameManager.Instance.AddStopDeviceMotionListeningCallBack(successCallback, failCallback);
+            QGStopDeviceMotionListening();
+        }
+
+        public static void OnDeviceMotionChange()
+        {
+            QGOnDeviceMotionChange(OnDeviceMotionChangeCallback);
+        }
+
+        public static void OffDeviceMotionChange()
+        {
+            QGOffDeviceMotionChange();
+        }
+
+        public static DeviceMotionChangeParam GetDeviceMotionChange()
+        {
+            QGGetDeviceMotionChange();
+            if (isGetDeviceMotionData)
+            {
+                return deviceMotionChangeParam;
+            }
+            return null;
         }
     }
 }

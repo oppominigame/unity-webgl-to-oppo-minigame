@@ -24,6 +24,7 @@
   - [使用 SDK 导出](doc/TransformBySDK.md)
   - [使用命令行导出](doc/TransformByCLI.md)
 - [运行小游戏](doc/RunQuickGame.md)
+- [创建证书](doc/OpensslPlugin.md)
 - [发布小游戏](doc/PublishQuickGame.md)
 
 ### 基本

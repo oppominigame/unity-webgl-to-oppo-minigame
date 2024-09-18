@@ -378,6 +378,13 @@ namespace QGMiniGame
     }
 
     [Serializable]
+    public class ARCameraYuvParam
+    {
+        public IntPtr ptr;  //Yuv Ar相机返回对象内存地址
+        public int length;  //Yuv byte数组长度
+    }
+
+    [Serializable]
     public class ARPostParam
     {
         public IntPtr arpost;  //位姿坐标内存地址
@@ -445,5 +452,13 @@ namespace QGMiniGame
         public float QgParamY;  //y 轴
         public float QgParamZ;  //z 轴
 
+    }
+
+    [Serializable]
+    public class DeviceMotionChangeParam
+    {
+        public float alpha;
+        public float beta;
+        public float gamma;
     }
 }

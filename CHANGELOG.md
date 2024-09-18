@@ -1,4 +1,14 @@
 # 更新日志
+## 2024-9-18 【重要更新】
+### Feature
+
+- 重要：上线新版本 Unity SDK，版本号 V8.0.5，位于 `tools/unity_webgl_rpk_oppo_v8.0.5.unitypackage`
+
+- 重要：新增 [创建证书](doc/OpensslPlugin.md).
+- 重要：新增 AR相机 Yuv格式接口.
+- 重要：修改 解决EditorWindow.HasOpenInstances unity2018打包编译异常.
+
+- 普通：新增 设备方向接口.
 
 ## 2024-8-6 【普通更新】
 ### Feature

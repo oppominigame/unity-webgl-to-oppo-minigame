@@ -35,12 +35,20 @@ namespace QGMiniGame
         private const string SDK_SERVER_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/OPPO-GAME-SDK/tools";
         private const string UPDATE_LOG_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/CHANGELOG.md";
         private const string CONTACT_US_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/doc/IssueAndContact.md.md";
+        private const string OPENSSL_EXE_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/hall/example/20240918/assets/OpenSSL-Win64.zip";
+        private static string OPENSSL_EXE_UNZIP_PATH = $"{Application.temporaryCachePath}/OpenSSL-Win64";
+        private static string OPENSSL_EXE_LOCAL_PATH = $"{OPENSSL_EXE_UNZIP_PATH}/bin/openssl.exe";
+        private static string GenerateCertificatePath = "";     //证书路径
+        private static bool isHaveCertificatePath = false;      //是否导入证书
+        private static bool isInstallOpenssl = false;           //是否安装openssl(全局)
+        private static bool isHaveOpenSslZIP = false;           //是否解压openssl(zip)
         private static float ImportPackagTime = 0;      //导入计时   
         private static float ImportPackagOvertime = 10; //导入超时
         private static Timer timer;
         private static string ImportingClass = $"{nameof(BuildEditorWindow)}.ImportingStatus";
 
         private static BuildEditorWindow instance;
+
         private static bool HasOpenInstances
 #if UNITY_2019_3_OR_NEWER
             => HasOpenInstances<BuildEditorWindow>();
@@ -156,7 +164,6 @@ namespace QGMiniGame
         private static bool IsProcessSafeExit(Process process) => process.ExitCode == 0;
 
         private static BuildEditorWindow GetOrCreateWindow() => GetWindow(typeof(BuildEditorWindow), false, "打包小游戏", true) as BuildEditorWindow;
-
         private static Process RunCommandProcess(string command)
         {
             return CmdRunner.CreateShellExProcess("cmd.exe", $"/c \"{command}\"");
@@ -179,6 +186,189 @@ namespace QGMiniGame
             // 返回执行结果
             return isSuccess;
         }
+
+        public static async Task GenerateCertificate(string command, string[] generateInfo, string path)
+        {
+            GenerateCertificatePath = path;
+            await DisplayProgressAndCheckOpensslInstallation();
+
+            if (!isHaveOpenSslZIP && !isInstallOpenssl) //既没有全局openssl,也没有本地压缩包
+            {
+                EditorUtility.DisplayDialog("提示", "请安装openssl环境", "确认");
+                return;
+            }
+            // Openssl 已安装，开始创建证书
+            EditorUtility.DisplayProgressBar("创建证书", "openssl 已安装", 0.7f);
+
+            var error = await CreateCertificate(command, generateInfo);
+            if (HandleError(error, "证书生成失败")) return;
+
+            // 证书生成成功
+            DisplayProgress("创建证书", "证书已生成", 0.9f);
+            EditorUtility.ClearProgressBar();
+
+            if (EditorUtility.DisplayDialog("提示", "证书已生成", "确认")) ;
+            QGGameTools.ShowInExplorer(GenerateCertificatePath);
+            isHaveCertificatePath = true;
+        }
+
+        private static async Task DisplayProgressAndCheckOpensslInstallation()
+        {
+            DisplayProgress("创建证书", "openssl 正在检测环境: ", 0.1f);
+            var error = await IsInstallOpenssl();
+
+            if (error.IsValid())
+            {
+                if (await HandleOpensslDownloadAndInstall()) return;
+            }
+        }
+
+        private static async Task<bool> HandleOpensslDownloadAndInstall()
+        {
+            if (!File.Exists(OPENSSL_EXE_LOCAL_PATH) && !File.Exists($"{OPENSSL_EXE_UNZIP_PATH}/OpenSSL-Win64.zip"))
+            {
+                if (!ShowDownloadDialog("需要下载openssl")) return true;
+
+                DisplayProgress("创建证书", "openssl 下载中...", 0.3f);
+                var error = await StartDownloadOpenssl();
+                if (HandleError(error, "openssl下载失败")) return true;
+
+                DisplayProgress("创建证书", "openssl 下载成功", 0.4f);
+            }
+
+            // if (!ShowDownloadDialog("需要安装openssl")) return true; 默认安装
+            DisplayProgress("创建证书", "openssl 安装中...", 0.5f);
+            var installError = await StartsInstallOpenssl();
+            return HandleError(installError, "openssl安装失败");
+        }
+
+        private static bool ShowDownloadDialog(string message)
+        {
+            return EditorUtility.DisplayDialog("提示", message, "确认", "取消");
+        }
+
+        private static void DisplayProgress(string title, string message, float progress)
+        {
+            EditorUtility.DisplayProgressBar(title, message, progress);
+        }
+
+        private static bool HandleError(string error, string errorMessage)
+        {
+            if (error.IsValid())
+            {
+                EditorUtility.ClearProgressBar();
+                return EditorUtility.DisplayDialog("提示", errorMessage, "确认");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 异步判断是否安装openssl,以及是否已解压本地openssl
+        /// </summary>
+        /// <returns>错误信息（没有代表成功）</returns>
+        private static Task<string> IsInstallOpenssl()
+        {
+            // 异步执行
+            return Task.Run(() =>
+            {
+                isInstallOpenssl = RunCommandProcessWait("openssl -v", out var output);
+                isHaveOpenSslZIP = File.Exists(OPENSSL_EXE_LOCAL_PATH);
+                if (isInstallOpenssl || isHaveOpenSslZIP)
+                {
+                    return string.Empty;
+                }
+                // 失败返回错误
+                return output;
+            });
+        }
+
+        /// <summary>
+        /// 异步下载openssl(下载压缩包)
+        /// </summary>
+        /// <returns>错误信息（没有代表成功）</returns>
+        private static async Task<string> StartDownloadOpenssl()
+        {
+            // 异步执行
+            return await Task.Run(() =>
+            {
+                if (!Directory.Exists(OPENSSL_EXE_UNZIP_PATH))
+                {
+                    Directory.CreateDirectory(OPENSSL_EXE_UNZIP_PATH);
+                }
+                var isSuccess = RunCommandProcessWait($"curl -o {OPENSSL_EXE_UNZIP_PATH}/OpenSSL-Win64.zip {OPENSSL_EXE_URL}", out var output);
+                if (isSuccess)
+                {
+                    return string.Empty;
+                }
+                return output;
+            });
+        }
+
+
+        /// <summary>
+        /// 异步安装openssl(解压缩包)
+        /// </summary>
+        /// <returns>错误信息（没有代表成功）</returns>
+        private static async Task<string> StartsInstallOpenssl()
+        {
+            // 异步执行
+            return await Task.Run(() =>
+            {
+                var isSuccess = RunCommandProcessWait($"tar -xf {OPENSSL_EXE_UNZIP_PATH}/OpenSSL-Win64.zip -C {OPENSSL_EXE_UNZIP_PATH}", out var output);
+
+                if (isSuccess)
+                {
+                    isHaveOpenSslZIP = true;
+                    return string.Empty;
+                }
+                return output;
+            });
+        }
+
+        /// <summary>
+        /// 异步生成证书
+        /// </summary>
+        /// <returns>错误信息（没有代表成功）</returns>
+        private static async Task<string> CreateCertificate(string command, string[] generateInfo)
+        {
+            // 异步执行
+            return await Task.Run(() =>
+            {
+                if (isInstallOpenssl)
+                {
+                    command = "openssl" + command;
+                }
+                else if (isHaveOpenSslZIP)
+                {
+                    command = $"{OPENSSL_EXE_LOCAL_PATH}" + command;
+                }
+                var isSuccess = RunCommandProcessWait(command, out var output);
+                if (isSuccess)
+                {
+                    // 目标文件路径
+                    string CertificateTxtPath = GenerateCertificatePath + "/证书.txt";
+                    try
+                    {
+                        // 使用 StreamWriter 写入文件
+                        using (StreamWriter writer = new StreamWriter(CertificateTxtPath))
+                        {
+                            foreach (string line in generateInfo)
+                            {
+                                writer.WriteLine(line);
+                            }
+                        }
+                        Debug.LogError("证书写入成功: " + CertificateTxtPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError("证书写入异常: " + ex.Message);
+                    }
+                    return string.Empty;
+                }
+                return output;
+            });
+        }
+
 
         /// <summary>
         /// 是否为有效的版本号
@@ -804,6 +994,13 @@ namespace QGMiniGame
                         }
                         GUIUtility.ExitGUI();
                     }
+
+                    if (GUILayout.Button("新建", GUILayout.Width(64f)))
+                    {
+                        ClearTextFieldFocus();
+                        GetWindow<OpensslPlugin>("生成签名文件");
+                        GUIUtility.ExitGUI();
+                    }
                     GUILayout.EndHorizontal();
                     ValidateLabel(certificateErrorText, -2);
                     // 私钥
@@ -831,6 +1028,17 @@ namespace QGMiniGame
                         }
                         GUIUtility.ExitGUI();
                     }
+                    if (isHaveCertificatePath)
+                    {
+                        var certificatePaths = $"{GenerateCertificatePath}/certificate.pem";
+                        var privatePaths = $"{GenerateCertificatePath}/private.pem";
+                        SaveProperty(ref fundamentals.signCertificate, certificatePaths);
+                        SaveProperty(ref fundamentals.signPrivate, privatePaths);
+                        validationMap[nameof(fundamentals.signCertificate)] = string.Empty;
+                        validationMap[nameof(fundamentals.signPrivate)] = string.Empty;
+                        isHaveCertificatePath = false;
+                    }
+
                     GUILayout.EndHorizontal();
                     ValidateLabel(privateErrorText, -2);
                     --EditorGUI.indentLevel;
@@ -1499,7 +1707,14 @@ namespace QGMiniGame
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void OnScriptReload()
         {
-            bool isBuildEditorWindowRunning = EditorWindow.HasOpenInstances<BuildEditorWindow>();
+            bool isBuildEditorWindowRunning = false;
+#if UNITY_2019_1_OR_NEWER
+        // Use the HasOpenInstances method if available (Unity 2019 and later)
+        isBuildEditorWindowRunning =  EditorWindow.HasOpenInstances<BuildEditorWindow>();
+#else
+            // Use the GetWindow method and check if the result is not null (Unity 2018 and earlier)
+            isBuildEditorWindowRunning = EditorWindow.GetWindow<BuildEditorWindow>(false) != null;
+#endif
             if (isBuildEditorWindowRunning && (EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.Importimg
                 || EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.FirstInjection))
             {

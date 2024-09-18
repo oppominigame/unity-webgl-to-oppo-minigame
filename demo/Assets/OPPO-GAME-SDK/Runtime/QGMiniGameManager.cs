@@ -312,9 +312,9 @@ namespace QGMiniGame
 
         #region 获取本地临时文件或本地用户文件的文件信息 filename 例: "/abc/file.txt"
 
-        public void GetFileInfo(string filename,Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        public void GetFileInfo(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            QGGetFileInfo(filename,QGCallBackManager.Add(successCallback),
+            QGGetFileInfo(filename, QGCallBackManager.Add(successCallback),
             QGCallBackManager.Add(failCallback));
         }
 
@@ -1084,6 +1084,60 @@ namespace QGMiniGame
             onARCameraFail(msg);
         }
 
+        private Action<string> onARCameraYuvSuccess;
+        private Action<string> onARCameraYuvFail;
+        public void AddARCameraYuvCallBack(Action<string> successCallback = null, Action<string> failCallback = null)
+        {
+            onARCameraYuvSuccess = successCallback;
+            onARCameraYuvFail = failCallback;
+        }
+
+        public void OnARCameraYuvSuccess(string msg)
+        {
+            onARCameraYuvSuccess(msg);
+        }
+
+        public void OnARCameraYuvFail(string msg)
+        {
+            onARCameraYuvFail(msg);
+        }
+
+        private Action<string> startDeviceMotionListeningSuccess;
+        private Action<string> startDeviceMotionListeningFail;
+        private Action<string> stopDeviceMotionListeningSuccess;
+        private Action<string> stopDeviceMotionListeningFail;
+        public void AddStartDeviceMotionListeningCallBack(Action<string> successCallback = null, Action<string> failCallback = null)
+        {
+            startDeviceMotionListeningSuccess = successCallback;
+            startDeviceMotionListeningFail = failCallback;
+        }
+
+        public void AddStopDeviceMotionListeningCallBack(Action<string> successCallback = null, Action<string> failCallback = null)
+        {
+            stopDeviceMotionListeningSuccess = successCallback;
+            stopDeviceMotionListeningFail = failCallback;
+        }
+
+        public void StartDeviceMotionListeningSuccess(string msg)
+        {
+            startDeviceMotionListeningSuccess(msg);
+        }
+
+        public void StartDeviceMotionListeningFail(string msg)
+        {
+            startDeviceMotionListeningFail(msg);
+        }
+
+        public void StopDeviceMotionListeningSuccess(string msg)
+        {
+            stopDeviceMotionListeningSuccess(msg);
+        }
+
+        public void StopDeviceMotionListeningFail(string msg)
+        {
+            stopDeviceMotionListeningFail(msg);
+        }
+
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
 
@@ -1237,7 +1291,7 @@ namespace QGMiniGame
         private static extern void QGUnzip();
 
         [DllImport("__Internal")]
-        private static extern void QGGetFileInfo(string a,string b, string c);
+        private static extern void QGGetFileInfo(string a, string b, string c);
 
         [DllImport("__Internal")]
         private static extern void QGPlayAudio(string a, string b);
