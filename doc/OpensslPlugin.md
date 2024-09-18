@@ -12,14 +12,23 @@ SDK：V8.0.5 及以上
 #### 新建签名证书
 
 1. 执行 `OPPO小游戏 -> 打包小游戏 -> 勾选 自定义密钥库 -> 新建`
+
    ![UnityPlatform](image/GenerateCertificate.png)
+
 2. 按提示输入有效参数,点击保存
+
    ![UnityPlatform](image/GenerateCertificateParameters.png)
+
 3. 确认需要下载的证书工具 `会优先使用全局openssl工具,如果没有点击确认自动安装`
+
    ![UnityPlatform](image/GenerateCertificateTools.png)
+
 4. 生成证书提示,并弹出证书保存路径
 
    ![UnityPlatform](image/GenerateCertificateTip.png)
    ![UnityPlatform](image/GenerateCertificatePath2.png)
+
 5. 创建成功证书和私钥路径会自动导入
+
    ![UnityPlatform](image/GenerateCertificateImport.png)
+
