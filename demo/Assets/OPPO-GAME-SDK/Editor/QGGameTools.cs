@@ -36,7 +36,7 @@ namespace QGMiniGame
 
             commandStr += (" --packageName=" + BuildConfigAsset.Fundamentals.packageName);
 
-            var orientationArr = new[] { "portrait", "landscape" };
+            var orientationArr = new[] { "portrait", "landscape", "landscapeLeft", "landscapeRight" };
             commandStr += (" --orientation=" + orientationArr[BuildConfigAsset.Fundamentals.orientation]);
             commandStr += (" --versionName=" + BuildConfigAsset.Fundamentals.projectVersionName);
             commandStr += (" --versionCode=" + BuildConfigAsset.Fundamentals.projectVersion);
@@ -56,6 +56,12 @@ namespace QGMiniGame
                 commandStr += (" --excludeClearFiles=" + BuildConfigAsset.AssetCache.excludeClearFiles);
                 commandStr += (" --bundleHashLength=" + BuildConfigAsset.AssetCache.bundleHashLength);
                 commandStr += (" --defaultReleaseSize=" + BuildConfigAsset.AssetCache.defaultReleaseSize);
+            }
+
+            //UnityWebGLVersion
+            if (BuildConfigAsset.AssetCache.unityUseWebGL2)
+            {
+                commandStr += (" --unityUseWebGL2=" + BuildConfigAsset.AssetCache.unityUseWebGL2);
             }
 
             if (BuildConfigAsset.Fundamentals.useCustomSign)
@@ -177,9 +183,9 @@ namespace QGMiniGame
 #endif
             PlayerSettings.runInBackground = false;
             PlayerSettings.WebGL.threadsSupport = false;
-            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.WebGL, false);
-            GraphicsDeviceType[] targets = { GraphicsDeviceType.OpenGLES2 };
-            PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, targets);
+            // PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.WebGL, false);
+            // GraphicsDeviceType[] targets = { GraphicsDeviceType.OpenGLES2 };
+            // PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, targets);
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             PlayerSettings.WebGL.template = "APPLICATION:Minimal";
             EditorSettings.spritePackerMode = SpritePackerMode.AlwaysOnAtlas;
@@ -297,6 +303,24 @@ namespace QGMiniGame
             string shaderTestToolUrl = "https://ie-activity-cn.heytapimage.com/static/minigame/hall/example123456/assets/com.oppo.ShaderDemo.rpk";
 
             UnityEngine.Application.OpenURL(shaderTestToolUrl);
+        }
+
+        //当前是否使用WebGL2.0版本
+        public static void GetUserWebGLVersion()
+        {
+            BuildConfigAsset.AssetCache.unityUseWebGL2 = false;
+            // 获取当前图形 API 列表
+            GraphicsDeviceType[] graphicsAPIs = PlayerSettings.GetGraphicsAPIs(BuildTarget.WebGL);
+
+            // 检查使用的图形 API
+            foreach (var api in graphicsAPIs)
+            {
+                QGLog.Log("检查使用的图形 API: " + api);
+                if (api == GraphicsDeviceType.OpenGLES3)
+                {
+                    BuildConfigAsset.AssetCache.unityUseWebGL2 = true;
+                }
+            }
         }
     }
 }

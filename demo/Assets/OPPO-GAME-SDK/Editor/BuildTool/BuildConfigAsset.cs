@@ -37,6 +37,7 @@ namespace QGMiniGame
         public string bundlePathIdentifier;
         public string excludeClearFiles;
         public string excludeFileExtensions = ".json;.hash";
+        public bool unityUseWebGL2;
 
         [NonSerialized]
         public bool available;

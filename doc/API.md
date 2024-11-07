@@ -215,6 +215,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
   qGAudioPlayer = QG.PlayAudio(new AudioParam()
         {
             url = "https://activity-cdo.heytapimage.com/cdo-activity/static/minigame/test/demo/music/huxia-4M.mp3", //播放链接
+            // url = "/huxia-4M.mp3", //如果已使用 QG.DownLoadFile 下载音频文件到本地，可播放本地音频
             startTime = 1.5f,  //起始播放时间
             loop = true,  //设置循环
             volume = 0.75f  //设置音量
@@ -226,6 +227,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
                 Debug
                     .Log("监听音频播放成功");
   });
+
 // 新增视频音频通用监听:OnPlay,OnCanPlay,OnPause,OnStop,OnEnded,OnTimeUpdate,OnError,OnWaiting,OnSeeking,OnSeeked.
 // 新增视频音频通用方法:Play(),Pause(),Stop(),Seek(Time),Destroy,SetVolume,SetLoop.
 ```
@@ -767,6 +769,529 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
         Debug.Log("本地文件不存在：" + JsonUtility.ToJson(fail));
       }
      );
+```
+
+## <a id="判断文件/目录是否存在"></a>判断文件/目录是否存在
+
+使用此接口可以让玩家在游戏中判断文件/目录是否存在
+
+```c#
+     //异步
+      string filename = "/test.zip";    //要判断是否存在的文件/目录路径
+      QG.Access(filename, (success) =>
+      {
+          Debug.Log("QG.Access success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.Access fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.Access complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步 
+    //bool isAccessSync = QG.AccessSync(filename); //所有File类Sync同步方法 success fail 回调可不传
+    bool isAccessSync = QG.AccessSync(filename, (success) =>
+        {
+            Debug.Log("QG.AccessSync success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.AccessSync fail = " + JsonUtility.ToJson(fail));
+        }
+    );
+    loginMessage.text = "QG.AccessSync 同步判断文件/目录是否存在 = " + isAccessSync;     
+```
+
+## <a id="在文件结尾追加内容"></a>在文件结尾追加内容
+
+使用此接口可以让玩家在游戏中在文件结尾追加内容
+
+```c#
+     //AppendFile AppendFileSync 第二个参数 param 支持传入string 或 byte数组
+     //异步
+        string filename = "/myfile.txt";                //要追加内容的文件路径
+        string append_data = "appendFile data";         //要追加的文本或二进制数据
+        byte[] append_byteArray = new byte[] { 1, 2, 3, 4 };    //要追加的文本或二进制数据
+        QG.AppendFile(filename, append_byteArray, (success) =>
+      {
+          Debug.Log("QG.AppendFile success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.AppendFile fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.AppendFile complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步 
+        bool isAppendFileSync = QG.AppendFileSync(filename, append_byteArray, (success) =>
+         {
+             Debug.Log("QG.AppendFileSync success = " + JsonUtility.ToJson(success));
+         },
+         (fail) =>
+         {
+             Debug.Log("QG.AppendFileSync fail = " + JsonUtility.ToJson(fail));
+         }
+        );
+        Debug.Log("QG.AppendFileSync 是否同步在文件結尾追加內容 = " + isAppendFileSync);    
+```
+
+## <a id="复制文件"></a>复制文件
+
+使用此接口可以让玩家在游戏中复制文件
+
+```c#
+     //异步
+        string srcPath = "/myfile.txt";         //源文件路径，只可以是普通文件
+        string destPath = "/myfileCopy.txt";    //目标文件路径
+        QG.CopyFile(srcPath, destPath, (success) =>
+      {
+          Debug.Log("QG.CopyFile success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.CopyFile fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.CopyFile complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        bool isCopyFileSync = QG.CopyFileSync(srcPath, destPath, (success) =>
+          {
+              Debug.Log("QG.CopyFileSync success = " + JsonUtility.ToJson(success));
+          },
+          (fail) =>
+          {
+              Debug.Log("QG.CopyFileSync fail = " + JsonUtility.ToJson(fail));
+          }
+         );
+        Debug.Log("QG.CopyFileSync 是否同步拷貝目录 = " + isCopyFileSync);     
+```
+
+## <a id="创建目录"></a>创建目录
+
+使用此接口可以让玩家在游戏中创建目录
+
+```c#
+     //异步
+        string dirPath = "/oppo";       //创建的目录路径
+        QG.Mkdir(dirPath, (success) =>
+        {
+            Debug.Log("QG.Mkdir success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.Mkdir fail = " + JsonUtility.ToJson(fail));
+        },
+         (complete) =>
+        {
+            Debug.Log("QG.Mkdir complete = " + JsonUtility.ToJson(complete));
+        }
+       );
+     //同步
+        bool recursive = true; //是否在递归创建该目录的上级目录后再创建该目录
+        bool isMkdirSync = QG.MkdirSync(dirPath, recursive, (success) =>
+       {
+           Debug.Log("QG.MkdirSync success = " + JsonUtility.ToJson(success));
+       },
+       (fail) =>
+       {
+           Debug.Log("QG.MkdirSync fail = " + JsonUtility.ToJson(fail));
+       }
+      );
+        Debug.Log("QG.MkdirSync 是否同步创建目录 = " + isMkdirSync);     
+```
+
+## <a id="读取本地文件内容"></a>读取本地文件内容
+
+使用此接口可以让玩家在游戏中读取本地文件内容
+
+```c#
+     //异步
+        string filename = "/myfile.txt";    //要读取的文件的路径
+        string encoding = "binary"; //指定读取文件的字符编码，默认为 binary, 支持 utf8 binary 类型
+        QG.ReadFile(filename, encoding, (success) =>
+      {
+          ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
+          Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(success));
+          if (res.encoding == "utf8")
+          {
+              Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(success) + "\n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8);
+          }
+          else if (res.encoding == "binary")
+          {
+              Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(success) + "\n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8 + "\n dataBytes[0]:" + res.dataBytes[0] + "\n dataBytes[end]:" + res.dataBytes[res.dataBytes.Length - 1]);
+          }
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.ReadFile fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.ReadFile complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        ReadFileResponse res = QG.ReadFileSync(filename, encoding, (success) =>
+       {
+           ReadFileResponse readFileResponse = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
+           if (readFileResponse.encoding == "utf8")
+           {
+               Debug.Log("QG.ReadFileSync utf8 success = " + JsonUtility.ToJson(success));
+           }
+           else if (readFileResponse.encoding == "binary")
+           {
+               Debug.Log("QG.ReadFileSync binary success = " + JsonUtility.ToJson(success));
+           }
+       },
+       (fail) =>
+       {
+           Debug.Log("QG.ReadFileSync fail = " + JsonUtility.ToJson(fail));
+       }
+      );
+        if (res == null)
+        {
+            Debug.Log("QG.ReadFileSync fail");
+            return;
+        }
+        if (res.encoding == "utf8")
+        {
+            Debug.Log("QG.ReadFileSync success =\n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8);
+        }
+        else if (res.encoding == "binary")
+        {
+            Debug.Log("QG.ReadFileSync success =\n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8 + "\n dataBytes[0]:" + res.dataBytes[0] + "\n dataBytes[end]:" + res.dataBytes[res.dataBytes.Length - 1]);
+        }
+    //返回对象
+    public class ReadFileResponse
+    {
+        public string encoding;     //读取文件编码
+        public string dataStr;      //读取文件字符串
+        public string dataUtf8;     //读取文件UTF8
+        public byte[] dataBytes;    //读取文件字节
+    }    
+```
+
+## <a id="重命名文件，可以把文件从 oldPath 移动到 newPath"></a>重命名文件，可以把文件从 oldPath 移动到 newPath
+
+使用此接口可以让玩家在游戏中重命名文件，可以把文件从 oldPath 移动到 newPath
+
+```c#
+     //异步
+        string oldPath = "/myfile.txt";         //源文件路径，可以是普通文件或目录
+        string newPath = "/new1/rename.txt";    //新文件路径
+        QG.Rename(oldPath, newPath, (success) =>
+      {
+          Debug.Log("QG.Rename success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.Rename fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.Rename complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        bool isRenameSync = QG.RenameSync(oldPath, newPath, (success) =>
+          {
+              Debug.Log("QG.RenameSync success = " + JsonUtility.ToJson(success));
+          },
+          (fail) =>
+          {
+              Debug.Log("QG.RenameSync fail = " + JsonUtility.ToJson(fail));
+          }
+         );
+        Debug.Log("QG.RenameSync 是否同步重命名文件 = " + isRenameSync);
+```
+
+## <a id="删除目录"></a>删除目录
+
+使用此接口可以让玩家在游戏中删除目录
+
+```c#
+     //异步
+        string dirPath = "/oppo";   //要删除的目录路径
+        bool recursive = true;      //是否递归删除目录。如果为 true，则删除该目录和该目录下的所有子目录以及文件。
+        QG.Rmdir(dirPath, recursive, (success) =>
+        {
+            Debug.Log("QG.Rmdir success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.Rmdir fail = " + JsonUtility.ToJson(fail));
+        },
+         (complete) =>
+        {
+            Debug.Log("QG.Rmdir complete = " + JsonUtility.ToJson(complete));
+        }
+       );
+     //同步
+        bool isRmdirSync = QG.RmdirSync(dirPath, recursive, (success) =>
+        {
+            Debug.Log("QG.RmdirSync success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.RmdirSync fail = " + JsonUtility.ToJson(fail));
+        }
+       );
+        Debug.Log("QG.RmdirSync 是否同步删除目录 = " + isRmdirSync);
+```
+
+## <a id="读取目录内文件列表"></a>读取目录内文件列表
+
+使用此接口可以让玩家在游戏中读取目录内文件列表
+
+```c#
+     //异步
+        string dirPath = "/";   //要读取的目录路径
+        QG.ReadDir(dirPath, (success) =>
+      {
+          ReadDirResponse res = JsonUtility.FromJson<ReadDirResponse>(JsonUtility.ToJson(success));
+          Debug.Log("QG.ReadDir success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.ReadDir fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.ReadDir complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        ReadDirResponse res = QG.ReadDirSync(dirPath, (success) =>
+          {
+              ReadDirResponse readDirResponse = JsonUtility.FromJson<ReadDirResponse>(JsonUtility.ToJson(success));
+              Debug.Log("QG.ReadDirSync success = " + JsonUtility.ToJson(success));
+          },
+          (fail) =>
+          {
+              Debug.Log("QG.ReadDirSync fail = " + JsonUtility.ToJson(fail));
+          }
+         );
+        if (res == null)
+        {
+            Debug.Log("QG.ReadDirSync fail");
+            return;
+        }
+        Debug.Log("QG.ReadDirSync success\n files[0]:" + res.files[0] + "\n files[end]:" + res.files[res.files.Length - 1]);
+     //返回对象
+    public class ReadDirResponse
+    {
+        public string filesStr; //文件列表字符串
+        public string[] files;  //文件列表字符串数组
+    }        
+```
+
+## <a id="删除文件"></a>删除文件
+
+使用此接口可以让玩家在游戏中删除文件
+
+```c#
+     //异步
+        string dirPath = "/Unlink.txt";     //要删除的文件路径
+        QG.Unlink(dirPath, (success) =>
+      {
+          Debug.Log("QG.Unlink success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.Unlink fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.Unlink complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        bool isUnlinkSync = QG.UnlinkSync(dirPath, (success) =>
+       {
+           Debug.Log("QG.UnlinkSync success = " + JsonUtility.ToJson(success));
+       },
+       (fail) =>
+       {
+           Debug.Log("QG.UnlinkSync fail = " + JsonUtility.ToJson(fail));
+       }
+      );
+        Debug.Log("QG.UnlinkSync 是否同步刪除文件 = " + isUnlinkSync);
+```
+
+## <a id="解压文件"></a>解压文件
+
+使用此接口可以让玩家在游戏中解压文件
+
+```c#
+     //异步
+        string zipFilePath = "/test.zip"; //源文件路径，只可以是 zip 压缩文件
+        string targetPath = "/";          //目标目录路径
+        QG.Unzip(zipFilePath, targetPath, (success) =>
+      {
+          Debug.Log("QG.Unzip success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.Unzip fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.Unzip complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+```
+
+## <a id="写文件"></a>写文件
+
+使用此接口可以让玩家在游戏中写文件
+
+```c#
+     //WriteFile WriteFileSync 第二个参数 param 支持传入string 或 byte数组
+     //异步
+        string filename = "/myfile.txt";    //要写入的文件路径
+        string append_data = "writeFile data"; //要写入的文本或二进制数据
+        byte[] append_byteArray = new byte[] { 1, 2, 3, 4 }; //要写入的文本或二进制数据
+        bool append = false;            //默认为 false，覆盖旧文件
+        QG.WriteFile(filename, append_data, append, (success) =>
+      {
+          Debug.Log("QG.WriteFile success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.WriteFile fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.WriteFile complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        bool isWriteFileSync = QG.WriteFileSync(filename, append_byteArray, append, (success) =>
+          {
+              Debug.Log("QG.WriteFileSync success = " + JsonUtility.ToJson(success));
+          },
+          (fail) =>
+          {
+              Debug.Log("QG.WriteFileSync fail = " + JsonUtility.ToJson(fail));
+          }
+         );
+        Debug.Log("QG.WriteFileSync 是否同步写入文件 = " + isWriteFileSync);
+```
+
+## <a id="保存临时文件到本地"></a>保存临时文件到本地
+
+使用此接口可以让玩家在游戏中保存临时文件到本地
+
+```c#
+     //异步
+        string filePath = "/myfile.txt";          //要存储的文件路径
+        string tempFilePath = "/myfileSave.txt";  //临时存储文件路径
+        QG.SaveFile(tempFilePath, filePath, (success) =>
+      {
+          Debug.Log("QG.SaveFile success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.SaveFile fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.SaveFile complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        string SaveFileSyncStr = QG.SaveFileSync(tempFilePath, filePath, (success) =>
+          {
+              Debug.Log("QG.SaveFileSync success = " + JsonUtility.ToJson(success));
+          },
+          (fail) =>
+          {
+              Debug.Log("QG.SaveFileSync fail = " + JsonUtility.ToJson(fail));
+          }
+         );
+        Debug.Log("QG.SaveFileSync 同步保存临时文件路径 = " + SaveFileSyncStr);
+```
+
+## <a id="删除该 OPPO 小游戏下已保存的本地缓存文件"></a>删除该 OPPO 小游戏下已保存的本地缓存文件
+
+使用此接口可以让玩家在游戏中删除该 OPPO 小游戏下已保存的本地缓存文件
+
+```c#
+     //异步
+        string filePath = "/RemoveSavedFile.txt";       //文件/目录路径
+        QG.RemoveSavedFile(filePath, (success) =>
+      {
+          Debug.Log("QG.RemoveSavedFile success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.RemoveSavedFile fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.RemoveSavedFile complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+```
+
+## <a id="获取文件 Stats 对象"></a>获取文件 Stats 对象
+
+使用此接口可以让玩家在游戏中获取文件 Stats 对象
+
+```c#
+     //异步
+        string path = "/test.zip";  //文件/目录路径
+        bool recursive = false;     //是否递归获取目录中所有文件的信息
+        QG.Stat(path, (success) =>
+      {
+          StatResponse res = JsonUtility.FromJson<StatResponse>(JsonUtility.ToJson(success));
+          Debug.Log("QG.Stat success = " + JsonUtility.ToJson(success));
+      },
+      (fail) =>
+      {
+          Debug.Log("QG.Stat fail = " + JsonUtility.ToJson(fail));
+      },
+       (complete) =>
+      {
+          Debug.Log("QG.Stat complete = " + JsonUtility.ToJson(complete));
+      }
+     );
+     //同步
+        StatResponse res = QG.StatSync(path, recursive, (success) =>
+        {
+            StatResponse statResponse = JsonUtility.FromJson<StatResponse>(JsonUtility.ToJson(success));
+            Debug.Log("QG.StatSync success = " + JsonUtility.ToJson(success));
+        },
+        (fail) =>
+        {
+            Debug.Log("QG.StatSync fail = " + JsonUtility.ToJson(fail));
+        }
+       );
+        if (res == null)
+        {
+            Debug.Log("QG.StatSync fail");
+            return;
+        }
+        Debug.Log("QG.StatSync success\n mode:" + res.mode + "\n size:" + res.size + "\n lastAccessedTime:" + res.lastAccessedTime + "\n lastModifiedTime:" + res.lastModifiedTime + "\n isDirectory:" + res.isDirectory + "\n isFile:" + res.isFile);
+        //返回对象
+        public class StatResponse
+        {
+            public int mode; //文件 mode
+            public int size; //文件大小
+            public int lastAccessedTime; //最后一次读取的时间
+            public int lastModifiedTime; //最后一次修改时间
+            public bool isDirectory; //判断当前文件是否一个目录
+            public bool isFile; //判断当前文件是否一个普通文件
+        }      
 ```
 
 ## <a id="自定义拓展"></a>自定义拓展

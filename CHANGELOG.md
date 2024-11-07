@@ -1,4 +1,15 @@
 # 更新日志
+
+## 2024-11-07 【重要更新】
+### Feature
+
+- 重要：上线新版本 Unity SDK，版本号 V8.0.6，位于 `tools/unity_webgl_rpk_oppo_v8.0.6.unitypackage`
+
+- 重要：修改 BuildEditorWindow.cs 编译异常.
+- 重要：修改 开放WEBGL2.0设置.
+- 重要：新增 画面旋转设置 "landscapeLeft" or "landscapeRight", OPPO 小游戏调试器 V9.2.0 有效.
+- 重要：新增 FileSystemManager 适配.详情参考 [OPPO SDK API](doc/API.md#获取本地临时文件或本地用户文件的文件信息)
+
 ## 2024-9-18 【重要更新】
 ### Feature
 

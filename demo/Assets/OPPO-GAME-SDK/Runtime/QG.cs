@@ -388,20 +388,40 @@ namespace QGMiniGame
         // 文件系统
         #region Mkdir 创建目录
 
-        public static void Mkdir()
+        public static void Mkdir(string dirPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.Mkdir();
+            QGMiniGameManager.Instance.Mkdir(dirPath, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool MkdirSync(string dirPath, bool recursive, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.MkdirSync(dirPath, recursive, successCallback, failCallback);
         }
 
         #endregion
 
         #region Rmdir 删除目录
-
-        public static void Rmdir()
+        public static void Rmdir(string dirPath, bool recursive, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.Rmdir();
+            QGMiniGameManager.Instance.Rmdir(dirPath, recursive, successCallback, failCallback, completeCallback);
         }
 
+        public static bool RmdirSync(string dirPath, bool recursive, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.RmdirSync(dirPath, recursive, successCallback, failCallback);
+        }
+        #endregion
+
+        #region Rmdir 删除文件
+        public static void Unlink(string dirPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.Unlink(dirPath, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool UnlinkSync(string dirPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.UnlinkSync(dirPath, successCallback, failCallback);
+        }
         #endregion
 
         #region IsExist 是否是目录/文件
@@ -415,90 +435,128 @@ namespace QGMiniGame
 
         #region Rename 重命名目录
 
-        public static void Rename()
+        public static void Rename(string oldPath, string newPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.Rename();
+            QGMiniGameManager.Instance.Rename(oldPath, newPath, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool RenameSync(string oldPath, string newPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.RenameSync(oldPath, newPath, successCallback, failCallback);
         }
 
         #endregion
 
         #region SaveFile 保存临时文件到本地
-
-        public static void SaveFile()
+        public static void SaveFile(string tempFilePath, string filePath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.SaveFile();
+            QGMiniGameManager.Instance.SaveFile(tempFilePath, filePath, successCallback, failCallback, completeCallback);
+        }
+
+        public static string SaveFileSync(string tempFilePath, string filePath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.SaveFileSync(tempFilePath, filePath, successCallback, failCallback);
         }
 
         #endregion
 
         #region ReadDir 读取目录内文件列表
 
-        public static void ReadDir()
+        public static void ReadDir(string dirPath, Action<ReadDirResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.ReadDir();
+            QGMiniGameManager.Instance.ReadDir(dirPath, successCallback, failCallback, completeCallback);
+        }
+
+        public static ReadDirResponse ReadDirSync(string dirPath, Action<ReadDirResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.ReadDirSync(dirPath, successCallback, failCallback);
         }
 
         #endregion
 
         #region WriteFile 写入文件
-
-        public static void WriteFile()
+        public static void WriteFile(string filePath, object param, bool append, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.WriteFile();
+            QGMiniGameManager.Instance.WriteFile(filePath, param, append, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool WriteFileSync(string filePath, object param, bool append, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.WriteFileSync(filePath, param, append, successCallback, failCallback);
         }
 
         #endregion
 
         #region ReadFile 读取文件
 
-        public static void ReadFile()
+        public static void ReadFile(string filePath, string encoding, Action<ReadFileResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.ReadFile();
+            QGMiniGameManager.Instance.ReadFile(filePath, encoding, successCallback, failCallback, completeCallback);
+        }
+
+        public static ReadFileResponse ReadFileSync(string filePath, string encoding, Action<ReadFileResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.ReadFileSync(filePath, encoding, successCallback, failCallback);
         }
 
         #endregion
 
         #region AppendFile 追加文件
 
-        public static void AppendFile()
+        public static void AppendFile(string filePath, object param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.AppendFile();
+            QGMiniGameManager.Instance.AppendFile(filePath, param, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool AppendFileSync(string filePath, object param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.AppendFileSync(filePath, param, successCallback, failCallback);
         }
 
         #endregion
 
         #region CopyFile 复制文件
 
-        public static void CopyFile()
+        public static void CopyFile(string srcPath, string destPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.CopyFile();
+            QGMiniGameManager.Instance.CopyFile(srcPath, destPath, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool CopyFileSync(string srcPath, string destPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.CopyFileSync(srcPath, destPath, successCallback, failCallback);
         }
 
         #endregion
 
         #region RemoveSavedFile 删除文件
 
-        public static void RemoveSavedFile()
+        public static void RemoveSavedFile(string filePath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.RemoveSavedFile();
+            QGMiniGameManager.Instance.RemoveSavedFile(filePath, successCallback, failCallback, completeCallback);
         }
 
         #endregion
 
         #region Stat 获取文件信息
 
-        public static void Stat()
+        public static void Stat(string path, Action<StatResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.Stat();
+            QGMiniGameManager.Instance.Stat(path, successCallback, failCallback, completeCallback);
+        }
+
+        public static StatResponse StatSync(string path, bool recursive, Action<StatResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.StatSync(path, recursive, successCallback, failCallback);
         }
 
         #endregion
 
         #region Unzip 解压文件
 
-        public static void Unzip()
+        public static void Unzip(string zipFilePath, string targetPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.Unzip();
+            QGMiniGameManager.Instance.Unzip(zipFilePath, targetPath, successCallback, failCallback, completeCallback);
         }
 
         #endregion
@@ -783,6 +841,18 @@ namespace QGMiniGame
         public static void StopCompass(Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
             QGMiniGameManager.Instance.StopCompass(successCallback, failCallback, completeCallback);
+        }
+        #endregion
+
+        #region FileSystemManager  文件类
+        public static void Access(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGMiniGameManager.Instance.Access(filename, successCallback, failCallback, completeCallback);
+        }
+
+        public static bool AccessSync(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGMiniGameManager.Instance.AccessSync(filename, successCallback, failCallback);
         }
         #endregion
     }

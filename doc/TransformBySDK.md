@@ -21,7 +21,7 @@
 - **基本设置**
     - <span style="font-size:12px">**游戏包名**：游戏唯一标识，打包后的文件以此命名，一般格式为 `com.company.product`，默认写为 `com.[PlayerSettings.companyName].[PlayerSettings.productName]`</span>
     - <span style="font-size:12px">**游戏名称**：游戏对外展示名称</span>
-    - <span style="font-size:12px">**游戏方向**：进入游戏时的设备方向，包含 Portrait（竖屏）、Landscape（横屏）</span>
+    - <span style="font-size:12px">**游戏方向**：进入游戏时的设备方向，包含 Portrait（竖屏）、Landscape（横屏）、landscapeLeft (横左屏)、landscapeRight (横右屏) </span>
     - <span style="font-size:12px">**游戏版本号**：正整数，一般从 1 开始递增</span>
     - <span style="font-size:12px">**游戏版本名称**：与版本号对应，用于展示版本信息</span>
     - <span style="font-size:12px">**最小平台版本号**：一般填写 1103，平台版本支持的 API 可查询 [OPPO小游戏官方文档](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/)</span>

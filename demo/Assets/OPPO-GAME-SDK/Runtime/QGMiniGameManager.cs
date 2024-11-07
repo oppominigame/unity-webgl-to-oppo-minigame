@@ -195,19 +195,49 @@ namespace QGMiniGame
 
         #region 创建目录
 
-        public void Mkdir()
+        public void Mkdir(string dirPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMkdir();
+            QGMkdir(dirPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
+
+        public bool MkdirSync(string dirPath, bool recursive, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            string recursiveStr = recursive ? "true" : "false";
+            return QGMkdirSync(dirPath, recursiveStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+
 
         #endregion
 
         #region 删除目录
 
-        public void Rmdir()
+        public void Rmdir(string dirPath, bool recursive, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGRmdir();
+            string recursiveStr = recursive ? "true" : "false";
+            QGRmdir(dirPath, recursiveStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
+
+        public bool RmdirSync(string dirPath, bool recursive, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            string recursiveStr = recursive ? "true" : "false";
+            return QGRmdirSync(dirPath, recursiveStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+
+
+        #endregion
+
+        #region 删除文件
+
+        public void Unlink(string dirPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGUnlink(dirPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public bool UnlinkSync(string dirPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGUnlinkSync(dirPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+
 
         #endregion
 
@@ -222,90 +252,253 @@ namespace QGMiniGame
 
         #region 重命名目录
 
-        public void Rename()
+        public void Rename(string oldPath, string newPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGRename();
+            QGRename(oldPath, newPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public bool RenameSync(string oldPath, string newPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGRenameSync(oldPath, newPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
         #endregion
 
         #region 保存临时文件到本地
-
-        public void SaveFile()
+        public void SaveFile(string tempFilePath, string filePath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGSaveFile();
+            QGSaveFile(tempFilePath, filePath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public string SaveFileSync(string tempFilePath, string filePath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGSaveFileSync(tempFilePath, filePath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
         #endregion
 
         #region 读取目录内文件列表
 
-        public void ReadDir()
+        public void ReadDir(string dirPath, Action<ReadDirResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGReadDir();
+            QGReadDir(dirPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        ReadDirResponse readDirResponse = new ReadDirResponse();
+        public ReadDirResponse ReadDirSync(string dirPath, Action<ReadDirResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            string filesStr = QGReadDirSync(dirPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            if (filesStr == null)
+            {
+                Debug.LogError("讀取失敗");
+                return null;
+            }
+            readDirResponse.files = filesStr.Split(',');
+            readDirResponse.filesStr = String.Empty;
+            return readDirResponse;
+        }
+
+        public void OnReadDirSuccessCallBack(string msg)
+        {
+            ReadDirResponse res = JsonUtility.FromJson<ReadDirResponse>(msg);
+            string filesStr = res.filesStr;
+            res.files = filesStr.Split(',');
+            res.filesStr = String.Empty;
+            QGCallBackManager.InvokeResponseCallback<ReadDirResponse>(JsonUtility.ToJson(res));
         }
 
         #endregion
 
         #region 写入文件
 
-        public void WriteFile()
+        public void WriteFile(string filePath, object param, bool append, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGWriteFile();
+            var result = ProcessFile(param);
+            if (result.encodingStr == "utf8" || result.encodingStr == "binary")
+            {
+                string appendStr = append ? "true" : "false";
+                QGWriteFile(filePath, result.fileParamStr, result.encodingStr, appendStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+            }
         }
+
+        public bool WriteFileSync(string filePath, object param, bool append, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            var result = ProcessFile(param);
+            if (result.encodingStr == "utf8" || result.encodingStr == "binary")
+            {
+                string appendStr = append ? "true" : "false";
+                return QGWriteFileSync(filePath, result.fileParamStr, result.encodingStr, appendStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            }
+            return false;
+        }
+
 
         #endregion
 
         #region 读取文件
 
-        public void ReadFile()
+        public void ReadFile(string filePath, string encoding, Action<ReadFileResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGReadFile();
+            QGReadFile(filePath, encoding, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
+
+        ReadFileResponse readFileSyncResponse = new ReadFileResponse();
+        public ReadFileResponse ReadFileSync(string filePath, string encoding, Action<ReadFileResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            string dataStr = QGReadFileSync(filePath, encoding, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            if (dataStr == null)
+            {
+                Debug.LogError("讀取失敗");
+                return null;
+            }
+            if (encoding == "utf8")
+            {
+                readFileSyncResponse.dataUtf8 = dataStr;
+            }
+            else if (encoding == "binary")
+            {
+                string[] stringBytes = dataStr.Split(',');
+                byte[] dataBytes = new byte[stringBytes.Length];
+                for (int i = 0; i < stringBytes.Length; i++)
+                {
+                    dataBytes[i] = Convert.ToByte(stringBytes[i]);
+                }
+                readFileSyncResponse.dataBytes = dataBytes;
+            }
+            else
+            {
+                Debug.LogError("未知类型: " + encoding);
+                return null;
+            }
+            readFileSyncResponse.encoding = encoding;
+            return readFileSyncResponse;
+        }
+        public void OnReadFileSuccessCallBack(string msg)
+        {
+            ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(msg);
+            string dataStr = res.dataStr;
+            string encodingStr = res.encoding;
+            if (encodingStr == "utf8")
+            {
+                res.dataUtf8 = dataStr;
+            }
+            else if (encodingStr == "binary")
+            {
+                string[] stringBytes = dataStr.Split(',');
+                byte[] dataBytes = new byte[stringBytes.Length];
+                for (int i = 0; i < stringBytes.Length; i++)
+                {
+                    dataBytes[i] = Convert.ToByte(stringBytes[i]);
+                }
+                res.dataBytes = dataBytes;
+            }
+            else
+            {
+                Debug.LogError("未知类型: " + encodingStr);
+            }
+            res.dataStr = String.Empty;
+            QGCallBackManager.InvokeResponseCallback<ReadFileResponse>(JsonUtility.ToJson(res));
+        }
+
 
         #endregion
 
         #region 追加文件
 
-        public void AppendFile()
+        public void AppendFile(string filePath, object param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGAppendFile();
+            var result = ProcessFile(param);
+            if (result.encodingStr == "utf8" || result.encodingStr == "binary")
+            {
+                QGAppendFile(filePath, result.fileParamStr, result.encodingStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+            }
         }
 
+        public bool AppendFileSync(string filePath, object param, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            var result = ProcessFile(param);
+            if (result.encodingStr == "utf8" || result.encodingStr == "binary")
+            {
+                return QGAppendFileSync(filePath, result.fileParamStr, result.encodingStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            }
+            return false;
+        }
+
+        private (string fileParamStr, string encodingStr) ProcessFile(object param)
+        {
+            string encoding = "";
+            string fileParam = "";
+
+            if (param is string strParam)
+            {
+                encoding = "utf8";
+                fileParam = strParam;
+            }
+            else if (param is byte[] byteParam)
+            {
+                encoding = "binary";
+                fileParam = string.Join(",", byteParam);
+            }
+            else
+            {
+                Debug.LogError("未知类型: " + param.GetType());
+            }
+            return (fileParam, encoding);
+        }
         #endregion
 
         #region 复制文件
 
-        public void CopyFile()
+        public void CopyFile(string srcPath, string destPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGCopyFile();
+            QGCopyFile(srcPath, destPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public bool CopyFileSync(string srcPath, string destPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGCopyFileSync(srcPath, destPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
         #endregion
 
         #region 删除文件
 
-        public void RemoveSavedFile()
+        public void RemoveSavedFile(string filePath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGRemoveSavedFile();
+            QGRemoveSavedFile(filePath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
         #endregion
 
         #region 获取文件信息
 
-        public void Stat()
+        StatResponse statResponse = new StatResponse();
+        public void Stat(string path, Action<StatResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGStat();
+            QGStat(path, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
+        public StatResponse StatSync(string path, bool recursive, Action<StatResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {   
+            statResponse = null;
+            string recursiveStr = recursive ? "true" : "false";
+            QGStatSync(path, recursiveStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            return statResponse;
+        }
+
+        public void OnStatSuccessCallBack(string msg)
+        {
+            StatResponse res = JsonUtility.FromJson<StatResponse>(msg);
+            statResponse = res;
+            QGCallBackManager.InvokeResponseCallback<StatResponse>(JsonUtility.ToJson(res));
+        }
         #endregion
 
         #region 解压文件
 
-        public void Unzip()
+        public void Unzip(string zipFilePath, string targetPath, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGUnzip();
+            QGUnzip(zipFilePath, targetPath, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
         #endregion
@@ -314,8 +507,7 @@ namespace QGMiniGame
 
         public void GetFileInfo(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            QGGetFileInfo(filename, QGCallBackManager.Add(successCallback),
-            QGCallBackManager.Add(failCallback));
+            QGGetFileInfo(filename, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
         #endregion
@@ -324,6 +516,12 @@ namespace QGMiniGame
 
         public QGAudioPlayer PlayAudio(AudioParam param)
         {
+            string audioUrl = param.url;
+            bool containsHttp = audioUrl.Contains("http");
+            if (!containsHttp)
+            {
+                param.url = "qgfile://usr" + audioUrl;
+            }
             var playerId = QGCallBackManager.getKey();
             Debug.Log("playerId: " + playerId);
             QGAudioPlayer ap = new QGAudioPlayer(playerId);
@@ -1138,6 +1336,17 @@ namespace QGMiniGame
             stopDeviceMotionListeningFail(msg);
         }
 
+        //文件类
+        public void Access(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
+        {
+            QGAccess(filename, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
+        }
+
+        public bool AccessSync(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            return QGAccessSync(filename, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
 
@@ -1252,43 +1461,71 @@ namespace QGMiniGame
         private static extern void QGHideKeyboard();
 
         [DllImport("__Internal")]
-        private static extern void QGMkdir();
+        private static extern void QGMkdir(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGRmdir();
+        private static extern bool QGMkdirSync(string a, string b, string c, string d);
+
+        [DllImport("__Internal")]
+        private static extern void QGRmdir(string a, string b, string c, string d, string e);
+
+        [DllImport("__Internal")]
+        private static extern bool QGRmdirSync(string a, string b, string c, string d);
+
+        [DllImport("__Internal")]
+        private static extern void QGUnlink(string a, string b, string c, string d);
+
+        [DllImport("__Internal")]
+        private static extern bool QGUnlinkSync(string a, string b, string c);
 
         [DllImport("__Internal")]
         private static extern void QGIsExist();
 
         [DllImport("__Internal")]
-        private static extern void QGRename();
+        private static extern void QGRename(string a, string b, string c, string d, string e);
 
         [DllImport("__Internal")]
-        private static extern void QGSaveFile();
+        private static extern bool QGRenameSync(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGReadDir();
+        private static extern void QGReadDir(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern string QGReadDirSync(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGWriteFile(string a, string b, string c, string d, string e, string f, string g);
 
         [DllImport("__Internal")]
-        private static extern void QGWriteFile();
+        private static extern bool QGWriteFileSync(string a, string b, string c, string d, string e, string f);
+        [DllImport("__Internal")]
+        private static extern void QGReadFile(string a, string b, string c, string d, string e);
+        [DllImport("__Internal")]
+        private static extern string QGReadFileSync(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern void QGAppendFile(string a, string b, string c, string d, string e, string f);
+        [DllImport("__Internal")]
+        private static extern bool QGAppendFileSync(string a, string b, string c, string d, string e);
 
         [DllImport("__Internal")]
-        private static extern void QGReadFile();
+        private static extern void QGCopyFile(string a, string b, string c, string d, string e);
+        [DllImport("__Internal")]
+        private static extern bool QGCopyFileSync(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGAppendFile();
+        private static extern void QGSaveFile(string a, string b, string c, string d, string e);
+        [DllImport("__Internal")]
+        private static extern string QGSaveFileSync(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGCopyFile();
+        private static extern void QGRemoveSavedFile(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGRemoveSavedFile();
+        private static extern void QGStat(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGStat();
+        private static extern void QGStatSync(string a, string b, string c, string d);
 
         [DllImport("__Internal")]
-        private static extern void QGUnzip();
+        private static extern void QGUnzip(string a, string b, string c, string d, string e);
 
         [DllImport("__Internal")]
         private static extern void QGGetFileInfo(string a, string b, string c);
@@ -1396,5 +1633,9 @@ namespace QGMiniGame
         private static extern void QGStartCompass(string a, string b, string c);
         [DllImport("__Internal")]
         private static extern void QGStopCompass(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGAccess(string a, string b, string c, string d);
+        [DllImport("__Internal")]
+        private static extern bool QGAccessSync(string a, string b, string c);
     }
 }

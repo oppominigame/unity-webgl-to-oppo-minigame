@@ -461,4 +461,57 @@ namespace QGMiniGame
         public float beta;
         public float gamma;
     }
+
+    [Serializable]
+    public class ARPlaneParam
+    {
+        public string projectionMatrix;
+        public string viewMatrix;
+        public string modelMatrix;
+        public string modelViewMatrix;
+        public string modelViewProjectionMatrix;
+        public string planeAngleUvMatrix;
+        public string normalVector;
+        public string msg;
+    }
+
+    [Serializable]
+    public class ARPlaneData
+    {
+        public float[] projectionMatrix = new float[] { }; //投影矩阵(摄像头)
+        public float[] viewMatrix = new float[] { };       //视图矩阵(摄像头)
+        public float[] modelMatrix = new float[] { };      //模型矩阵
+        public float[] modelViewMatrix = new float[] { };  //模型视图矩阵
+        public float[] modelViewProjectionMatrix = new float[] { }; //模型视图投影矩阵
+        public float[] planeAngleUvMatrix = new float[] { };  //平面角矩阵
+        public float[] normalVector = new float[] { }; //向量矩阵
+        public string msg = ""; //响应消息
+    }
+
+    [Serializable]
+    public class ReadFileResponse : QGBaseResponse
+    {
+        public string encoding;     //读取文件编码
+        public string dataStr;      //读取文件字符串
+        public string dataUtf8;     //读取文件UTF8
+        public byte[] dataBytes;    //读取文件字节
+    }
+
+    [Serializable]
+    public class ReadDirResponse : QGBaseResponse
+    {
+        public string filesStr; //文件列表字符串
+        public string[] files;  //文件列表字符串数组
+    }
+
+        [Serializable]
+    public class StatResponse : QGBaseResponse
+    {
+        public int mode; //文件 mode
+        public int size; //文件大小
+        public int lastAccessedTime; //最后一次读取的时间
+        public int lastModifiedTime; //最后一次修改时间
+        public bool isDirectory; //判断当前文件是否一个目录
+        public bool isFile; //判断当前文件是否一个普通文件
+    }
 }

@@ -12,16 +12,21 @@ namespace QGMiniGame
         static bool isGetARCameraData = false;//已获取相机数据?
         static bool isGetARCameraYuvData = false;//已获取Yuv相机数据?
         static bool isGetARPostData = false;//已获取位姿数据?
+        static bool isGetARPlaneData = false;//已获取平面检测数据?
+        static bool isGetARPlaneInfo = false;//已转换平面检测数据?
         static bool isGetDeviceMotionData = false;//已获取设备方向数据?
         public delegate void CameraImageCallback(IntPtr ptr, int length, int width, int height);
         public delegate void CameraImageYuvCallback(IntPtr ptr, int length);
         //public delegate void CameraArPoseCallback(IntPtr ptr, int modelMatrixArrayLen);
         public delegate void CameraArPoseCallback(string posStr, string rotStr);
+        public delegate void CameraArPlaneCallback(string projectionMatrix, string viewMatrix, string modelMatrix, string modelViewMatrix, string modelViewProjectionMatrix, string planeAngleUvMatrix, string normalVector, string msg);
         public delegate void DeviceMotionChangeCallback(string alpha, string beta, string gamma);//设备方向
         public static ARCameraParam CameraParam = new ARCameraParam();
         public static ARCameraYuvParam CameraYuvParam = new ARCameraYuvParam();
         public static ARPostParam PostParam = new ARPostParam();
+        public static ARPlaneParam PlaneParam = new ARPlaneParam();
         public static ARPostData PostData = new ARPostData();
+        public static ARPlaneData PlaneData = new ARPlaneData();
         public static DeviceMotionChangeParam deviceMotionChangeParam = new DeviceMotionChangeParam();
         [DllImport("__Internal")]
         public static extern void QGStartARCamera(CameraImageCallback callback);
@@ -39,6 +44,10 @@ namespace QGMiniGame
         public static extern void QGCreateOppoARPose(CameraArPoseCallback cameraArPoseCallback);
         [DllImport("__Internal")]
         public static extern void QGRequireARPose();
+        [DllImport("__Internal")]
+        public static extern void QGCreateOppoARPlane(CameraArPlaneCallback cameraArPlaneCallback);
+        [DllImport("__Internal")]
+        public static extern void QGRequireARPlane();
         [DllImport("__Internal")]
         private static extern void QGStartDeviceMotionListening(string interval);
         [DllImport("__Internal")]
@@ -78,7 +87,6 @@ namespace QGMiniGame
             isGetARPostData = true;
         }
         */
-
         [MonoPInvokeCallback(typeof(Action<string, string>))]
         public static void OnARPostCallback(string posStr, string rotStr)
         {
@@ -86,6 +94,21 @@ namespace QGMiniGame
             PostParam.aRRotStr = rotStr;
             isGetARPostData = true;
         }
+
+        [MonoPInvokeCallback(typeof(Action<string, string, string, string, string, string, string, string>))]
+        public static void OnARPlaneCallback(string projectionMatrix, string viewMatrix, string modelMatrix, string modelViewMatrix, string modelViewProjectionMatrix, string planeAngleUvMatrix, string normalVector, string msg)
+        {
+            PlaneParam.projectionMatrix = projectionMatrix;
+            PlaneParam.viewMatrix = viewMatrix;
+            PlaneParam.modelMatrix = modelMatrix;
+            PlaneParam.modelViewMatrix = modelViewMatrix;
+            PlaneParam.modelViewProjectionMatrix = modelViewProjectionMatrix;
+            PlaneParam.planeAngleUvMatrix = planeAngleUvMatrix;
+            PlaneParam.normalVector = normalVector;
+            PlaneParam.msg = msg;
+            isGetARPlaneData = true;
+        }
+
 
         [MonoPInvokeCallback(typeof(Action<string, string, string>))]
         public static void OnDeviceMotionChangeCallback(string alpha, string beta, string gamma)
@@ -151,6 +174,11 @@ namespace QGMiniGame
         public static void CreateOppoARPose()
         {
             QGCreateOppoARPose(OnARPostCallback);
+        }
+
+        public static void CreateOppoARPlane()
+        {
+            QGCreateOppoARPlane(OnARPlaneCallback);
         }
 
         //渲染相机到RawImage 每n帧执行一次 (RawImage,成功回调)
@@ -271,6 +299,44 @@ namespace QGMiniGame
             return PostData;
         }
 
+        //获取平面检测数据 每n帧执行一次 (成功回调)
+        public static ARPlaneData GetRequireARPlane(Action successCallback)
+        {
+            QGRequireARPlane();
+            isGetARPlaneInfo = false;
+            if (!isGetARPlaneData)
+                return PlaneData;
+
+            PlaneData.projectionMatrix = ParseFloatArray(PlaneParam.projectionMatrix);
+            PlaneData.viewMatrix = ParseFloatArray(PlaneParam.viewMatrix);
+            PlaneData.modelMatrix = ParseFloatArray(PlaneParam.modelMatrix);
+            PlaneData.modelViewMatrix = ParseFloatArray(PlaneParam.modelViewMatrix);
+            PlaneData.modelViewProjectionMatrix = ParseFloatArray(PlaneParam.modelViewProjectionMatrix);
+            PlaneData.planeAngleUvMatrix = ParseFloatArray(PlaneParam.planeAngleUvMatrix);
+            PlaneData.normalVector = ParseFloatArray(PlaneParam.normalVector);
+            PlaneData.msg = PlaneParam.msg;
+
+            successCallback?.Invoke(); // 使用 null 条件运算符
+
+            isGetARPlaneData = false;
+            isGetARPlaneInfo = true;
+            return PlaneData;
+        }
+
+        // 辅助方法：将以逗号分隔的字符串解析为 float 数组
+        private static float[] ParseFloatArray(string input)
+        {
+            string[] stringArray = input.Split(',');
+            float[] floatArray = new float[stringArray.Length];
+
+            for (int i = 0; i < stringArray.Length; i++)
+            {
+                floatArray[i] = float.Parse(stringArray[i]);
+            }
+
+            return floatArray;
+        }
+
         //已获取相机数据?
         public static bool IsGetARCameraData()
         {
@@ -281,6 +347,12 @@ namespace QGMiniGame
         public static bool IsGetARPostData()
         {
             return isGetARPostData;
+        }
+
+        //已获取平面检测数据?
+        public static bool IsGetARPlaneInfo()
+        {
+            return isGetARPlaneInfo;
         }
 
         public static float[] ConvertByteArrayToFloatArray(byte[] bytes)

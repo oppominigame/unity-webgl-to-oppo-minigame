@@ -36,8 +36,8 @@ namespace QGMiniGame
         private const string UPDATE_LOG_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/CHANGELOG.md";
         private const string CONTACT_US_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/doc/IssueAndContact.md.md";
         private const string OPENSSL_EXE_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/hall/example/20240918/assets/OpenSSL-Win64.zip";
-        private static string OPENSSL_EXE_UNZIP_PATH = $"{Application.temporaryCachePath}/OpenSSL-Win64";
-        private static string OPENSSL_EXE_LOCAL_PATH = $"{OPENSSL_EXE_UNZIP_PATH}/bin/openssl.exe";
+        private static string OPENSSL_EXE_UNZIP_PATH = "";
+        private static string OPENSSL_EXE_LOCAL_PATH = "";
         private static string GenerateCertificatePath = "";     //证书路径
         private static bool isHaveCertificatePath = false;      //是否导入证书
         private static bool isInstallOpenssl = false;           //是否安装openssl(全局)
@@ -49,6 +49,11 @@ namespace QGMiniGame
 
         private static BuildEditorWindow instance;
 
+        private void OnEnable()
+        {
+            OPENSSL_EXE_UNZIP_PATH = $"{Application.temporaryCachePath}/OpenSSL-Win64";
+            OPENSSL_EXE_LOCAL_PATH = $"{OPENSSL_EXE_UNZIP_PATH}/bin/openssl.exe";
+        }
         private static bool HasOpenInstances
 #if UNITY_2019_3_OR_NEWER
             => HasOpenInstances<BuildEditorWindow>();
@@ -1156,7 +1161,7 @@ namespace QGMiniGame
                 DirtySaveField(() =>
                 {
                     // 游戏方向
-                    fundamentals.orientation = EditorGUILayout.IntPopup("游戏方向", fundamentals.orientation, new[] { "Portrait", "Landscape" }, new[] { 0, 1 });
+                    fundamentals.orientation = EditorGUILayout.IntPopup("游戏方向", fundamentals.orientation, new[] { "Portrait", "Landscape", "LandscapeLeft", "LandscapeRight" }, new[] { 0, 1, 2, 3 });
                 });
                 // 游戏版本号
                 DirtySaveField(() =>
@@ -1380,7 +1385,7 @@ namespace QGMiniGame
         private async void SDKUpdateProcess()
         {
             // 弹窗让用户确认升级
-            var option = EditorUtility.DisplayDialogComplex("提示", $"是否确认安装新版本 {latestSDKVersion}", "确认", "取消", "查看更新日志");
+            var option = EditorUtility.DisplayDialogComplex("提示", $"是否确认安装SDK最新版本 {latestSDKVersion}", "确认", "取消", "查看更新日志");
             switch (option)
             {
                 case 0:
@@ -1468,6 +1473,10 @@ namespace QGMiniGame
             {
                 MiniLinkButton("升级版本", async () =>
                 {
+                    if (!EditorUtility.DisplayDialog("提示", $"是否确认安装小游戏打包工具最新版本 {latestBuildToolVersion}", "确认", "取消"))
+                    {
+                        return;
+                    }
                     if (isUpgradingQGBuildTool) return;
                     isUpgradingQGBuildTool = true;
                     var title = "安装小游戏打包工具";
@@ -1628,6 +1637,8 @@ namespace QGMiniGame
                         var webGLExportPath = Path.Combine(exportPath, WEBGL_BUILD_DIR);
                         // 进行符合小游戏规范的项目设置
                         QGGameTools.SetPlayer();
+                        // 获取当前是否使用WEBGL2.0
+                        QGGameTools.GetUserWebGLVersion();
                         // 删除之前构建的目录
                         QGGameTools.DelectDir(webGLExportPath);
                         // 构建导出 WebGL 工程

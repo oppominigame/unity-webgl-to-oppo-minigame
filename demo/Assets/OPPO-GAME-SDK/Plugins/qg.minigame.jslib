@@ -38,6 +38,8 @@ var QgGameBridge = {
     cameraObjYuv: null,
     cameraImageYuvCallback: null,
     cameraYuvData: null,
+    cameraArPlaneCallback: null,
+    cameraArPlane: null,
   },
 
   QGLog: function () {
@@ -565,37 +567,263 @@ var QgGameBridge = {
     qg.hideKeyboard();
   },
 
-  QGMkdir: function () {
+  QGMkdir: function (dirPath, success, fail, complete) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localDir = qgDir + UTF8ToString(dirPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
     fs.mkdir({
       dirPath: localDir,
       encoding: "utf8",
-      success: function () {
-        console.log("???????" + localDir);
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("mkdir success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log("???????" + localDir + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("mkdir fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("mkdir complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
 
-  QGRmdir: function () {
+  QGMkdirSync: function (dirPath, recursivebl, success, fail) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localDir = qgDir + UTF8ToString(dirPath);
+    var recursive = UTF8ToString(recursivebl) === "true";
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      fs.mkdirSync(localDir, recursive);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("mkdirSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("mkdirSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return false;
+    }
+  },
+
+  QGRmdir: function (dirPath, recursivebl, success, fail, complete) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localDir = qgDir + UTF8ToString(dirPath);
+    var recursive = UTF8ToString(recursivebl) === "true";
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
     fs.rmdir({
       dirPath: localDir,
-      success: function () {
-        console.log("???????" + localDir);
+      recursive: recursive,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("rmdir success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log("???????" + localDir + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("rmdir fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("rmdir complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
+  },
+
+  QGRmdirSync: function (dirPath, recursivebl, success, fail) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localDir = qgDir + UTF8ToString(dirPath);
+    var recursive = UTF8ToString(recursivebl) === "true";
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      fs.rmdirSync(localDir, recursive);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("rmdirSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("rmdirSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return false;
+    }
+  },
+
+  QGUnlink: function (dirPath, success, fail, complete) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localDir = qgDir + UTF8ToString(dirPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    console.log("QGUnlink dirPath::: ", localDir);
+    fs.unlink({
+      filePath: localDir,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("unlink success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("unlink fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("unlink complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGUnlinkSync: function (dirPath, success, fail) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localDir = qgDir + UTF8ToString(dirPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    console.log("QGUnlinkSync dirPath::: ", localDir);
+    try {
+      fs.unlinkSync(localDir);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("unlinkSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("unlinkSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return false;
+    }
   },
 
   QGIsExist: function () {
@@ -619,176 +847,947 @@ var QgGameBridge = {
     }
   },
 
-  QGRename: function () {
+  // QGRename: function () {
+  //   var qgDir = qg.env.USER_DATA_PATH;
+  //   var localFilePath = qgDir + "/my/file.txt";
+  //   var localDir = qgDir + "/my";
+  //   var fs = qg.getFileSystemManager();
+  //   fs.rename({
+  //     oldPath: localDir,
+  //     newPath: qgDir + "/new/" + Math.random(),
+  //     success: function () {
+  //       console.log("????????" + localDir + "=>" + qgDir + "/new");
+  //     },
+  //     fail: function (res) {
+  //       console.log("????????" + localDir + "?" + JSON.stringify(res));
+  //     },
+  //   });
+  // },
+
+  // QGSaveFile: function () {
+  //   var qgDir = qg.env.USER_DATA_PATH;
+  //   var localFilePath = qgDir + "/my/file.txt";
+  //   var localDir = qgDir + "/my";
+  //   var fs = qg.getFileSystemManager();
+  //   qg.chooseImage({
+  //     count: 1,
+  //     sizeType: ["original"],
+  //     sourceType: ["album"],
+  //     success: function (imgRes) {
+  //       fs.saveFile({
+  //         filePath: localFilePath,
+  //         tempFilePath: imgRes.tempFilePaths[0],
+  //         success: function (res) {
+  //           console.log("?????: " + res.savedFilePath);
+  //         },
+  //         fail: function (res) {
+  //           console.log("error?" + JSON.stringify(res));
+  //         },
+  //       });
+  //     },
+  //     fail: function (e) {
+  //       console.log("???????" + JSON.stringify(e));
+  //     },
+  //   });
+  // },
+
+  QGRename: function (oldPath, newPath, success, fail, complete) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localOldPath = qgDir + UTF8ToString(oldPath);
+    var localNewPath = qgDir + UTF8ToString(newPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
     fs.rename({
-      oldPath: localDir,
-      newPath: qgDir + "/new/" + Math.random(),
-      success: function () {
-        console.log("????????" + localDir + "=>" + qgDir + "/new");
-      },
-      fail: function (res) {
-        console.log("????????" + localDir + "?" + JSON.stringify(res));
-      },
-    });
-  },
-
-  QGSaveFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
-    var fs = qg.getFileSystemManager();
-    qg.chooseImage({
-      count: 1,
-      sizeType: ["original"],
-      sourceType: ["album"],
-      success: function (imgRes) {
-        fs.saveFile({
-          filePath: localFilePath,
-          tempFilePath: imgRes.tempFilePaths[0],
-          success: function (res) {
-            console.log("?????: " + res.savedFilePath);
-          },
-          fail: function (res) {
-            console.log("error?" + JSON.stringify(res));
-          },
-        });
-      },
-      fail: function (e) {
-        console.log("???????" + JSON.stringify(e));
-      },
-    });
-  },
-
-  QGReadDir: function () {
-    var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
-    var fs = qg.getFileSystemManager();
-    fs.readdir({
-      dirPath: localDir,
+      oldPath: localOldPath,
+      newPath: localNewPath,
       success: function (res) {
-        console.log("success?" + localDir + "?" + res.files);
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("rename success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log(
-          "error?" +
-            localFilePath +
-            "=>" +
-            qgDir +
-            "/newPath.txt?" +
-            JSON.stringify(res)
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("rename fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("rename complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
         );
       },
     });
   },
 
-  QGWriteFile: function () {
+  QGRenameSync: function (oldPath, newPath, success, fail) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localOldPath = qgDir + UTF8ToString(oldPath);
+    var localNewPath = qgDir + UTF8ToString(newPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
     var fs = qg.getFileSystemManager();
-    var data = "Hello world.";
-    var encoding = "utf8";
+    try {
+      fs.renameSync(localOldPath, localNewPath);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("renameSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("renameSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return false;
+    }
+  },
+
+  // QGReadDir: function () {
+  //   var qgDir = qg.env.USER_DATA_PATH;
+  //   var localFilePath = qgDir + "/my/file.txt";
+  //   var localDir = qgDir + "/my";
+  //   var fs = qg.getFileSystemManager();
+  //   fs.readdir({
+  //     dirPath: localDir,
+  //     success: function (res) {
+  //       console.log("success?" + localDir + "?" + res.files);
+  //     },
+  //     fail: function (res) {
+  //       console.log(
+  //         "error?" +
+  //           localFilePath +
+  //           "=>" +
+  //           qgDir +
+  //           "/newPath.txt?" +
+  //           JSON.stringify(res)
+  //       );
+  //     },
+  //   });
+  // },
+
+  QGReadDir: function (path, success, fail, complete) {
+    var localDirPath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    fs.readdir({
+      dirPath: localDirPath,
+      success: function (res) {
+        var files = res.files;
+        var filesStr = files.join(", ");
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+          filesStr: filesStr,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnReadDirSuccessCallBack",
+          json
+        );
+        console.log("readdir success:", json);
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("readdir fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("readdir complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGReadDirSync: function (path, success, fail) {
+    var localDirPath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      var res = fs.readdirSync(localDirPath);
+      var filesStr = res.join(", ");
+      console.log("readdirSync success:", res);
+      var json = JSON.stringify({
+        callbackId: successID,
+        errCode: res.errCode,
+        errMsg: res.errMsg,
+        filesStr: filesStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnReadDirSuccessCallBack",
+        json
+      );
+      var bufferSize = lengthBytesUTF8(filesStr) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(filesStr, buffer, bufferSize);
+      return buffer;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errCode: error.errCode,
+        errMsg: error.errMsg,
+      });
+      console.log("readdirSync fail: " + JSON.stringify(error));
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return null;
+    }
+  },
+
+  QGWriteFile: function (
+    path,
+    param,
+    paramEncoding,
+    appendbl,
+    success,
+    fail,
+    complete
+  ) {
+    var paramStr = UTF8ToString(param);
+    var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var encoding = UTF8ToString(paramEncoding);
+    var append = UTF8ToString(appendbl) === "true";
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    var FileData;
+    if (encoding === "binary") {
+      var uint8ArrayData = new Uint8Array(paramStr.split(",").map(Number));
+      FileData = uint8ArrayData.buffer;
+    } else if (encoding === "utf8") {
+      FileData = paramStr;
+    } else {
+      console.log(
+        "This data type is not supported, please pass in utf8 or binary"
+      );
+      return;
+    }
+
     fs.writeFile({
       filePath: localFilePath,
-      data: data,
+      data: FileData,
       encoding: encoding,
-      success: function () {
-        console.log("???????" + localFilePath);
+      append: append,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("writeFile success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log(JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("writeFile fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("writeFile complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
 
-  QGReadFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+  QGWriteFileSync: function (
+    path,
+    param,
+    paramEncoding,
+    appendbl,
+    success,
+    fail
+  ) {
+    var paramStr = UTF8ToString(param);
+    var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var encoding = UTF8ToString(paramEncoding);
+    var append = UTF8ToString(appendbl) === "true";
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
     var fs = qg.getFileSystemManager();
+    var FileData;
+    if (encoding === "binary") {
+      var uint8ArrayData = new Uint8Array(paramStr.split(",").map(Number));
+      FileData = uint8ArrayData.buffer;
+    } else if (encoding === "utf8") {
+      FileData = paramStr;
+    } else {
+      console.log(
+        "This data type is not supported, please pass in utf8 or binary"
+      );
+      return false;
+    }
+    try {
+      fs.writeFileSync(localFilePath, FileData, encoding, append);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("writeFileSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("writeFileSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return false;
+    }
+  },
+
+  QGReadFile: function (path, paramEncoding, success, fail, complete) {
+    var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var encoding = UTF8ToString(paramEncoding);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    if (encoding === "binary" || encoding === "utf8") {
+    } else {
+      console.log(
+        "This ReadFile data type is not supported, please pass in utf8 or binary"
+      );
+      return;
+    }
+
     fs.readFile({
       filePath: localFilePath,
-      data: "Hello world.",
-      encoding: "utf8",
+      encoding: encoding,
       success: function (res) {
-        console.log("???????" + localFilePath + "?" + res.data);
+        var str;
+        if (encoding === "utf8") {
+          str = res.data;
+        } else if (encoding === "binary") {
+          var uint8Array = new Uint8Array(res.data);
+          str = uint8Array.join(", ");
+        }
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+          encoding: encoding,
+          dataStr: str,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnReadFileSuccessCallBack",
+          json
+        );
+        console.log("readFile success:", json);
       },
-      fail: function (res) {
-        console.log("???????" + localFilePath + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("readFile fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("readFile complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
 
-  QGAppendFile: function () {
-    var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+  QGReadFileSync: function (path, paramEncoding, success, fail) {
+    var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var encoding = UTF8ToString(paramEncoding);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
     var fs = qg.getFileSystemManager();
+    if (encoding === "binary" || encoding === "utf8") {
+    } else {
+      console.log(
+        "This ReadFileSync data type is not supported, please pass in utf8 or binary"
+      );
+      return null;
+    }
+    try {
+      var res = fs.readFileSync(localFilePath, encoding);
+      console.log("readFileSync success:", res);
+      var str;
+      if (encoding === "utf8") {
+        str = res;
+      } else if (encoding === "binary") {
+        var uint8Array = new Uint8Array(res);
+        str = uint8Array.join(", ");
+      }
+      var json = JSON.stringify({
+        callbackId: successID,
+        errCode: res.errCode,
+        errMsg: res.errMsg,
+        encoding: encoding,
+        dataStr: str,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnReadFileSuccessCallBack",
+        json
+      );
+      var bufferSize = lengthBytesUTF8(str) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(str, buffer, bufferSize);
+      return buffer;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errCode: error.errCode,
+        errMsg: error.errMsg,
+      });
+      console.log("readFileSync fail: " + JSON.stringify(error));
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return null;
+    }
+  },
+
+  QGAppendFile: function (path, param, paramEncoding, success, fail, complete) {
+    var paramStr = UTF8ToString(param);
+    var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var encoding = UTF8ToString(paramEncoding);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    var FileData;
+    if (encoding === "binary") {
+      var uint8ArrayData = new Uint8Array(paramStr.split(",").map(Number));
+      FileData = uint8ArrayData.buffer;
+    } else if (encoding === "utf8") {
+      FileData = paramStr;
+    } else {
+      console.log(
+        "This data type is not supported, please pass in utf8 or binary"
+      );
+      return;
+    }
     fs.appendFile({
       filePath: localFilePath,
-      data: "Hello world.",
-      encoding: "utf8",
-      success: function () {
-        console.log("???????" + localFilePath);
+      data: FileData,
+      encoding: encoding,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("appendFile success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log("???????" + localFilePath + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("appendFile fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("appendFile complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
 
-  QGCopyFile: function () {
+  QGAppendFileSync: function (path, param, paramEncoding, success, fail) {
+    var paramStr = UTF8ToString(param);
+    var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var encoding = UTF8ToString(paramEncoding);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    var FileData;
+    if (encoding === "binary") {
+      var uint8ArrayData = new Uint8Array(paramStr.split(",").map(Number));
+      FileData = uint8ArrayData.buffer;
+    } else if (encoding === "utf8") {
+      FileData = paramStr;
+    } else {
+      console.log(
+        "This data type is not supported, please pass in utf8 or binary"
+      );
+      return false;
+    }
+    try {
+      fs.appendFileSync(localFilePath, FileData, encoding);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("appendFileSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("appendFileSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return;
+    }
+  },
+
+  QGCopyFile: function (srcPath, destPath, success, fail, complete) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localSrcPath = qgDir + UTF8ToString(srcPath);
+    var localDestPath = qgDir + UTF8ToString(destPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
     fs.copyFile({
-      srcPath: localFilePath,
-      destPath: qgDir + "/copy.txt",
-      success: function () {
-        console.log("???????" + localFilePath + "=>" + qgDir + "/copy.txt");
+      srcPath: localSrcPath,
+      destPath: localDestPath,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("copyFile success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log("???????" + localFilePath + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("copyFile fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("copyFile complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
 
-  QGRemoveSavedFile: function () {
+  QGCopyFileSync: function (srcPath, destPath, success, fail) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localSrcPath = qgDir + UTF8ToString(srcPath);
+    var localDestPath = qgDir + UTF8ToString(destPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      fs.copyFileSync(localSrcPath, localDestPath);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      console.log("copyFileSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("copyFileSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return false;
+    }
+  },
+
+  QGSaveFile: function (tempFilePath, filePath, success, fail, complete) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localTempFilePath = qgDir + UTF8ToString(tempFilePath);
+    var localFilePath = qgDir + UTF8ToString(filePath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    fs.saveFile({
+      tempFilePath: localTempFilePath,
+      filePath: localFilePath,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.savedFilePath,
+        });
+        console.log("saveFile success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("saveFile fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("saveFile complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGSaveFileSync: function (tempFilePath, filePath, success, fail) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localTempFilePath = qgDir + UTF8ToString(tempFilePath);
+    var localFilePath = qgDir + UTF8ToString(filePath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      var savedFilePath = fs.saveFileSync(localTempFilePath, localFilePath);
+      var json = JSON.stringify({
+        callbackId: successID,
+        errMsg: savedFilePath,
+      });
+      console.log("saveFileSync success");
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      var bufferSize = lengthBytesUTF8(savedFilePath) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(savedFilePath, buffer, bufferSize);
+      return buffer;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errMsg: error,
+      });
+      console.log("saveFileSync fail: " + error);
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return null;
+    }
+  },
+
+  QGRemoveSavedFile: function (filePath, success, fail, complete) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localFilePath = qgDir + UTF8ToString(filePath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
     fs.removeSavedFile({
       filePath: localFilePath,
-      success: function () {
-        console.log("???????" + localFilePath);
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("removeSavedFile success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log("????????" + localFilePath + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("removeSavedFile fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("removeSavedFile complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
 
-  QGStat: function () {
+  QGStat: function (path, success, fail, complete) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localPath = qgDir + UTF8ToString(path);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
     fs.stat({
-      path: localFilePath,
+      path: localPath,
       success: function (res) {
-        console.log("????????" + localFilePath + "?" + JSON.stringify(res));
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+          mode: res.stat.mode,
+          size: res.stat.size,
+          lastAccessedTime: res.stat.lastAccessedTime,
+          lastModifiedTime: res.stat.lastModifiedTime,
+          isDirectory : res.stat.isDirectory(),
+          isFile : res.stat.isFile(),
+        });
+        console.log("stat success res: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnStatSuccessCallBack",
+          json
+        );
+        console.log("stat success json:", json);
       },
-      fail: function (res) {
-        console.log("????????" + localFilePath + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("stat fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("stat complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
+  },
+
+  QGStatSync: function (path, recursivebl, success, fail) {
+    var localPath = qg.env.USER_DATA_PATH + UTF8ToString(path);
+    var recursive = UTF8ToString(recursivebl) === "true";
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      console.log("statSync -js localPath: ",localPath,",recursive: ",recursive)
+      var res = fs.statSync(localPath, recursive);
+      console.log("statSync -js success res: " + JSON.stringify(res));
+        var json = JSON.stringify({
+          callbackId: successID,
+          mode: res.mode,
+          size: res.size,
+          lastAccessedTime: res.lastAccessedTime,
+          lastModifiedTime: res.lastModifiedTime,
+          isDirectory : res.isDirectory(),
+          isFile : res.isFile(),
+        });
+        
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "OnStatSuccessCallBack",
+          json
+        );
+        console.log("statSync success json:", json);
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+        errCode: error.errCode,
+        errMsg: error.errMsg,
+      });
+      console.log("statSync fail: " + JSON.stringify(error));
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      return null;
+    }
   },
 
   QGUploadFile: function (param, success, fail) {
@@ -866,27 +1865,55 @@ var QgGameBridge = {
     });
   },
 
-  QGUnzip: function () {
+  QGUnzip: function (zipFilePath, targetPath, success, fail, complete) {
     var qgDir = qg.env.USER_DATA_PATH;
-    var localFilePath = qgDir + "/my/file.txt";
-    var localDir = qgDir + "/my";
+    var localZipFilePath = qgDir + UTF8ToString(zipFilePath);
+    var localTargetPath = qgDir + UTF8ToString(targetPath);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
     var fs = qg.getFileSystemManager();
-    var tempFilePath = qg.env.USER_DATA_PATH + "/test.zip";
-    var url =
-      "https://cdofs.oppomobile.com/cdo-activity/static/201905/08/da1f253b1854d1c6353ec79c3e3e8145.zip";
-    qg.downloadFile({
-      // TODO: ??????????
-      url: url,
-      filePath: tempFilePath,
-    });
     fs.unzip({
-      zipFilePath: tempFilePath,
-      targetPath: qgDir,
+      zipFilePath: localZipFilePath,
+      targetPath: localTargetPath,
       success: function (res) {
-        console.log("???????" + qgDir);
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("unzip success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
-      fail: function (res) {
-        console.log("???????" + qgDir + "?" + JSON.stringify(res));
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("unzip fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("unzip complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
       },
     });
   },
@@ -903,14 +1930,12 @@ var QgGameBridge = {
       success: function (res) {
         var json = JSON.stringify({
           callbackId: successID,
+          errMsg: res.size,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
           CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
           json
-        );
-        console.log(
-          "success: " + localFilePath + "?" + "?????" + res.size + "??"
         );
       },
       fail: function (err) {
@@ -926,6 +1951,7 @@ var QgGameBridge = {
       },
     });
   },
+
   QGCreateVideo: function (adId, param) {
     var paramStr = UTF8ToString(param);
     var paramData = JSON.parse(paramStr);
@@ -2605,10 +3631,7 @@ var QgGameBridge = {
     }
     var buffer = _malloc(dataLen);
     HEAPU8.set(dataView, buffer);
-    dynCall("vii", property.cameraImageYuvCallback, [
-      buffer,
-      dataLen,
-    ]);
+    dynCall("vii", property.cameraImageYuvCallback, [buffer, dataLen]);
     _free(buffer);
   },
 
@@ -2636,6 +3659,58 @@ var QgGameBridge = {
     var posString = allocateUTF8(posStr);
     var rotSring = allocateUTF8(rotStr);
     dynCall("vii", property.cameraArPoseCallback, [posString, rotSring]);
+  },
+
+  QGCreateOppoARPlane: function (ArPlaneCallback) {
+    qg.createARPlaneDetector()
+      .then(function (res) {
+        property.cameraArPlane = res;
+        console.log("createARPlaneDetector-js", JSON.stringify(res));
+      })
+      .catch(function (err) {});
+    property.cameraArPlaneCallback = ArPlaneCallback;
+  },
+
+  QGRequireARPlane: function () {
+    if (!property.cameraArPlaneCallback) {
+      return;
+    }
+    if (!property.cameraArPlane) {
+      return;
+    }
+
+    var projectionMatrixStr = property.cameraArPlane.projectionMatrix.join(",");
+    var viewMatrixStr = property.cameraArPlane.viewMatrix.join(",");
+    var modelMatrixStr = property.cameraArPlane.modelMatrix.join(",");
+    var modelViewMatrixStr = property.cameraArPlane.modelViewMatrix.join(",");
+    var modelViewProjectionMatrixStr =
+      property.cameraArPlane.modelViewProjectionMatrix.join(",");
+    var planeAngleUvMatrixStr =
+      property.cameraArPlane.planeAngleUvMatrix.join(",");
+    var normalVectorStr = property.cameraArPlane.normalVector.join(",");
+    var msgStr = property.cameraArPlane.msg;
+
+    var projectionMatrixString = allocateUTF8(projectionMatrixStr);
+    var viewMatrixString = allocateUTF8(viewMatrixStr);
+    var modelMatrixString = allocateUTF8(modelMatrixStr);
+    var modelViewMatrixString = allocateUTF8(modelViewMatrixStr);
+    var modelViewProjectionMatrixString = allocateUTF8(
+      modelViewProjectionMatrixStr
+    );
+    var planeAngleUvMatrixString = allocateUTF8(planeAngleUvMatrixStr);
+    var normalVectorString = allocateUTF8(normalVectorStr);
+    var msgString = allocateUTF8(msgStr);
+    property.cameraArPlane = null;
+    dynCall("viiiiiiii", property.cameraArPlaneCallback, [
+      projectionMatrixString,
+      viewMatrixString,
+      modelMatrixString,
+      modelViewMatrixString,
+      modelViewProjectionMatrixString,
+      planeAngleUvMatrixString,
+      normalVectorString,
+      msgString,
+    ]);
   },
 
   QGSetUserCloudStorage: function (param, success, fail, complete) {
@@ -3383,6 +4458,89 @@ var QgGameBridge = {
 
   QGOffDeviceMotionChange: function () {
     qg.offDeviceMotionChange();
+  },
+
+  QGAccess: function (filename, success, fail, complete) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localDir = qgDir + UTF8ToString(filename);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    var fs = qg.getFileSystemManager();
+    fs.access({
+      path: localDir,
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("access success: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      fail: function (err) {
+        var json = JSON.stringify({
+          callbackId: failID,
+          errCode: err.errCode,
+          errMsg: err.errMsg,
+        });
+        console.log("access fail: " + JSON.stringify(err));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+      complete: function (res) {
+        var json = JSON.stringify({
+          callbackId: completeID,
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+        });
+        console.log("access complete: " + JSON.stringify(res));
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGAccessSync: function (filename, success, fail) {
+    var qgDir = qg.env.USER_DATA_PATH;
+    var localDir = qgDir + UTF8ToString(filename);
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var fs = qg.getFileSystemManager();
+    try {
+      fs.accessSync(localDir);
+      var json = JSON.stringify({
+        callbackId: successID,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      console.log("accessSync success");
+      return true;
+    } catch (error) {
+      var json = JSON.stringify({
+        callbackId: failID,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+        json
+      );
+      console.log("accessSync fail: " + error);
+      return false;
+    }
   },
 };
 
