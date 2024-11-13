@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 using System;
 using System.Text;
+using AOT;
 
 namespace QGMiniGame
 {
@@ -49,20 +50,29 @@ namespace QGMiniGame
 
         #region 获取桌面图标是否创建
 
-        public void HasShortcutInstalled(Action<QGCommonResponse<QGHasShortcutInstalled>> successCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        public void HasShortcutInstalled(Action<QGHasShortcutInstalledBean> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGHasShortcutInstalled(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            QGHasShortcutInstalled(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
         #endregion
 
         // #region 创建桌面图标
 
-        public void InstallShortcut(Action<QGCommonResponse<QGHasShortcutInstalled>> successCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        public void InstallShortcut(Action<QGInstallShortcutBean> successCallback = null, Action<QGInstallShortcutBean> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGInstallShortcut(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+            QGInstallShortcut(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
+        public void HasShortcutInstalledCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGHasShortcutInstalledBean>(msg);
+        }
+
+        public void InstallShortcutCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGInstallShortcutBean>(msg);
+        }
         // #endregion
 
         #region 获取网络类型
@@ -331,75 +341,74 @@ namespace QGMiniGame
             }
             return false;
         }
-
-
         #endregion
 
         #region 读取文件
+        public static ReadFileParam readFileParam = new ReadFileParam();
+        public static ReadFileResponse readFileSyncResponse = new ReadFileResponse();
+        public static bool isReadFileParam = false;
+        public delegate void ReadFileUtf8Callback(string readFileUtf8);
+        public delegate void ReadFileByteArrayCallback(IntPtr ptr, int length);
+
+        [DllImport("__Internal")]
+        public static extern void QGReadFileUtf8(ReadFileUtf8Callback callback);
+
+        [DllImport("__Internal")]
+        public static extern void QGReadFileByteArray(ReadFileByteArrayCallback callback);
+
+        [MonoPInvokeCallback(typeof(ReadFileUtf8Callback))]
+        public static void OnReadFileUtf8Callback(string readFileUtf8)
+        {
+            readFileParam.readFileUtf8 = readFileUtf8;
+        }
+
+        [MonoPInvokeCallback(typeof(ReadFileByteArrayCallback))]
+        public static void OnReadFileByteArrayCallback(IntPtr ptr, int length)
+        {
+            readFileParam.ptr = ptr;
+            readFileParam.length = length;
+
+            byte[] managedArray = new byte[readFileParam.length];
+            Marshal.Copy(readFileParam.ptr, managedArray, 0, readFileParam.length);
+            readFileSyncResponse.dataBytes = managedArray;
+            Marshal.FreeHGlobal(readFileParam.ptr); // 释放内存
+            isReadFileParam = true;
+        }
 
         public void ReadFile(string filePath, string encoding, Action<ReadFileResponse> successCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
             QGReadFile(filePath, encoding, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback), QGCallBackManager.Add(completeCallback));
         }
 
-        ReadFileResponse readFileSyncResponse = new ReadFileResponse();
         public ReadFileResponse ReadFileSync(string filePath, string encoding, Action<ReadFileResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
-            string dataStr = QGReadFileSync(filePath, encoding, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
-            if (dataStr == null)
-            {
-                Debug.LogError("讀取失敗");
-                return null;
-            }
-            if (encoding == "utf8")
-            {
-                readFileSyncResponse.dataUtf8 = dataStr;
-            }
-            else if (encoding == "binary")
-            {
-                string[] stringBytes = dataStr.Split(',');
-                byte[] dataBytes = new byte[stringBytes.Length];
-                for (int i = 0; i < stringBytes.Length; i++)
-                {
-                    dataBytes[i] = Convert.ToByte(stringBytes[i]);
-                }
-                readFileSyncResponse.dataBytes = dataBytes;
-            }
-            else
-            {
-                Debug.LogError("未知类型: " + encoding);
-                return null;
-            }
-            readFileSyncResponse.encoding = encoding;
+            QGReadFileSync(filePath, encoding, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
             return readFileSyncResponse;
         }
         public void OnReadFileSuccessCallBack(string msg)
         {
-            ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(msg);
-            string dataStr = res.dataStr;
-            string encodingStr = res.encoding;
+            readFileSyncResponse = JsonUtility.FromJson<ReadFileResponse>(msg);
+
+            string encodingStr = readFileSyncResponse.encoding;
             if (encodingStr == "utf8")
             {
-                res.dataUtf8 = dataStr;
+                QGReadFileUtf8(OnReadFileUtf8Callback);
+                readFileSyncResponse.dataUtf8 = readFileParam.readFileUtf8;
             }
             else if (encodingStr == "binary")
             {
-                string[] stringBytes = dataStr.Split(',');
-                byte[] dataBytes = new byte[stringBytes.Length];
-                for (int i = 0; i < stringBytes.Length; i++)
+                QGReadFileByteArray(OnReadFileByteArrayCallback);
+                if (isReadFileParam)
                 {
-                    dataBytes[i] = Convert.ToByte(stringBytes[i]);
+                    isReadFileParam = false;
                 }
-                res.dataBytes = dataBytes;
             }
             else
             {
                 Debug.LogError("未知类型: " + encodingStr);
             }
-            res.dataStr = String.Empty;
-            QGCallBackManager.InvokeResponseCallback<ReadFileResponse>(JsonUtility.ToJson(res));
+            QGCallBackManager.InvokeResponseCallback<ReadFileResponse>(JsonUtility.ToJson(readFileSyncResponse));
         }
-
 
         #endregion
 
@@ -479,7 +488,7 @@ namespace QGMiniGame
         }
 
         public StatResponse StatSync(string path, bool recursive, Action<StatResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
-        {   
+        {
             statResponse = null;
             string recursiveStr = recursive ? "true" : "false";
             QGStatSync(path, recursiveStr, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
@@ -800,20 +809,6 @@ namespace QGMiniGame
         public void OnNetworkStatusChangeResponseCallback(string msg)
         {
             QGCallBackManager.InvokeResponseCallback<QGOnNetworkStatus>(msg, false);
-        }
-
-        // public void GetUserInfoResponseCallback(string msg)
-        // {
-        //     QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGUserInfoBean>>(msg);
-        // }
-        public void ShortcutResponseCallback(string msg)
-        {
-            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGShortcutBean>>(msg);
-        }
-
-        public void HasShortcutInstalledResponseCallback(string msg)
-        {
-            QGCallBackManager.InvokeResponseCallback<QGCommonResponse<QGHasShortcutInstalled>>(msg);
         }
 
         public void DefaultResponseCallback(string msg)
@@ -1351,10 +1346,10 @@ namespace QGMiniGame
         private static extern void QGLogin(string s, string f);
 
         [DllImport("__Internal")]
-        private static extern void QGHasShortcutInstalled(string s, string f);
+        private static extern void QGHasShortcutInstalled(string s, string f,string w);
 
         [DllImport("__Internal")]
-        private static extern void QGInstallShortcut(string s, string f);
+        private static extern void QGInstallShortcut(string s, string f, string w);
 
         [DllImport("__Internal")]
         // private static extern void QGCreateBannerAd(string a, string p, string s, int i);
@@ -1499,7 +1494,7 @@ namespace QGMiniGame
         [DllImport("__Internal")]
         private static extern void QGReadFile(string a, string b, string c, string d, string e);
         [DllImport("__Internal")]
-        private static extern string QGReadFileSync(string a, string b, string c, string d);
+        private static extern void QGReadFileSync(string a, string b, string c, string d);
         [DllImport("__Internal")]
         private static extern void QGAppendFile(string a, string b, string c, string d, string e, string f);
         [DllImport("__Internal")]

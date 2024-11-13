@@ -40,6 +40,7 @@ var QgGameBridge = {
     cameraYuvData: null,
     cameraArPlaneCallback: null,
     cameraArPlane: null,
+    readFileData: null,
   },
 
   QGLog: function () {
@@ -1244,26 +1245,19 @@ var QgGameBridge = {
       filePath: localFilePath,
       encoding: encoding,
       success: function (res) {
-        var str;
-        if (encoding === "utf8") {
-          str = res.data;
-        } else if (encoding === "binary") {
-          var uint8Array = new Uint8Array(res.data);
-          str = uint8Array.join(", ");
-        }
+        property.readFileData = res.data;
         var json = JSON.stringify({
           callbackId: successID,
           errCode: res.errCode,
           errMsg: res.errMsg,
           encoding: encoding,
-          dataStr: str,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
           "OnReadFileSuccessCallBack",
           json
         );
-        console.log("readFile success:", json);
+        console.log("readFile success:", JSON.stringify(res));
       },
       fail: function (err) {
         var json = JSON.stringify({
@@ -1294,6 +1288,37 @@ var QgGameBridge = {
     });
   },
 
+  QGReadFileByteArray: function (QGReadFileDataCallback) {
+    if (!QGReadFileDataCallback) {
+      return;
+    }
+    if (!property.readFileData) {
+      return;
+    }
+    var dataView = new Uint8Array(property.readFileData);
+    var dataLen = dataView.length;
+    if (!dataLen) {
+      return;
+    }
+    var buffer = _malloc(dataLen);
+    HEAPU8.set(dataView, buffer);
+    dynCall("vii", QGReadFileDataCallback, [buffer, dataLen]);
+    property.readFileData = null;
+    _free(buffer);
+  },
+
+  QGReadFileUtf8: function (QGReadFileDataCallback) {
+    if (!QGReadFileDataCallback) {
+      return;
+    }
+    if (!property.readFileData) {
+      return;
+    }
+    var readFileDataUtf8String = allocateUTF8(property.readFileData);
+    dynCall("vi", QGReadFileDataCallback, [readFileDataUtf8String]);
+    property.readFileData = null;
+  },
+
   QGReadFileSync: function (path, paramEncoding, success, fail) {
     var localFilePath = qg.env.USER_DATA_PATH + UTF8ToString(path);
     var encoding = UTF8ToString(paramEncoding);
@@ -1309,30 +1334,16 @@ var QgGameBridge = {
     }
     try {
       var res = fs.readFileSync(localFilePath, encoding);
-      console.log("readFileSync success:", res);
-      var str;
-      if (encoding === "utf8") {
-        str = res;
-      } else if (encoding === "binary") {
-        var uint8Array = new Uint8Array(res);
-        str = uint8Array.join(", ");
-      }
+      property.readFileData = res;
       var json = JSON.stringify({
         callbackId: successID,
-        errCode: res.errCode,
-        errMsg: res.errMsg,
         encoding: encoding,
-        dataStr: str,
       });
       unityInstance.SendMessage(
         CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
         "OnReadFileSuccessCallBack",
         json
       );
-      var bufferSize = lengthBytesUTF8(str) + 1;
-      var buffer = _malloc(bufferSize);
-      stringToUTF8(str, buffer, bufferSize);
-      return buffer;
     } catch (error) {
       var json = JSON.stringify({
         callbackId: failID,
@@ -1345,7 +1356,6 @@ var QgGameBridge = {
         CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
         json
       );
-      return null;
     }
   },
 
@@ -1708,8 +1718,8 @@ var QgGameBridge = {
           size: res.stat.size,
           lastAccessedTime: res.stat.lastAccessedTime,
           lastModifiedTime: res.stat.lastModifiedTime,
-          isDirectory : res.stat.isDirectory(),
-          isFile : res.stat.isFile(),
+          isDirectory: res.stat.isDirectory(),
+          isFile: res.stat.isFile(),
         });
         console.log("stat success res: " + JSON.stringify(res));
         unityInstance.SendMessage(
@@ -1755,25 +1765,30 @@ var QgGameBridge = {
     var failID = UTF8ToString(fail);
     var fs = qg.getFileSystemManager();
     try {
-      console.log("statSync -js localPath: ",localPath,",recursive: ",recursive)
+      console.log(
+        "statSync -js localPath: ",
+        localPath,
+        ",recursive: ",
+        recursive
+      );
       var res = fs.statSync(localPath, recursive);
       console.log("statSync -js success res: " + JSON.stringify(res));
-        var json = JSON.stringify({
-          callbackId: successID,
-          mode: res.mode,
-          size: res.size,
-          lastAccessedTime: res.lastAccessedTime,
-          lastModifiedTime: res.lastModifiedTime,
-          isDirectory : res.isDirectory(),
-          isFile : res.isFile(),
-        });
-        
-        unityInstance.SendMessage(
-          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "OnStatSuccessCallBack",
-          json
-        );
-        console.log("statSync success json:", json);
+      var json = JSON.stringify({
+        callbackId: successID,
+        mode: res.mode,
+        size: res.size,
+        lastAccessedTime: res.lastAccessedTime,
+        lastModifiedTime: res.lastModifiedTime,
+        isDirectory: res.isDirectory(),
+        isFile: res.isFile(),
+      });
+
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "OnStatSuccessCallBack",
+        json
+      );
+      console.log("statSync success json:", json);
     } catch (error) {
       var json = JSON.stringify({
         callbackId: failID,
@@ -2115,83 +2130,31 @@ var QgGameBridge = {
     });
   },
 
-  QGHasShortcutInstalled: function (success, fail) {
+  QGHasShortcutInstalled: function (success, fail, complete) {
     if (typeof qg == "undefined") {
       console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
-
     var successID = UTF8ToString(success);
     var failID = UTF8ToString(fail);
-
+    var completeID = UTF8ToString(complete);
     qg.hasShortcutInstalled({
       success: function (res) {
-        if (res == false) {
-          qg.installShortcut({
-            success: function (res) {
-              console.log("?????????????" + JSON.stringify(res));
-              var json = JSON.stringify({
-                callbackId: successID,
-                data: res,
-              });
-              console.log(res);
-              console.log(res.data);
-              console.log(json);
-              unityInstance.SendMessage(
-                CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-                "HasShortcutInstalledResponseCallback",
-                json
-              );
-            },
-            fail: function (err) {
-              console.log("?????????????" + JSON.stringify(err));
-              var json = JSON.stringify({
-                callbackId: failID,
-                data: err,
-              });
-              console.log(err);
-              console.log(json);
-              unityInstance.SendMessage(
-                CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-                "HasShortcutInstalledResponseCallback",
-                json
-              );
-            },
-          });
-        } else {
-          console.log("???????");
-        }
-      },
-      fail: function (err) {
+        console.log("qg.hasShortcutInstalled success:", JSON.stringify(res));
         var json = JSON.stringify({
-          callbackId: failID,
-          errMsg: err.errMsg,
-          errCode: err.errCode,
+          callbackId: successID,
+          hasShortcutInstalled: res,
         });
-        console.log(err);
-        console.log(json);
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-          "ShortcutResponseCallback",
+          "HasShortcutInstalledCallback",
           json
         );
       },
-    });
-  },
-
-  QGInstallShortcut: function (success, fail) {
-    if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
-      return;
-    }
-    var successID = UTF8ToString(success);
-    var failID = UTF8ToString(fail);
-
-    qg.installShortcut({
-      success: function (res) {
+      fail: function (res) {
+        console.log("qg.hasShortcutInstalled fail: " + JSON.stringify(res));
         var json = JSON.stringify({
-          callbackId: successID,
-          data: res,
+          callbackId: failID,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -2199,10 +2162,62 @@ var QgGameBridge = {
           json
         );
       },
-      fail: function (err) {
+      complete: function (res) {
+        console.log("qg.hasShortcutInstalled complete: " + JSON.stringify(res));
+        var json = JSON.stringify({
+          callbackId: completeID,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_DEFAULT,
+          json
+        );
+      },
+    });
+  },
+
+  QGInstallShortcut: function (success, fail, complete) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var successID = UTF8ToString(success);
+    var failID = UTF8ToString(fail);
+    var completeID = UTF8ToString(complete);
+    qg.installShortcut({
+      success: function (res) {
+        var json = JSON.stringify({
+          callbackId: successID,
+          data: res.data,
+          errMsg: res.errMsg,
+          code: res.code,
+          errCode: res.errCode,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "InstallShortcutCallback",
+          json
+        );
+      },
+      fail: function (res) {
+        console.log("qg.installShortcut fail: " + JSON.stringify(res));
         var json = JSON.stringify({
           callbackId: failID,
-          errMsg: err,
+          data: res.data,
+          errMsg: res.errMsg,
+          code: res.code,
+          errCode: res.errCode,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          "InstallShortcutCallback",
+          json
+        );
+      },
+      complete: function (res) {
+        console.log("qg.installShortcut complete: " + JSON.stringify(res));
+        var json = JSON.stringify({
+          callbackId: completeID,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,

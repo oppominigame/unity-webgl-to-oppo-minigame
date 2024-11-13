@@ -26,10 +26,9 @@ namespace QGMiniGame
         //(msg) => { Debug.Log("QG.HasShortcutInstalled success = " + JsonUtility.ToJson(msg)); },
         //(msg) => { Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg); }
         //);
-        // public static void HasShortcutInstalled(Action<QGCommonResponse<QGShortcutBean>> succCallback = null, Action<QGCommonResponse<QGShortcutBean>> failCallback = null)
-        public static void HasShortcutInstalled(Action<QGCommonResponse<QGHasShortcutInstalled>> succCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        public static void HasShortcutInstalled(Action<QGHasShortcutInstalledBean> succCallback = null, Action<QGBaseResponse> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.HasShortcutInstalled(succCallback, failCallback);
+            QGMiniGameManager.Instance.HasShortcutInstalled(succCallback, failCallback, completeCallback);
         }
         #endregion
 
@@ -40,9 +39,9 @@ namespace QGMiniGame
         // //(msg) => { Debug.Log("QG.InstallShortcut success = " + JsonUtility.ToJson(msg)); },
         // //(msg) => { Debug.Log("QG.InstallShortcut fail = " + msg.errMsg); }
         // //);
-        public static void InstallShortcut(Action<QGCommonResponse<QGHasShortcutInstalled>> succCallback = null, Action<QGCommonResponse<QGHasShortcutInstalled>> failCallback = null)
+        public static void InstallShortcut(Action<QGInstallShortcutBean> succCallback = null, Action<QGInstallShortcutBean> failCallback = null, Action<QGBaseResponse> completeCallback = null)
         {
-            QGMiniGameManager.Instance.InstallShortcut(succCallback, failCallback);
+            QGMiniGameManager.Instance.InstallShortcut(succCallback, failCallback, completeCallback);
         }
         // #endregion
 

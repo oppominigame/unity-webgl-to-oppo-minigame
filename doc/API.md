@@ -1294,6 +1294,51 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
         }      
 ```
 
+## <a id="判断是否已经创建桌面图标"></a>判断是否已经创建桌面图标
+
+使用此接口可以让玩家在游戏中判断是否已经创建桌面图标
+
+```c#
+        QG.HasShortcutInstalled((msg) =>
+           {
+               Debug.Log("是否已经创建桌面图标 = " + msg.hasShortcutInstalled);
+               if (msg.hasShortcutInstalled)
+               {
+                   Debug.Log("桌面图标已创建");
+                   return;
+               }
+                    QG.InstallShortcut((success) =>
+                    {Debug.Log("创建桌面图标成功 = " + JsonUtility.ToJson(success));},
+                    (fail) =>
+                    {Debug.Log("取消创建桌面图标 = " + JsonUtility.ToJson(fail));},
+                    (complete) =>
+                    {Debug.Log("QG.InstallShortcut complete = " + JsonUtility.ToJson(complete));}
+                    );
+           },
+           (msg) =>
+           {
+               Debug.Log("接口调用失败的回调函数 = " + JsonUtility.ToJson(msg));
+           },
+           (msg) =>
+           {
+               Debug.Log("接口调用结束的回调函数 = " + JsonUtility.ToJson(msg));
+           });
+```
+
+## <a id="创建桌面图标，每次创建都需要用户授权"></a>创建桌面图标，每次创建都需要用户授权
+
+使用此接口可以让玩家在游戏中创建桌面图标，每次创建都需要用户授权
+
+```c#
+     QG.InstallShortcut((success) =>
+                        {Debug.Log("创建桌面图标成功 = " + JsonUtility.ToJson(success));},
+                        (fail) =>
+                        {Debug.Log("取消创建桌面图标 = " + JsonUtility.ToJson(fail));},
+                        (complete) =>
+                        {Debug.Log("QG.InstallShortcut complete = " + JsonUtility.ToJson(complete));}
+                        );
+```
+
 ## <a id="自定义拓展"></a>自定义拓展
 
 - 可参考 Unity 提供的 C# 调用 JS 方法的 [代码示例](https://docs.unity.cn/cn/2019.4/Manual/webgl-interactingwithbrowserscripting.html)

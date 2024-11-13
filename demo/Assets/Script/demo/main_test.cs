@@ -23,34 +23,56 @@ public class main_test : MonoBehaviour
         SceneManager.LoadScene("login");
     }
 
-    public void playQGHasShortcutInstalled()
-    {
-        QG
-            .HasShortcutInstalled((msg) =>
-            {
-                Debug
-                    .Log("QG.HasShortcutInstalled success = " +
-                    JsonUtility.ToJson(msg));
-            },
-            (msg) =>
-            {
-                Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg);
-            });
-    }
-
     public void playQGInstallShortcut()
     {
-        QG
-            .InstallShortcut((msg) =>
-            {
-                Debug
-                    .Log("QG.InstallShortcut success = " +
-                    JsonUtility.ToJson(msg));
-            },
-            (msg) =>
-            {
-                Debug.Log("QG.InstallShortcut fail = " + msg.errMsg);
-            });
+        QG.HasShortcutInstalled((msg) =>
+           {
+               Debug.Log("是否已经创建桌面图标 = " + msg.hasShortcutInstalled);
+               if (msg.hasShortcutInstalled)
+               {
+                   QG.ShowToast(new ShowToastParam()
+                   {
+                       title = "桌面图标已创建",
+                       iconType = "success",
+                       durationTime = 1500,
+                   });
+                   return;
+               }
+
+               QG.InstallShortcut((success) =>
+                                          {
+                                              QG.ShowToast(new ShowToastParam()
+                                              {
+                                                  title = "创建桌面图标成功",
+                                                  iconType = "none",
+                                                  durationTime = 1500,
+                                              });
+                                              Debug.Log("创建桌面图标成功 = " + JsonUtility.ToJson(success));
+                                          },
+                                          (fail) =>
+                                          {
+                                              QG.ShowToast(new ShowToastParam()
+                                              {
+                                                  title = "取消创建桌面图标",
+                                                  iconType = "none",
+                                                  durationTime = 1500,
+                                              });
+                                              Debug.Log("取消创建桌面图标 = " + JsonUtility.ToJson(fail));
+                                          },
+                                          (complete) =>
+                                          {
+                                              Debug.Log("QG.InstallShortcut complete = " + JsonUtility.ToJson(complete));
+                                          }
+                                          );
+           },
+           (msg) =>
+           {
+               Debug.Log("接口调用失败的回调函数 = " + JsonUtility.ToJson(msg));
+           },
+           (msg) =>
+           {
+               Debug.Log("接口调用结束的回调函数 = " + JsonUtility.ToJson(msg));
+           });
     }
 
     public void playQGCreateBannerAd()

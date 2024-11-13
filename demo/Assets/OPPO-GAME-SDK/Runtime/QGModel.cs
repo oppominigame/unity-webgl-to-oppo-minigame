@@ -19,12 +19,15 @@ namespace QGMiniGame
         [SerializeField] public H data;
     }
     [Serializable]
-    public class QGHasShortcutInstalled
+    public class QGInstallShortcutBean : QGBaseResponse
     {
-        public string errMsg;
         public string code;
-        public string errCode;
-
+        public string data;
+    }
+    [Serializable]
+    public class QGHasShortcutInstalledBean : QGBaseResponse
+    {
+        public bool hasShortcutInstalled; // 是否创建桌面图标
     }
     [Serializable]
     public class QGOnNetworkStatus : QGBaseResponse
@@ -139,11 +142,7 @@ namespace QGMiniGame
     //     public int gender; //性别：0，保密；1，男；2，女
     // }
 
-    [Serializable]
-    public class QGShortcutBean
-    {
-        public bool hasShortcutInstalled; // 是否创建桌面图标
-    }
+
 
     [Serializable]
     public class QGFileResponse : QGBaseResponse
@@ -492,7 +491,6 @@ namespace QGMiniGame
     public class ReadFileResponse : QGBaseResponse
     {
         public string encoding;     //读取文件编码
-        public string dataStr;      //读取文件字符串
         public string dataUtf8;     //读取文件UTF8
         public byte[] dataBytes;    //读取文件字节
     }
@@ -504,7 +502,7 @@ namespace QGMiniGame
         public string[] files;  //文件列表字符串数组
     }
 
-        [Serializable]
+    [Serializable]
     public class StatResponse : QGBaseResponse
     {
         public int mode; //文件 mode
@@ -514,4 +512,13 @@ namespace QGMiniGame
         public bool isDirectory; //判断当前文件是否一个目录
         public bool isFile; //判断当前文件是否一个普通文件
     }
+
+    [Serializable]
+    public class ReadFileParam
+    {
+        public IntPtr ptr;  //ReadFile 返回对象内存地址
+        public int length;  //ReadFile byte数组长度
+        public string readFileUtf8;
+    }
+
 }

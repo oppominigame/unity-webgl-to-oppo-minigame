@@ -517,67 +517,93 @@ public class filemanager : MonoBehaviour
 
     public void readFilefunc()
     {
-        string filename = "/myfile.txt";
-        string encoding = "binary"; //utf8 binary
-        QG.ReadFile(filename, encoding, (success) =>
-      {
-          ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
-          Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(success));
-          if (res.encoding == "utf8")
+        QG.DownLoadFile(new DownLoadFileParam()
+        {
+            path = "/database2",
+            url = "https://openfs.oppomobile.com/open/res/201907/31/5f27f86a3cc84b02a8baaf0a4a3066ab.png", //替换成自己的文件
+        }, (success) =>
+        {
+            string filename = "/database2";
+            string encoding = "binary"; //utf8 binary
+            QG.ReadFile(filename, encoding, (success) =>
           {
-              loginMessage.text = "QG.ReadFile success = " + JsonUtility.ToJson(success) + "\n >>>>>>>> \n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8;
-          }
-          else if (res.encoding == "binary")
+              ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
+              Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(success));
+              if (res.encoding == "utf8")
+              {
+                  loginMessage.text = "QG.ReadFile success = " + JsonUtility.ToJson(success) + "\n >>>>>>>> \n encoding:" + res.encoding + "\n dataUtf8:" + res.dataUtf8;
+              }
+              else if (res.encoding == "binary")
+              {
+                  loginMessage.text = "QG.ReadFile success = \n encoding:" + res.encoding + "\n dataUtf8:" + res.dataUtf8 + "\n dataBytes[0]:" + res.dataBytes[0] + "\n dataBytes[end]:" + res.dataBytes[res.dataBytes.Length - 1] + "\n res.dataBytes.Length: " + res.dataBytes.Length;
+              }
+          },
+          (fail) =>
           {
-              loginMessage.text = "QG.ReadFile success = " + JsonUtility.ToJson(success) + "\n >>>>>>>> \n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8 + "\n dataBytes[0]:" + res.dataBytes[0] + "\n dataBytes[end]:" + res.dataBytes[res.dataBytes.Length - 1];
+              Debug.Log("QG.ReadFile fail = " + JsonUtility.ToJson(fail));
+              loginMessage.text = "QG.ReadFile fail = " + JsonUtility.ToJson(fail);
+          },
+           (complete) =>
+          {
+              Debug.Log("QG.ReadFile complete = " + JsonUtility.ToJson(complete));
           }
-      },
-      (fail) =>
-      {
-          Debug.Log("QG.ReadFile fail = " + JsonUtility.ToJson(fail));
-          loginMessage.text = "QG.ReadFile fail = " + JsonUtility.ToJson(fail);
-      },
-       (complete) =>
-      {
-          Debug.Log("QG.ReadFile complete = " + JsonUtility.ToJson(complete));
-      }
-     );
+         );
+        },
+       (fail) =>
+       {
+           Debug.Log("QG.DownLoadFile fail = " + JsonUtility.ToJson(fail));
+           loginMessage.text = "QG.DownLoadFile fail = " + JsonUtility.ToJson(fail);
+       }
+      );
     }
 
     public void readFileSyncfunc()
     {
-        string filename = "/myfile.txt";
-        string encoding = "binary"; //utf8 binary
-        ReadFileResponse res = QG.ReadFileSync(filename, encoding, (success) =>
-       {
-           ReadFileResponse readFileResponse = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
-           if (readFileResponse.encoding == "utf8")
+        QG.DownLoadFile(new DownLoadFileParam()
+        {
+            path = "/database3",
+            url = "https://openfs.oppomobile.com/open/res/201907/31/5f27f86a3cc84b02a8baaf0a4a3066ab.png",  //替换成自己的文件
+        }, (success) =>
+        {
+            string filename = "/database3";
+            string encoding = "binary"; //utf8 binary
+            ReadFileResponse res = QG.ReadFileSync(filename, encoding, (success) =>
            {
-               Debug.Log("QG.ReadFileSync utf8 success = " + JsonUtility.ToJson(success));
-           }
-           else if (readFileResponse.encoding == "binary")
+               ReadFileResponse readFileResponse = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
+               if (readFileResponse.encoding == "utf8")
+               {
+                   Debug.Log("QG.ReadFileSync utf8 success = " + JsonUtility.ToJson(success));
+               }
+               else if (readFileResponse.encoding == "binary")
+               {
+                   Debug.Log("QG.ReadFileSync binary success = " + JsonUtility.ToJson(success));
+               }
+           },
+           (fail) =>
            {
-               Debug.Log("QG.ReadFileSync binary success = " + JsonUtility.ToJson(success));
+               Debug.Log("QG.ReadFileSync fail = " + JsonUtility.ToJson(fail));
            }
-       },
-       (fail) =>
-       {
-           Debug.Log("QG.ReadFileSync fail = " + JsonUtility.ToJson(fail));
-       }
-      );
-        if (res == null)
+          );
+            if (res == null)
+            {
+                loginMessage.text = "QG.ReadFileSync fail";
+                return;
+            }
+            if (res.encoding == "utf8")
+            {
+                loginMessage.text = "QG.ReadFileSync success = \n >>>>>>>> \n encoding:" + res.encoding + "\n dataUtf8:" + res.dataUtf8;
+            }
+            else if (res.encoding == "binary")
+            {
+                loginMessage.text = "QG.ReadFileSync success =  \n >>>>>>>> \n encoding:" + res.encoding + "\n dataUtf8:" + res.dataUtf8 + "\n dataBytes[0]:" + res.dataBytes[0] + "\n dataBytes[end]:" + res.dataBytes[res.dataBytes.Length - 1] + "\n res.dataBytes.Length:" + res.dataBytes.Length;
+            }
+        },
+        (fail) =>
         {
-            loginMessage.text = "QG.ReadFileSync fail";
-            return;
+            Debug.Log("QG.DownLoadFile fail = " + JsonUtility.ToJson(fail));
+            loginMessage.text = "QG.DownLoadFile fail = " + JsonUtility.ToJson(fail);
         }
-        if (res.encoding == "utf8")
-        {
-            loginMessage.text = "QG.ReadFileSync success = \n >>>>>>>> \n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8;
-        }
-        else if (res.encoding == "binary")
-        {
-            loginMessage.text = "QG.ReadFileSync success =  \n >>>>>>>> \n encoding:" + res.encoding + "\n dataStr:" + res.dataStr + "\n dataUtf8:" + res.dataUtf8 + "\n dataBytes[0]:" + res.dataBytes[0] + "\n dataBytes[end]:" + res.dataBytes[res.dataBytes.Length - 1];
-        }
+       );
     }
 
     public void readdirfunc()
