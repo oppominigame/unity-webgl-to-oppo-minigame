@@ -605,17 +605,6 @@ namespace QGMiniGame
 
         #endregion
 
-
-
-        // #region PauseAudio 暂停音频
-
-        // public static void PauseAudio()
-        // {
-        //     QGMiniGameManager.Instance.PauseAudio();
-        // }
-
-        // #endregion 
-
         #region OnAudioInterruptionBegin 监听qg.onAudioInterruptionBegin
 
         public static void OnAudioInterruptionBegin()
@@ -852,6 +841,20 @@ namespace QGMiniGame
         public static bool AccessSync(string filename, Action<QGBaseResponse> successCallback = null, Action<QGBaseResponse> failCallback = null)
         {
             return QGMiniGameManager.Instance.AccessSync(filename, successCallback, failCallback);
+        }
+        #endregion
+
+        #region 判断桌面启动
+        public static void IsStartupByShortcut(Action<QGIsStartupByShortcutParam> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            QGMiniGameManager.Instance.IsStartupByShortcut(successCallback, failCallback);
+        }
+        #endregion
+
+        #region 录音
+        public static QGRecordManager GetRecorderManager()
+        {
+            return QGMiniGameManager.Instance.GetRecorderManager();
         }
         #endregion
     }

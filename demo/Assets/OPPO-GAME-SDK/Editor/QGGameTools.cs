@@ -51,6 +51,7 @@ namespace QGMiniGame
                 }
                 commandStr += (" --keepOldVersion=" + BuildConfigAsset.AssetCache.keepOldVersion);
                 commandStr += (" --enableCacheLog=" + BuildConfigAsset.AssetCache.enableCacheLog);
+                commandStr += (" --gameCDNRoot=" + BuildConfigAsset.AssetCache.gameCDNRoot);
                 commandStr += (" --bundlePathIdentifier=" + BuildConfigAsset.AssetCache.bundlePathIdentifier);
                 commandStr += (" --excludeFileExtensions=" + BuildConfigAsset.AssetCache.excludeFileExtensions);
                 commandStr += (" --excludeClearFiles=" + BuildConfigAsset.AssetCache.excludeClearFiles);

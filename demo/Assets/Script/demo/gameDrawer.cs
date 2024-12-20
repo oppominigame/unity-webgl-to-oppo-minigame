@@ -86,11 +86,21 @@ public class gameDrawer : MonoBehaviour
         Debug.Log("创建互推盒子抽屉广告开始运行");
         QG.ShowToast(new ShowToastParam()
         {
-            title = "创建互推盒子抽屉广告,adUnitId = "+ inputAdUnitId,
+            title = "创建互推盒子抽屉广告,adUnitId = " + inputAdUnitId,
             iconType = "none",
             durationTime = 1500,
         });
-
+        qGGameDrawerAd
+            .OnShow(() =>
+            {
+                QG.ShowToast(new ShowToastParam()
+                {
+                    title = "互推盒子抽屉广告展示回调成功",
+                    iconType = "none",
+                    durationTime = 1500,
+                });
+                Debug.Log("互推盒子抽屉广告展示回调成功");
+            });
         qGGameDrawerAd
        .OnLoad(() =>
        {
@@ -119,7 +129,7 @@ public class gameDrawer : MonoBehaviour
 
     public void showGameDrawerAdfunc()
     {
-        Debug.Log("qGGameDrawerAd:::"+qGGameDrawerAd);
+        Debug.Log("qGGameDrawerAd:::" + qGGameDrawerAd);
         if (qGGameDrawerAd == null)
         {
             return;

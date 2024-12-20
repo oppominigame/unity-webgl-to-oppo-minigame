@@ -297,12 +297,24 @@ namespace QGMiniGame
     [Serializable]
     public class VideoParam
     {
-        public int ParamX;
-        public int ParamY;
-        public int ParamWidth;
-        public int ParamHeight;
-        public string url;
-        public string poster;
+        //必要参数 具体参数参考: https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/media/video
+        public string url;      //必要参数 视频的资源地址
+        //选填参数
+        public int ParamX;      //视频的左上角横坐标 默认值0
+        public int ParamY;      //视频的左上角纵坐标 默认值0
+        public int ParamWidth;  //视频的宽度 默认值300
+        public int ParamHeight; //视频的高度 默认值150
+        public string poster;   //视频的封面
+        public float initialTime; //视频的初始播放位置，单位为 s 秒  默认值0
+        public float playbackRate;//视频的播放速率，有效值有 0.5、0.8、1.0、1.25、1.5 默认值1.0
+        public bool live;       //视频是否为直播 默认值false
+        public string objectFit; //视频的缩放模式 fill:填充  contain:包含，保持原有长宽比例  cover: 覆盖，保持原有长宽比例 默认值'contain'
+        public bool autoplay;   //视频是否自动播放 默认值false
+        public bool loop;       //视频是否循环播放 默认值false
+        public bool muted;      //视频是否静音 默认值false
+        public bool controls;      //视频是否显示控件 true
+        public bool showCenterPlayBtn; //是否显示视频中央的播放按钮 默认值false
+        public bool enableProgressGesture;   //是否启用手势控制播放进度 默认值false
     }
 
     [Serializable]
@@ -519,6 +531,25 @@ namespace QGMiniGame
         public IntPtr ptr;  //ReadFile 返回对象内存地址
         public int length;  //ReadFile byte数组长度
         public string readFileUtf8;
+    }
+
+    [Serializable]
+    public class QGIsStartupByShortcutParam : QGBaseResponse
+    {
+        public bool isStartupByShortcut;
+    }
+
+    [Serializable]
+    public class RecordParam
+    {
+        //选填 具体参数参考:https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/media/record?id=recordermanagerstartobject
+        public int duration = 60000;  //录音的时长，单位 ms，最大值 600000（10 分钟） 默认值 60000
+        public int sampleRate = 8000; //采样率 默认值 8000
+        public int numberOfChannels = 2;     //录音通道数  默认值 2
+        public int encodeBitRate = 48000;  //编码码率 默认值 48000
+        public string format = "aac";     //音频格式  默认值 aac
+        public int frameSize = 1000;  ///指定帧大小，单位 KB
+        public string audioSource = "auto";  //指定录音的音频输入源 默认值 auto
     }
 
 }

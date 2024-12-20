@@ -65,4 +65,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NewScenes/deviceMotion.unity
     guid: 499f8124009e9fa4fb177aea29b29167
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/video.unity
+    guid: 2ccc854c710c6504a88f6a0aceac4d30
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/recorder.unity
+    guid: ba9f89b0f5fc7d7438760ea86fb8d208
   m_configObjects: {}

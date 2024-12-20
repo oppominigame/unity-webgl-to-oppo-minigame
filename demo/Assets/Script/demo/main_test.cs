@@ -75,6 +75,30 @@ public class main_test : MonoBehaviour
            });
     }
 
+    //是否是桌面启动
+    public void IsQGInstallShortcut()
+    {
+        QG.IsStartupByShortcut((success) =>
+        {
+            string titleNote = success.isStartupByShortcut ? "桌面" : "其他";
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "启动方式: " + titleNote,
+                iconType = "none",
+                durationTime = 1500,
+            });
+        },
+            (fail) =>
+            {
+                QG.ShowToast(new ShowToastParam()
+                {
+                    title = "调用接口失败",
+                    iconType = "fail",
+                    durationTime = 1500,
+                });
+            });
+    }
+
     public void playQGCreateBannerAd()
     {
         SceneManager.LoadScene("banner");
@@ -404,6 +428,19 @@ public class main_test : MonoBehaviour
         Debug.Log("打开音频");
     }
 
+    public void playVideo()
+    {
+        SceneManager.LoadScene("video");
+        Debug.Log("打开视频");
+    }
+
+    public void playRecorder()
+    {
+        SceneManager.LoadScene("recorder");
+        Debug.Log("打开录音");
+    }
+
+
     public void exitApplication()
     {
         QG.ExitApplication();
@@ -453,5 +490,42 @@ public class main_test : MonoBehaviour
     {
         SceneManager.LoadScene("showModal");
         Debug.Log("提示弹出");
+    }
+
+    public void playQGHasShortcutInstalled()
+    {
+        QG.HasShortcutInstalled((msg) =>
+  {
+      Debug.Log("QG.HasShortcutInstalled success = " + JsonUtility.ToJson(msg));
+      if (msg.hasShortcutInstalled)
+      {
+          QG.ShowToast(new ShowToastParam()
+          {
+              title = "桌面图标已创建",
+              iconType = "success",
+              durationTime = 1500,
+          });
+      }
+      else
+      {
+          QG.ShowToast(new ShowToastParam()
+          {
+              title = "桌面图标未创建",
+              iconType = "error",
+              durationTime = 1500,
+          });
+
+      }
+  },
+  (msg) =>
+  {
+      QG.ShowToast(new ShowToastParam()
+      {
+          title = "桌面图标异常",
+          iconType = "error",
+          durationTime = 1500,
+      });
+      Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg);
+  });
     }
 }

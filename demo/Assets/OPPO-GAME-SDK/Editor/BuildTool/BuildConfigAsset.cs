@@ -38,6 +38,7 @@ namespace QGMiniGame
         public string excludeClearFiles;
         public string excludeFileExtensions = ".json;.hash";
         public bool unityUseWebGL2;
+        public string gameCDNRoot;
 
         [NonSerialized]
         public bool available;

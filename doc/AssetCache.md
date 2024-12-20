@@ -27,9 +27,12 @@ OPPO 小游戏打包工具：2.1.8-beta.1 及以上
 
 - <span style="font-size:12px">**disableBundleCache**  
 是否禁用缓存，建议默认开启</span>
+- <span style="font-size:12px">**gameCDNRoot**  
+缓存CDN路径(必填项)，例如 https://localhost:8080/StreamingAssets
+只有以配置项包含的 CDN 路径才会进行缓存判断，例如配置为 https://localhost:8080/StreamingAssets，请求 URL 为 https://localhost:8080/StreamingAssets/8d265a9dfd6cb7669cdb8b726f0afb1e.bundle ；若不填写所有传入的 URL 均视为常规网络请求</span>
 - <span style="font-size:12px">**bundlePathIdentifier**  
 缓存路径标识，使用分号分隔，例如 StreamingAssets;bundles  
-只有以配置项结尾的 URL 路径才会进行缓存判断，例如配置为 StreamingAssets，请求 URL 为 https://localhost:8080/StreamingAssets/8d265a9dfd6cb7669cdb8b726f0afb1e.bundle ；若不填写则所有路径都会进行缓存判断；其他情况传入的 URL 均视为常规网络请求</span>
+需要在缓存CDN路径下，并以配置项包含的 URL 路径才会进行缓存判断，例如配置为 StreamingAssets，请求 URL 为 https://localhost:8080/StreamingAssets/8d265a9dfd6cb7669cdb8b726f0afb1e.bundle ；若不填写,在缓存CDN路径下的所有路径都会进行缓存判断；其他情况传入的 URL 均视为常规网络请求</span>
 - <span style="font-size:12px">**excludeFileExtensions**  
 不缓存的文件类型，使用分号分隔，例如 .json;.hash  
 建议将确定不缓存的资源文件类型写入配置，提高缓存系统的性能</span>
@@ -68,6 +71,7 @@ Unity 小游戏默认有 500MB 的用户存储空间，若缓存写入时超过�
     ```javascript
     {
         "disableBundleCache": false,
+        "gameCDNRoot": "https://localhost:8080/StreamingAssets",
         "bundlePathIdentifier": "StreamingAssets",
         "excludeFileExtensions": ".json;.hash",
         "bundleHashLength": 32,

@@ -47,7 +47,7 @@ QG.Login(
                           new PayTestParam()
                          {
                              appId = 30173650,  //CP游戏在开放平台申请的appId
-                             token = parameterToken,//QG.Login 传入
+                             openId = parameterToken,//QG.Login 传入
                              productName = "测试礼包",//商品名称(必填)
                              productDesc = "测试支付",//商品说明(必填)
                              count = 1, //商品数量（只能传1）(必填)
@@ -83,7 +83,7 @@ QG.Login(
                              timestamp = 0,    //时间戳，当前计算机时间和GMT时间(格林威治时间)1970年1月1号0时0分0秒所差的毫秒数
                              orderNo = "", //下单生成的预付订单号
                              paySign = ""  //支付签名，CP 服务端生成
-                           
+
                          };
         QG
             .Pay(param,
@@ -116,7 +116,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
           });
           rewardedVideoAd.OnError((QGBaseResponse msg) =>
           {
-          Debug.Log("QG.rewardedVideoAd.OnError success = " + JsonUtility.ToJson(msg));
+          Debug.Log("rewardedVideoAd.OnError = " + JsonUtility.ToJson(msg));
           });
           rewardedVideoAd.OnClose((QGRewardedVideoResponse msg) =>
           {
@@ -126,6 +126,125 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
                 Debug.Log("激励视频广告取消关闭，不发放奖励");
               }
          });
+```
+
+## <a id="插屏广告"></a>插屏广告
+
+使用此接口可以让玩家在游戏中打开插屏广告
+
+```c#
+var qGInterstitialAd = QG.CreateInterstitialAd(new QGCommonAdParam()
+          {
+          adUnitId = "114187"
+          });
+          Debug.Log("创建插屏广告开始运行");
+          qGInterstitialAd.OnLoad(() => {
+          Debug.Log("插屏广告加载成功");
+          qGInterstitialAd.Show();
+          });
+          qGInterstitialAd.OnError((QGBaseResponse msg) =>
+          {
+          Debug.Log("qGInterstitialAd.OnError = " + JsonUtility.ToJson(msg));
+          });
+         qGInterstitialAd.Load();
+```
+
+## <a id="原生模板广告"></a>原生模板广告
+
+使用此接口可以让玩家在游戏中打开原生模板广告
+
+```c#
+var qGCustomAd = QG.CreateCustomAd(new QGCreateCustomAdParam()
+          {
+          adUnitId = "1193999"
+          });
+        Debug.Log("创建原生模板广告开始运行");
+        qGCustomAd.OnLoad(() =>{Debug.Log("原生模板广告加载成功");});
+        qGCustomAd.OnError((QGBaseResponse msg) => {Debug.Log("qGCustomAd.OnError = " +JsonUtility.ToJson(msg));});
+        qGCustomAd.OnHide(() => {Debug.Log("隐藏原生广告");});
+        qGCustomAd.OnShow(() => {Debug.Log("原生模板广告展示回调成功");});
+        qGCustomAd.Show((msg) =>
+          {
+            Debug.Log("原生模板广告展示成功 = " + JsonUtility.ToJson(msg));
+          },
+          (msg) =>
+          {
+            Debug.Log("原生模板广告展示失败 = " + msg.errMsg);
+          });
+```
+
+## <a id="互推盒子横幅广告"></a>互推盒子横幅广告
+
+使用此接口可以让玩家在游戏中打开互推盒子横幅广告
+
+```c#
+var qGGameBannerAd = QG.CreateGameBannerAd(new QGCommonAdParam()
+            { 
+                adUnitId = "201139" 
+            });
+            Debug.Log("创建互推盒子横幅广告开始运行");
+            qGGameBannerAd.OnLoad(() => { Debug.Log("互推盒子横幅广告加载成功");});
+            qGGameBannerAd.OnError((QGBaseResponse msg) => { Debug.Log("qGGameBannerAd.OnError = " + JsonUtility.ToJson(msg));});
+            qGGameBannerAd.OnShow(() => { Debug.Log("互推盒子横幅广告展示回调成功");});    
+            qGGameBannerAd.Show((msg) =>
+            {
+             Debug.Log("互推盒子横幅广告展示成功 = " + JsonUtility.ToJson(msg));
+            },
+            (msg) =>
+            {
+            Debug.Log("互推盒子横幅广告展示失败 = " + msg.errMsg);
+            });
+```
+
+## <a id="互推盒子九宫格广告"></a>互推盒子九宫格广告
+
+使用此接口可以让玩家在游戏中打开互推盒子九宫格广告
+
+```c#
+var = qGGamePortalAd = QG.CreateGamePortalAd(new QGCommonAdParam()
+                         { adUnitId = "201138" });
+            Debug.Log("创建互推盒子九宫格广告开始运行");
+            qGGamePortalAd.OnLoad(() =>
+                {
+                    Debug.Log("互推盒子九宫格广告加载成功");
+                    qGGamePortalAd.Show();
+                });
+            qGGamePortalAd.OnError((QGBaseResponse msg) =>
+                {
+                    Debug.Log("qGGamePortalAd.OnError = " + JsonUtility.ToJson(msg));
+                });
+            qGGamePortalAd.Load();
+```
+
+## <a id="互推盒子抽屉广告"></a>互推盒子抽屉广告
+
+使用此接口可以让玩家在游戏中打开互推盒子抽屉广告
+
+```c#
+var = qGGameDrawerAd =QG.CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
+                    { adUnitId = "336614" });
+            Debug.Log("创建互推盒子抽屉广告开始运行");
+          qGGameDrawerAd.OnLoad(() =>
+           {
+               Debug.Log("互推盒子抽屉广告加载成功");
+               qGGameDrawerAd
+              .Show((msg) =>
+              {
+                  Debug.Log("互推盒子抽屉广告展示成功 = " + JsonUtility.ToJson(msg));
+              },
+              (msg) =>
+              {
+                  Debug.Log("互推盒子抽屉广告展示失败 = " + msg.errMsg);
+              });
+           });
+            qGGameDrawerAd.OnError((QGBaseResponse msg) =>
+                {
+                    Debug.Log("qGGameDrawerAd.OnError = " + JsonUtility.ToJson(msg));
+                });
+            qGGameDrawerAd.OnShow(() =>
+            {
+                Debug.Log("互推盒子抽屉广告展示回调成功");
+            });    
 ```
 
 ## <a id="文件下载"></a>文件下载
@@ -197,14 +316,27 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 ```c#
     QGVideoPlayer obj = QG.PlayVideo(new VideoParam()
     {
-        ParamX = 0,                 //屏幕 X 轴位置
-        ParamY = 500,               //屏幕 Y 轴位置
-        ParamWidth = 1000,          //视频宽
-        ParamHeight = 800,          //视频长
-        url = "http://vjs.zencdn.net/v/oceans.mp4",  //视频源
-        poster = "/poster.jpg",                //视频封面 qgfile://usr/poster
+        //必要参数 具体参数参考: https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/media/video
+        url = "http://vjs.zencdn.net/v/oceans.mp4",  //视频的资源地址
+        //选填参数
+        ParamX = 0,                 //视频的左上角横坐标 默认值0
+        ParamY = 500,               //视频的左上角纵坐标 默认值0
+        ParamWidth = 1000,          //视频的宽度 默认值300
+        ParamHeight = 800,          //视频的高度 默认值150
+        poster = "/poster.jpg",     //视频封面 qgfile://usr/poster
+        initialTime = 0.1f,         //视频的初始播放位置，单位为 s 秒  默认值0
+        playbackRate = 0.5f,        //视频的播放速率，有效值有 0.5、0.8、1.0、1.25、1.5 默认值1.0
+        live = false,               //视频是否为直播 默认值false    
+        objectFit = "contain",      //视频的缩放模式 fill:填充  contain:包含，保持原有长宽比例  cover: 覆盖，保持原有长宽比例 默认值'contain'    
+        autoplay = false,           //视频是否自动播放 默认值false
+        loop = true,                //视频是否循环播放 默认值false
+        muted = false,              //视频是否静音 默认值false
+        controls = true,            //视频是否显示控件 true
+        showCenterPlayBtn = true,   //是否显示视频中央的播放按钮 默认值false
+        enableProgressGesture = false   //是否启用手势控制播放进度 默认值false
     });
-    obj.Destroy(); //销毁
+    // 新增视频监听:OnPlay,OnPause,OnEnded,OnTimeUpdate,OnError,OnWaiting,OnSeeking,OnSeeked.
+    // 新增视频方法:Play(),Pause(),Stop(),Seek(Time),Destroy().
 ```
 
 ## <a id="音频播放"></a>音频播放
@@ -228,8 +360,50 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
                     .Log("监听音频播放成功");
   });
 
-// 新增视频音频通用监听:OnPlay,OnCanPlay,OnPause,OnStop,OnEnded,OnTimeUpdate,OnError,OnWaiting,OnSeeking,OnSeeked.
-// 新增视频音频通用方法:Play(),Pause(),Stop(),Seek(Time),Destroy,SetVolume,SetLoop.
+// 新增音频监听:OnPlay,OnCanPlay,OnPause,OnStop,OnEnded,OnTimeUpdate,OnError,OnWaiting,OnSeeking,OnSeeked.
+// 新增音频方法:Play(),Pause(),Stop(),Seek(Time),Destroy,SetVolume,SetLoop.
+```
+
+## <a id="录音能力"></a>录音能力
+
+使用此接口可以让玩家在游戏中使用录音能力
+
+```c#
+    //录音音频源
+    private string audioUrl; 
+    //创建录音
+    QGRecordManager qGRecordManager = QG.GetRecorderManager(); 
+    qGRecordManager.OnStop((QGBaseResponse res) =>
+    {
+        audioUrl = res.errMsg;  //录音音频源需要停止录音后在录音回调获取。
+    });
+    //开始录音 默认可调用qGRecordManager.Start(new RecordParam());
+    qGRecordManager.Start(new RecordParam()                    
+            {
+                duration = 80000,       //录音的时长，单位 ms，最大值 600000（10 分钟） 默认值 60000
+                sampleRate = 8000,      //采样率 默认值 8000
+                numberOfChannels = 2,   //录音通道数  默认值 2
+                encodeBitRate = 48000,  //编码码率 默认值 48000
+                format = "aac",         //音频格式  默认值 aac
+                frameSize = 1000,       //指定帧大小，单位 KB
+                audioSource = "auto"    //指定录音的音频输入源 默认值 auto
+            });  
+    //暂停录音
+    qGRecordManager.Pause();
+    //继续录音
+    qGRecordManager.Resume();
+    //停止录音
+    qGRecordManager.Stop();
+    //播放录音
+    QGAudioPlayer qGAudioPlayer = QG.PlayAudio(new AudioParam()
+                {
+                    url = audioUrl,
+                    startTime = 0f,
+                    loop = true,
+                    volume = 1f
+                });
+    // 新增录音监听:OnStart,OnResume,OnPause,OnStop,OnError.
+    // 新增录音方法:Start(),Pause(),Resume(),Stop().
 ```
 
 ## <a id="消息框"></a>消息框
@@ -434,8 +608,9 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 
 ```c#
     //系统信息(异步)
-     QG.GetSystemInfo((msg) =>
+     QG.GetSystemInfo((success) =>
         {
+        var msg = success.data;
         string brand = msg.brand; // 手机品牌
         string language = msg.language; // 系统语言
         string model = msg.model; // 手机型号
@@ -470,12 +645,12 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
         QG.GetProvider((msg) =>
         {
             Debug.Log("渠道信息: " + msg.data.provider);
-        });   
+        });
 ```
 
-## <a id="获取配置文件Manifest"></a>获取配置文件Manifest
+## <a id="获取配置文件Manifest"></a>获取配置文件 Manifest
 
-使用此接口可以让玩家在游戏中获取配置文件Manifest
+使用此接口可以让玩家在游戏中获取配置文件 Manifest
 
 ```c#
         QG.GetManifestInfo((msg) =>
@@ -611,9 +786,9 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
        {
            float latitude = success.data.latitude; //纬度，范围为 -90~90，负数表示南纬
            float longitude = success.data.longitude; //经度，范围为 -180~180，负数表示西经
-           float speed = success.data.speed; //速度，单位 m/s          
+           float speed = success.data.speed; //速度，单位 m/s
            float accuracy = success.data.accuracy; //位置的精确度
-           float altitude = success.data.altitude; //高度，单位 m     
+           float altitude = success.data.altitude; //高度，单位 m
            float verticalAccuracy = success.data.verticalAccuracy; //垂直精度，单位 m（Android 无法获取，返回 0）
            float horizontalAccuracy = success.data.horizontalAccuracy; //水平精度，单位 m
            },
@@ -635,7 +810,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
         //game   适用于更新游戏的回调频率，在 20ms/次 左右
         //ui     适用于更新 UI 的回调频率，在 60ms/次 左右
         //normal 普通的回调频率，在 200ms/次 左右
-        string type = "game"; 
+        string type = "game";
         QG.StartAccelerometer(
         type,
         (success) =>
@@ -758,8 +933,8 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
 使用此接口可以让玩家在游戏中获取本地临时文件或本地用户文件的文件信息
 
 ```c#
-      //filename 说明: "/"+本地文件名.后缀 
-      string filename = "/BeAttack.ogg"; 
+      //filename 说明: "/"+本地文件名.后缀
+      string filename = "/BeAttack.ogg";
       QG.GetFileInfo(filename, (success) =>
       {
         Debug.Log("本地文件已存在：" + JsonUtility.ToJson(success));
@@ -791,7 +966,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
           Debug.Log("QG.Access complete = " + JsonUtility.ToJson(complete));
       }
      );
-     //同步 
+     //同步
     //bool isAccessSync = QG.AccessSync(filename); //所有File类Sync同步方法 success fail 回调可不传
     bool isAccessSync = QG.AccessSync(filename, (success) =>
         {
@@ -802,7 +977,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
             Debug.Log("QG.AccessSync fail = " + JsonUtility.ToJson(fail));
         }
     );
-    loginMessage.text = "QG.AccessSync 同步判断文件/目录是否存在 = " + isAccessSync;     
+    loginMessage.text = "QG.AccessSync 同步判断文件/目录是否存在 = " + isAccessSync;
 ```
 
 ## <a id="在文件结尾追加内容"></a>在文件结尾追加内容
@@ -828,7 +1003,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
           Debug.Log("QG.AppendFile complete = " + JsonUtility.ToJson(complete));
       }
      );
-     //同步 
+     //同步
         bool isAppendFileSync = QG.AppendFileSync(filename, append_byteArray, (success) =>
          {
              Debug.Log("QG.AppendFileSync success = " + JsonUtility.ToJson(success));
@@ -838,7 +1013,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
              Debug.Log("QG.AppendFileSync fail = " + JsonUtility.ToJson(fail));
          }
         );
-        Debug.Log("QG.AppendFileSync 是否同步在文件結尾追加內容 = " + isAppendFileSync);    
+        Debug.Log("QG.AppendFileSync 是否同步在文件結尾追加內容 = " + isAppendFileSync);
 ```
 
 ## <a id="复制文件"></a>复制文件
@@ -872,7 +1047,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
               Debug.Log("QG.CopyFileSync fail = " + JsonUtility.ToJson(fail));
           }
          );
-        Debug.Log("QG.CopyFileSync 是否同步拷貝目录 = " + isCopyFileSync);     
+        Debug.Log("QG.CopyFileSync 是否同步拷貝目录 = " + isCopyFileSync);
 ```
 
 ## <a id="创建目录"></a>创建目录
@@ -906,7 +1081,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
            Debug.Log("QG.MkdirSync fail = " + JsonUtility.ToJson(fail));
        }
       );
-        Debug.Log("QG.MkdirSync 是否同步创建目录 = " + isMkdirSync);     
+        Debug.Log("QG.MkdirSync 是否同步创建目录 = " + isMkdirSync);
 ```
 
 ## <a id="读取本地文件内容"></a>读取本地文件内容
@@ -977,7 +1152,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
         public string dataStr;      //读取文件字符串
         public string dataUtf8;     //读取文件UTF8
         public byte[] dataBytes;    //读取文件字节
-    }    
+    }
 ```
 
 ## <a id="重命名文件，可以把文件从 oldPath 移动到 newPath"></a>重命名文件，可以把文件从 oldPath 移动到 newPath
@@ -1091,7 +1266,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
     {
         public string filesStr; //文件列表字符串
         public string[] files;  //文件列表字符串数组
-    }        
+    }
 ```
 
 ## <a id="删除文件"></a>删除文件
@@ -1291,7 +1466,7 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
             public int lastModifiedTime; //最后一次修改时间
             public bool isDirectory; //判断当前文件是否一个目录
             public bool isFile; //判断当前文件是否一个普通文件
-        }      
+        }
 ```
 
 ## <a id="判断是否已经创建桌面图标"></a>判断是否已经创建桌面图标
@@ -1337,6 +1512,22 @@ var rewardedVideoAd = QG.CreateRewardedVideoAd(new QGCommonAdParam()
                         (complete) =>
                         {Debug.Log("QG.InstallShortcut complete = " + JsonUtility.ToJson(complete));}
                         );
+```
+
+## <a id="判断是否是桌面启动"></a>判断是否是桌面启动
+
+使用此接口可以让玩家在游戏中判断是否是桌面启动
+
+```c#
+        QG.IsStartupByShortcut((success) =>
+        {
+            string titleNote = success.isStartupByShortcut ? "桌面" : "其他"; //isStartupByShortcut 桌面 true 其他 false
+            Debug.Log($"启动方式: {titleNote}");
+        },
+            (fail) =>
+            {
+                Debug.Log("调用接口失败");
+            });
 ```
 
 ## <a id="自定义拓展"></a>自定义拓展

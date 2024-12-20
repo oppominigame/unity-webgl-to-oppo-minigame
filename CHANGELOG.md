@@ -1,5 +1,16 @@
 # 更新日志
 
+## 2024-12-18 【重要更新】
+### Feature
+
+- 重要：上线新版本 Unity SDK，版本号 V8.0.8，位于 `tools/unity_webgl_rpk_oppo_v8.0.8.unitypackage`
+- 重要：新增 [使用WebGL2.0说明文档](doc/WebGL2.md) .
+- 重要：新增 QG.IsStartupByShortcut 判断是否是桌面启动.详情参考 [OPPO SDK API](doc/API.md#判断是否是桌面启动)
+- 重要：新增 录音能力.详情参考 [OPPO SDK API](doc/API.md#录音能力)
+- 重要：新增 原生模板广告 互推盒子横幅广告 互推盒子抽屉广告 OnShow OffShow 回调.详情参考 [OPPO SDK API](doc/API.md#原生模板广告)
+- 重要：修改 [资源缓存系统](doc/AssetCache.md) 使用指导，新增 缓存CDN路径, 修改 缓存路径标识.
+- 重要：修改 视频能力参数补充.详情参考 [OPPO SDK API](doc/API.md#视频播放)
+
 ## 2024-11-14 【重要更新】
 ### Feature
 

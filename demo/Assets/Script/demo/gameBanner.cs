@@ -89,6 +89,17 @@ public class gameBanner : MonoBehaviour
             iconType = "none",
             durationTime = 1500,
         });
+        qGGameBannerAd
+           .OnShow(() =>
+           {
+               Debug.Log("QG.gameBannerAd.OnShow success = ");
+               QG.ShowToast(new ShowToastParam()
+               {
+                   title = "互推盒子横幅广告展示回调成功",
+                   iconType = "none",
+                   durationTime = 1500,
+               });
+           });
 
         qGGameBannerAd
            .OnLoad(() =>

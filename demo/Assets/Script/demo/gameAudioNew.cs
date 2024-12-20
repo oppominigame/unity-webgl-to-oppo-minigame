@@ -43,7 +43,11 @@ public class gameAudioNew : MonoBehaviour
 
     public void comebackfunc()
     {
-        destroyInnerAudioContextfunc();
+        if (qGAudioPlayer != null)
+        {
+            qGAudioPlayer.Destroy();
+            qGAudioPlayer = null;
+        }
         SceneManager.LoadScene("main");
     }
 
@@ -382,6 +386,16 @@ public class gameAudioNew : MonoBehaviour
                 durationTime = 1500,
             });
             qGAudioPlayer.Destroy();
+            qGAudioPlayer = null;
+        }
+        else
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "需要创建音频",
+                iconType = "error",
+                durationTime = 1000,
+            });
         }
     }
 }

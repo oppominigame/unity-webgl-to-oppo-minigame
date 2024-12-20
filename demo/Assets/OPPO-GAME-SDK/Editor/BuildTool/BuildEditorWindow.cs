@@ -31,7 +31,7 @@ namespace QGMiniGame
         }
 
         private const string WEBGL_BUILD_DIR = "webgl";
-        private const string ASSET_CACHE_SYSTEM_MIN_VERSION = "2.1.8-beta.0";
+        private const string ASSET_CACHE_SYSTEM_MIN_VERSION = "2.1.9-beta.11";
         private const string SDK_SERVER_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/OPPO-GAME-SDK/tools";
         private const string UPDATE_LOG_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/CHANGELOG.md";
         private const string CONTACT_US_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/doc/IssueAndContact.md.md";
@@ -1224,13 +1224,22 @@ namespace QGMiniGame
                 });
                 GUI.enabled &= assetCache.enableBundleCache;
                 ValidationTextField(
+                    target: ref assetCache.gameCDNRoot,
+                    key: nameof(assetCache.gameCDNRoot),
+                    label: new GUIContent("缓存CDN路径(必填)", "缓存路径必填项，例如 http://10.117.224.49:8080/StreamingAssets"),
+                    text: assetCache.gameCDNRoot,
+                    allowEmpty: !assetCache.enableBundleCache,
+                    emptyText: "地址不能为空",
+                    validatePattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
+                    validateText: "需填写填写http://或https://开头的有效URL地址");
+                ValidationTextField(
                     target: ref assetCache.bundlePathIdentifier,
                     key: nameof(assetCache.bundlePathIdentifier),
                     label: new GUIContent("缓存路径标识", "不填写代表所有路径都进行缓存判断。填写时多个时使用英文分号分隔，例如 StreamingAssets;bundles"),
                     text: assetCache.bundlePathIdentifier,
                     allowEmpty: true,
                     emptyText: string.Empty,
-                    validatePattern: @"^\w+(;\w+)*$",
+                    validatePattern: @"^([\w/]+)(;[\w/]+)*$",
                     validateText: "路径只能使用字母、数字、下划线，多个路径之间用英文分号分隔");
                 ValidationTextField(
                     target: ref assetCache.excludeFileExtensions,

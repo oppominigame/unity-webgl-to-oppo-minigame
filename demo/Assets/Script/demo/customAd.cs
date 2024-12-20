@@ -88,7 +88,7 @@ public class customAd : MonoBehaviour
         Debug.Log("创建原生模板广告开始运行");
         QG.ShowToast(new ShowToastParam()
         {
-            title = "创建原生模板广告,adUnitId = "+ inputAdUnitId,
+            title = "创建原生模板广告,adUnitId = " + inputAdUnitId,
             iconType = "none",
             durationTime = 1500,
         });
@@ -104,6 +104,17 @@ public class customAd : MonoBehaviour
                     durationTime = 1500,
                 });
             });
+        qGCustomAd
+        .OnShow(() =>
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "原生模板广告展示回调成功",
+                iconType = "none",
+                durationTime = 1500,
+            });
+               Debug.Log("原生模板广告展示回调成功");
+        });
         qGCustomAd
             .OnError((QGBaseResponse msg) =>
             {

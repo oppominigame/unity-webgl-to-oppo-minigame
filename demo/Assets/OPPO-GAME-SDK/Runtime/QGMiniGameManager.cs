@@ -527,7 +527,8 @@ namespace QGMiniGame
         {
             string audioUrl = param.url;
             bool containsHttp = audioUrl.Contains("http");
-            if (!containsHttp)
+            bool containsQgFile = audioUrl.Contains("qgfile");
+            if (!containsHttp && !containsQgFile)
             {
                 param.url = "qgfile://usr" + audioUrl;
             }
@@ -544,6 +545,12 @@ namespace QGMiniGame
 
         public QGVideoPlayer CreateVideo(VideoParam param)
         {
+            string videoUrl = param.url;
+            bool containsHttp = videoUrl.Contains("http");
+            if (!containsHttp)
+            {
+                param.url = "qgfile://usr" + videoUrl;
+            }
             var adId = QGCallBackManager.getKey();
             Debug.Log("adId: " + adId);
             QGVideoPlayer ad = new QGVideoPlayer(adId);
@@ -571,16 +578,6 @@ namespace QGMiniGame
             QGCallBackManager.Add(failCallback));
         }
         #endregion
-
-
-        // #region 暂停音频
-
-        // public void PauseAudio()
-        // {
-        //     QGPauseAudio();
-        // }
-
-        // #endregion
 
         #region 监听qg.onAudioInterruptionBegin
 
@@ -889,15 +886,27 @@ namespace QGMiniGame
             }
         }
 
-        // public void AdOnShowCallBack(string msg)
-        // {
-        //     var res = JsonUtility.FromJson<QGBaseResponse>(msg);
-        //     var ad = QGBaseAd.QGAds[res.callbackId];
-        //     if (ad != null && ad is QGGamePortalAd)
-        //     {
-        //         ((QGGamePortalAd)ad).onShowAction?.Invoke();
-        //     }
-        // }
+        public void AdOnShowCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var ad = QGBaseAd.QGAds[res.callbackId];
+            if (ad != null)
+            {
+                if (ad is QGGameBannerAd)
+                {
+                    ((QGGameBannerAd)ad).onShowAction?.Invoke();
+                }
+
+                if (ad is QGGameDrawerAd)
+                {
+                    ((QGGameDrawerAd)ad).onShowAction?.Invoke();
+                }
+                if (ad is QGCustomAd)
+                {
+                    ((QGCustomAd)ad).onShowAction?.Invoke();
+                }
+            }
+        }
 
         public void RewardedVideoAdOnCloseCallBack(string msg)
         {
@@ -1342,17 +1351,119 @@ namespace QGMiniGame
             return QGAccessSync(filename, QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
 
+        #region 判断桌面启动 
+        public void IsStartupByShortcut(Action<QGIsStartupByShortcutParam> successCallback = null, Action<QGBaseResponse> failCallback = null)
+        {
+            QGIsStartupByShortcut(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
+        }
+
+        public void IsStartupByShortcutCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGIsStartupByShortcutParam>(msg);
+        }
+        #endregion
+
+        #region 录音
+        public QGRecordManager GetRecorderManager()
+        {
+            var recordId = QGCallBackManager.getKey();
+            Debug.Log("recordId: " + recordId);
+            QGRecordManager record = new QGRecordManager(recordId);
+            QGGetRecorderManager(recordId);
+            return record;
+        }
+
+        public void RecorderStart(string recordId, RecordParam recordParam)
+        {
+            QGRecorderStart(recordId, JsonUtility.ToJson(recordParam));
+        }
+
+        public void RecorderPause(string recordId)
+        {
+            QGRecorderPause(recordId);
+        }
+
+        public void RecorderResume(string recordId)
+        {
+            QGRecorderResume(recordId);
+        }
+
+        public void RecorderStop(string recordId)
+        {
+            QGRecorderStop(recordId);
+        }
+
+        public void rdOnStartCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var record = QGRecordManager.QGRecords[res.callbackId];
+            if (record != null)
+            {
+                record.onStartAction?.Invoke();
+            }
+        }
+
+        public void rdOnResumeCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var record = QGRecordManager.QGRecords[res.callbackId];
+            if (record != null)
+            {
+                record.onResumeAction?.Invoke();
+            }
+        }
+
+        public void rdOnPauseCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var record = QGRecordManager.QGRecords[res.callbackId];
+            if (record != null)
+            {
+                record.onPauseAction?.Invoke();
+            }
+        }
+
+        public void rdOnStopCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var record = QGRecordManager.QGRecords[res.callbackId];
+            if (record != null)
+            {
+                record.onStopAction?.Invoke(res);
+            }
+        }
+
+        public void rdOnFrameRecordedCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var record = QGRecordManager.QGRecords[res.callbackId];
+            if (record != null)
+            {
+                record.onFrameRecordedAction?.Invoke();
+            }
+        }
+
+        public void rdOnErrorCallBack(string msg)
+        {
+            var res = JsonUtility.FromJson<QGBaseResponse>(msg);
+            var record = QGRecordManager.QGRecords[res.callbackId];
+            if (record != null)
+            {
+                record.onErrorAction?.Invoke();
+            }
+        }
+        #endregion
+
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
 
         [DllImport("__Internal")]
-        private static extern void QGHasShortcutInstalled(string s, string f,string w);
+        private static extern void QGHasShortcutInstalled(string s, string f, string w);
 
         [DllImport("__Internal")]
         private static extern void QGInstallShortcut(string s, string f, string w);
 
         [DllImport("__Internal")]
-        // private static extern void QGCreateBannerAd(string a, string p, string s, int i);
         private static extern void QGCreateBannerAd(string a, string p, string s);
 
         [DllImport("__Internal")]
@@ -1528,9 +1639,6 @@ namespace QGMiniGame
         [DllImport("__Internal")]
         private static extern void QGPlayAudio(string a, string b);
 
-        // [DllImport("__Internal")]
-        // private static extern void QGPauseAudio();
-
         [DllImport("__Internal")]
         private static extern void QGOnAudioInterruptionBegin();
 
@@ -1632,5 +1740,19 @@ namespace QGMiniGame
         private static extern void QGAccess(string a, string b, string c, string d);
         [DllImport("__Internal")]
         private static extern bool QGAccessSync(string a, string b, string c);
+        [DllImport("__Internal")]
+        private static extern void QGIsStartupByShortcut(string a, string b);
+        [DllImport("__Internal")]
+        private static extern void QGUniversalCallback(string a, string b);
+        [DllImport("__Internal")]
+        private static extern void QGGetRecorderManager(string a);
+        [DllImport("__Internal")]
+        private static extern void QGRecorderStart(string a, string b);
+        [DllImport("__Internal")]
+        private static extern void QGRecorderPause(string a);
+        [DllImport("__Internal")]
+        private static extern void QGRecorderResume(string a);
+        [DllImport("__Internal")]
+        private static extern void QGRecorderStop(string a);
     }
 }
