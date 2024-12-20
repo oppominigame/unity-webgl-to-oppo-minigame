@@ -38,6 +38,7 @@
 - [推荐引擎版本](doc/UnityVersion.md)
 - [能力支持](doc/CapabilitySupport.md)
 - [Shader 兼容性检测](doc/ShaderCompatibilityDetect.md)
+- [使用WebGL2.0](doc/WebGL2.md)
 
 ### 版本管理
 
