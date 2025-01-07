@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
 namespace QGMiniGame
@@ -121,7 +122,9 @@ namespace QGMiniGame
         static void MyCommandEnd(string buildSrc)
         {
             // 创建一个提示框，显示"Hello World!"消息，点击确定按钮后返回true
-            bool result = EditorUtility.DisplayDialog("提示", "完成打包！", "确定");
+            string unityUseWebGL2 = $"渲染版本: {(BuildConfigAsset.AssetCache.unityUseWebGL2 ? "WebGL2.0" : "WebGL1.0")}";
+            string useCustomSign = $"发布类型: {(BuildConfigAsset.Fundamentals.useCustomSign ? "release" : "debug")}";
+            bool result = EditorUtility.DisplayDialog("提示", $"完成打包\n\n{unityUseWebGL2}\n{useCustomSign}", "确定");
 
             // 检查返回值
             if (result)
@@ -191,6 +194,8 @@ namespace QGMiniGame
             PlayerSettings.WebGL.template = "APPLICATION:Minimal";
             EditorSettings.spritePackerMode = SpritePackerMode.AlwaysOnAtlas;
             PlayerSettings.WebGL.linkerTarget = WebGLLinkerTarget.Wasm;
+            //取消文件名以哈希命名
+            PlayerSettings.WebGL.nameFilesAsHashes = false;
         }
 
         //获取游戏中的场景

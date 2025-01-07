@@ -1,5 +1,13 @@
 # 更新日志
 
+## 2025-1-6 【重要更新】
+### Feature
+
+- 重要：上线新版本 Unity SDK，版本号 V8.0.9，位于 `tools/unity_webgl_rpk_oppo_v8.0.9.unitypackage`
+- 重要：上线基础能力版本 Unity SDK，位于 `tools/unity_webgl_rpk_oppo_v8.0.7_open_ability.unitypackage`
+- 普通：修改构建默认关闭nameFilesAsHashes.
+- 普通：修改构建完成提示渲染版本和发布类型.
+
 ## 2024-12-18 【重要更新】
 ### Feature
 

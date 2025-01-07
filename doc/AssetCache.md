@@ -2,8 +2,8 @@
 
 ## 版本要求
 
-OPPO 小游戏打包工具：2.1.8-beta.1 及以上
-> <span style="font-size:12px">建议前往`tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.0.unitypackage` 及以上版本，通过 [SDK 自检更新](SDKUpdate.md) 能力进行升级。也可通过命令行 `npm install -g @oppo-minigame/cli@^2.1.8-beta.1` 进行安装</span>
+OPPO 小游戏打包工具：2.1.9-beta.11 及以上
+> <span style="font-size:12px">建议前往`tools` 目录安装 `unity_webgl_rpk_oppo_v8.0.8.unitypackage` 及以上版本，通过 [SDK 自检更新](SDKUpdate.md) 能力进行升级。也可通过命令行 `npm install -g @oppo-minigame/cli@^2.1.9-beta.11` 进行安装</span>
 
 ## 系统介绍
 
