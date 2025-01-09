@@ -1,5 +1,11 @@
 # 更新日志
 
+## 2025-1-9 【普通更新】
+### Feature
+
+- 普通：更新基础能力版本 Unity SDK，位于 `tools/unity_webgl_rpk_oppo_v8.0.7_open_ability.unitypackage`
+- 普通：新增基础能力版本 Unity SDK 获取渠道接口.
+
 ## 2025-1-6 【重要更新】
 ### Feature
 
