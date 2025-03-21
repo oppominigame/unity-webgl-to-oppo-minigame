@@ -114,18 +114,23 @@ namespace QGMiniGame
         public string brand; // 手机品牌
         public string language; // 系统语言
         public string model; // 手机型号
-        public string statusBarHeight; // 状态栏/异形缺口高度
-        public string pixelRatio; // 设备像素比
-        public string platformVersionName; // 客户端平台
-        public string platformVersionCode; // 网络类型
-        public string screenHeight; // 屏幕高度
-        public string screenWidth; // 屏幕宽度
+        public float notchHeight; //刘海高度
+        public float statusBarHeight; // 状态栏/异形缺口高度
+        public float pixelRatio; // 设备像素比
+        public string platform; // 客户端平台
+        public float platformVersion; // 平台版本号
+        public string platformVersionName; // 客户端平台(兼容老版本) 
+        public float platformVersionCode; // 平台版本号(兼容老版本)
+        public float screenHeight; // 屏幕高度
+        public float screenWidth; // 屏幕宽度
         public string system; // 系统版本
-        public string windowHeight; // 可使用窗口高度
-        public string windowWidth; // 可使用窗口宽度
+        public float windowHeight; // 可使用窗口高度
+        public float windowWidth; // 可使用窗口宽度
         public string theme; // 系统当前主题
         public string deviceOrientation; // 设备方向
-        public string COREVersion; // 版本号
+        public float benchmarkLevel; // 设备性能等级（仅 Android）。取值为：（性能未知）-1，0<（低端机）<44，44<=（中端机）<58，>=58（高端机）
+        public string COREVersion; //版本号(兼容旧版本)
+        public string coreVersion; //版本号(客户端基础库版本)
     }
     // [Serializable]
     // public class QGFileBean
@@ -551,5 +556,37 @@ namespace QGMiniGame
         public int frameSize = 1000;  ///指定帧大小，单位 KB
         public string audioSource = "auto";  //指定录音的音频输入源 默认值 auto
     }
+    [Serializable]
+    public class Query
+    {
+        public string bdsTmp;
+        public string _ORNT_;
+    }
 
+    [Serializable]
+    public class ReferrerInfo
+    {
+        public ExtraData extraData;
+    }
+
+    [Serializable]
+    public class ExtraData
+    {
+        // 可以根据需要添加字段
+    }
+
+    //监听 OPPO 小游戏回到前台的事件 res
+    [Serializable]
+    public class QGOnshowResponse : QGBaseResponse
+    {
+        public Query query; //启动小游戏的 query 参数
+        public ReferrerInfo referrerInfo; //其他信息,包含跳转到该小游戏的应用带来的额外数据
+    }
+
+    //新用户账号登录及实名认证监听API
+    [Serializable]
+    public class QGOnAuthDialog : QGBaseResponse
+    {
+        public int authType; //1-登录账号；2-实名认证
+    }
 }

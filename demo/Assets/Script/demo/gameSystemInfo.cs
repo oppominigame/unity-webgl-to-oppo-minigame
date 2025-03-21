@@ -102,15 +102,16 @@ public class gameSystemInfo : MonoBehaviour
         string systemStr = QG.GetSystemInfoSync();
         loginMessage.text = "异步系统信息: \n"+ systemStr;
         Debug.Log("QG.GetSystemInfoSyncFunc = " + systemStr);
+
+        QGSystemInfo qgSystemInfo = JsonUtility.FromJson<QGSystemInfo>(systemStr);
+
+        Debug.Log("QG.GetSystemInfoSyncFunc qgSystemInfo.benchmarkLevel = " + qgSystemInfo.benchmarkLevel);
     }
 
     void getProviderFunc()
     {
-        QG.GetProvider((msg) =>
-        {
-            Debug.Log("QG.GetProviderFunc success = " + JsonUtility.ToJson(msg));
-            loginMessage.text = "渠道信息: \n" + JsonUtility.ToJson(msg);
-        });
+        string provider = QG.GetProvider();
+        loginMessage.text = "渠道信息: \n" + provider;
     }
 
     void getManifestInfoFunc()

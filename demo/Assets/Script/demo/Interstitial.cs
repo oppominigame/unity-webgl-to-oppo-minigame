@@ -114,6 +114,19 @@ public class Interstitial : MonoBehaviour
                     .Log("QG.interstitialAd.OnError success = " +
                     JsonUtility.ToJson(msg));
             });
+        qGInterstitialAd
+    .OnClose((QGBaseResponse msg) =>
+    {
+        QG.ShowToast(new ShowToastParam()
+        {
+            title = "插屏广告关闭回调",
+            iconType = "none",
+            durationTime = 1500,
+        });
+        Debug
+            .Log("QG.interstitialAd.OnClose success = " +
+            JsonUtility.ToJson(msg));
+    });
     }
 
     public void loadInterstitialAdfunc()

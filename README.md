@@ -2,6 +2,8 @@
 
 欢迎使用 Unity WebGL OPPO 小游戏适配（转换）方案，本方案设计的目的是降低游戏转换的开发成本，即您无需更换 Unity 引擎，无需重写核心代码的情况下将原有的 Unity 游戏项目转换到 OPPO 小游戏
 
+> 支持微信小游戏一键转换OPPO小游戏 [详情](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/wx-transfer)
+
 ## 方案特点
 
 - 对比 H5 小游戏方案，性能有明显提升

@@ -227,6 +227,11 @@ namespace QGMiniGame
         {
             QGMiniGameManager.StorageRemoveItem(keyName);
         }
+        // 调用该方法会清空存储中的所有键名 
+        public static void StorageClear()
+        {
+            QGMiniGameManager.StorageClear();
+        }
         #endregion
 
         #region Pay 支付
@@ -703,9 +708,9 @@ namespace QGMiniGame
             QGMiniGameManager.Instance.GetManifestInfo(successCallback, failCallback);
         }
 
-        public static void GetProvider(Action<QGCommonResponse<QGProviderRponse>> callback = null)
+        public static string GetProvider()
         {
-            QGMiniGameManager.Instance.GetProvider(callback);
+            return QGMiniGameManager.Instance.GetProvider();
         }
 
         public static void SetPreferredFramesPerSecond(int fps)
@@ -856,6 +861,52 @@ namespace QGMiniGame
         {
             return QGMiniGameManager.Instance.GetRecorderManager();
         }
+        #endregion
+
+        #region 生命周期
+        public static void OnShow(Action<QGOnshowResponse> onShowCallback = null)
+        {
+            QGMiniGameManager.Instance.OnShow(onShowCallback);
+        }
+
+        public static void OffShow(Action<QGBaseResponse> onShowCallback = null)
+        {
+            QGMiniGameManager.Instance.OffShow(onShowCallback);
+        }
+
+        public static void OnHide(Action<QGBaseResponse> onHideCallback = null)
+        {
+            QGMiniGameManager.Instance.OnHide(onHideCallback);
+        }
+
+        public static void OffHide(Action<QGBaseResponse> onHideCallback = null)
+        {
+            QGMiniGameManager.Instance.OffHide(onHideCallback);
+        }
+
+        #endregion
+
+        #region 新用户账号登录及实名认证监听API
+        public static void OnAuthDialogShow(Action<QGOnAuthDialog> onShowCallback = null)
+        {
+            QGMiniGameManager.Instance.OnAuthDialogShow(onShowCallback);
+        }
+
+        public static void OffAuthDialogShow(Action<QGOnAuthDialog> onShowCallback = null)
+        {
+            QGMiniGameManager.Instance.OffAuthDialogShow(onShowCallback);
+        }
+
+        public static void OnAuthDialogClose(Action<QGOnAuthDialog> onHideCallback = null)
+        {
+            QGMiniGameManager.Instance.OnAuthDialogClose(onHideCallback);
+        }
+
+        public static void OffAuthDialogClose(Action<QGOnAuthDialog> onHideCallback = null)
+        {
+            QGMiniGameManager.Instance.OffAuthDialogClose(onHideCallback);
+        }
+
         #endregion
     }
 }

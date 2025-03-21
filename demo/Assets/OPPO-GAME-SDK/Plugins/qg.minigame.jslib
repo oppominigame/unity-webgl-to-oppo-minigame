@@ -47,6 +47,10 @@ var QgGameBridge = {
     cameraArPlaneCallback: null,
     cameraArPlane: null,
     readFileData: null,
+    onShowCallBack: null,
+    onHideCallBack: null,
+    onAuthDialogShowCallBack : null,
+    onAuthDialogCloseCallBack : null,
   },
 
   QGLog: function () {
@@ -315,7 +319,7 @@ var QgGameBridge = {
           "SystemInfo",
           json
         );
-        console.log("??");
+        console.log("?? res?" + JSON.stringify(res));
         console.log("???? brand?" + res.brand);
         console.log("???? language?" + res.language);
         console.log("???? model?" + res.model);
@@ -2438,13 +2442,25 @@ var QgGameBridge = {
       });
       bannerAd.onError(function (err) {
         var json = JSON.stringify({
-          callbackId: adId,
+          callbackId: adIdStr,
           errMsg: err.errMsg,
           errCode: err.errCode,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
           CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_ERROR,
+          json
+        );
+      });
+      bannerAd.onClose(function (err) {
+        var json = JSON.stringify({
+          callbackId: adIdStr,
+          errMsg: err.msg,
+          errCode: err.code,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_CLOSE,
           json
         );
       });
@@ -2567,9 +2583,11 @@ var QgGameBridge = {
           json
         );
       });
-      interstitialAd.onClose(function () {
+      interstitialAd.onClose(function (err) {
         var json = JSON.stringify({
           callbackId: adIdStr,
+          errMsg: err.msg,
+          errCode: err.code,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -2656,6 +2674,18 @@ var QgGameBridge = {
           json
         );
       });
+      customAd.onClose(function (err) {
+        var json = JSON.stringify({
+          callbackId: adIdStr,
+          errMsg: err.msg,
+          errCode: err.code,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_CLOSE,
+          json
+        );
+      });
     }
   },
   // GameBannerAd
@@ -2707,16 +2737,18 @@ var QgGameBridge = {
           json
         );
       });
-      // gameBannerAd.onClose(function () {
-      //   var json = JSON.stringify({
-      //     callbackId: adIdStr,
-      //   });
-      //   unityInstance.SendMessage(
-      //    CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-      //    CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_CLOSE,
-      //    json
-      //  );
-      // });
+      gameBannerAd.onClose(function (err) {
+        var json = JSON.stringify({
+          callbackId: adIdStr,
+          errMsg: err.msg,
+          errCode: err.code,
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          CONSTANT.ACTION_CALL_BACK_METHORD_NAME_AD_CLOSE,
+          json
+        );
+      });
       gameBannerAd.onError(function (err) {
         var json = JSON.stringify({
           callbackId: adIdStr,
@@ -2793,9 +2825,11 @@ var QgGameBridge = {
           json
         );
       });
-      gamePortalAd.onClose(function () {
+      gamePortalAd.onClose(function (err) {
         var json = JSON.stringify({
           callbackId: adIdStr,
+          errMsg: err.msg,
+          errCode: err.code,
         });
         unityInstance.SendMessage(
           CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
@@ -3122,6 +3156,11 @@ var QgGameBridge = {
     var keyNameStr = UTF8ToString(keyName);
     localStorage.removeItem(keyNameStr);
     console.log("QGStorageRemoveItem: " + keyNameStr);
+  },
+
+  QGStorageClear: function () {
+    localStorage.clear();
+    console.log("QGStorageClear");
   },
 
   // pay
@@ -3568,24 +3607,21 @@ var QgGameBridge = {
     });
   },
 
-  QGGetProvider: function (callback) {
+  QGGetProvider: function () {
     if (typeof qg == "undefined") {
-      console.log("qg.minigame.jslib  qg is undefined");
       return;
     }
-    var callbackID = UTF8ToString(callback);
     var provider = qg.getProvider();
-    var tempData = { provider: provider };
-    var json = JSON.stringify({
-      callbackId: callbackID,
-      data: tempData,
-    });
-    unityInstance.SendMessage(
-      CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
-      "ProviderInfo",
-      json
-    );
-    console.log("QGGetProvider", provider);
+    console.log("qg.getProvider: ", provider);
+    if (provider) {
+      var bufferSize = lengthBytesUTF8(provider) + 1;
+      var buffer = _malloc(bufferSize);
+      stringToUTF8(provider, buffer, bufferSize);
+      return buffer;
+    } else {
+      console.log("qg.getProvider fail");
+      return;
+    }
   },
 
   QGSetPreferredFramesPerSecond: function (fps) {
@@ -4820,6 +4856,142 @@ var QgGameBridge = {
     if (record && record.stop) {
       record.stop();
     }
+  },
+
+  QGOnShow: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var cbIdStr = UTF8ToString(cb);
+    property.onShowCallBack = function (res) {
+      var json = JSON.stringify({
+        callbackId: cbIdStr,
+        query: res.query,
+        referrerInfo: res.referrerInfo,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "QGOnShowCallBack",
+        json
+      );
+      console.log("jslib qg.onShow: ", JSON.stringify(res));
+    };
+    qg.onShow(property.onShowCallBack);
+  },
+
+  QGOffShow: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (property.onShowCallBack === null) {
+      console.log("onShowCallBack is null");
+      return;
+    }
+    qg.offShow(property.onShowCallBack);
+    property.onShowCallBack = null;
+  },
+
+  QGOnHide: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var cbIdStr = UTF8ToString(cb);
+    property.onHideCallBack = function (res) {
+      var json = JSON.stringify({
+        callbackId: cbIdStr,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "QGOnHideCallBack",
+        json
+      );
+      console.log("jslib qg.onHide: ", JSON.stringify(res));
+    };
+    qg.onHide(property.onHideCallBack);
+  },
+
+  QGOffHide: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (property.onHideCallBack === null) {
+      console.log("onHideCallBack is null");
+      return;
+    }
+    qg.offHide(property.onHideCallBack);
+    property.onHideCallBack = null;
+  },
+
+  QGOnAuthDialogShow: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var cbIdStr = UTF8ToString(cb);
+    property.onAuthDialogShowCallBack = function (res) {
+      var json = JSON.stringify({
+        callbackId: cbIdStr,
+        authType: res.authType,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "QGOnAuthDialogShowCallBack",
+        json
+      );
+      console.log("jslib qg.onAuthDialogShow: ", JSON.stringify(res));
+    };
+    qg.onAuthDialogShow(property.onAuthDialogShowCallBack);
+  },
+
+  QGOffAuthDialogShow: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (property.onAuthDialogShowCallBack === null) {
+      console.log("onAuthDialogShowCallBack is null");
+      return;
+    }
+    qg.offAuthDialogShow(property.onAuthDialogShowCallBack);
+    property.onAuthDialogShowCallBack = null;
+  },
+
+  QGOnAuthDialogClose: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    var cbIdStr = UTF8ToString(cb);
+    property.onAuthDialogCloseCallBack = function (res) {
+      var json = JSON.stringify({
+        callbackId: cbIdStr,
+        authType: res.authType,
+      });
+      unityInstance.SendMessage(
+        CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+        "QGOnAuthDialogCloseCallBack",
+        json
+      );
+      console.log("jslib qg.onAuthDialogClose: ", JSON.stringify(res));
+    };
+    qg.onAuthDialogClose(property.onAuthDialogCloseCallBack);
+  },
+
+  QGOffAuthDialogClose: function (cb) {
+    if (typeof qg == "undefined") {
+      console.log("qg.minigame.jslib  qg is undefined");
+      return;
+    }
+    if (property.onAuthDialogCloseCallBack === null) {
+      console.log("onAuthDialogCloseCallBack is null");
+      return;
+    }
+    qg.offAuthDialogClose(property.onAuthDialogCloseCallBack);
+    property.onAuthDialogCloseCallBack = null;
   },
 };
 

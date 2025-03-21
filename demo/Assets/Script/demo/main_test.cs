@@ -9,8 +9,21 @@ using UnityEngine.SceneManagement;
 // using System.Runtime.InteropServices;
 public class main_test : MonoBehaviour
 {
+    void OnEnable()
+    {
+        QG.OnAuthDialogShow((msg) =>
+      {
+          Debug.Log("QG.OnAuthDialogShow = " + JsonUtility.ToJson(msg));
+      });
+
+        QG.OnAuthDialogClose((msg) =>
+         {
+             Debug.Log("QG.OnAuthDialogClose = " + JsonUtility.ToJson(msg));
+         });
+    }
     void Start()
     {
+
     }
 
     // Update is called once per frame
@@ -495,37 +508,61 @@ public class main_test : MonoBehaviour
     public void playQGHasShortcutInstalled()
     {
         QG.HasShortcutInstalled((msg) =>
-  {
-      Debug.Log("QG.HasShortcutInstalled success = " + JsonUtility.ToJson(msg));
-      if (msg.hasShortcutInstalled)
-      {
-          QG.ShowToast(new ShowToastParam()
-          {
-              title = "桌面图标已创建",
-              iconType = "success",
-              durationTime = 1500,
-          });
-      }
-      else
-      {
-          QG.ShowToast(new ShowToastParam()
-          {
-              title = "桌面图标未创建",
-              iconType = "error",
-              durationTime = 1500,
-          });
+    {
+        Debug.Log("QG.HasShortcutInstalled success = " + JsonUtility.ToJson(msg));
+        if (msg.hasShortcutInstalled)
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "桌面图标已创建",
+                iconType = "success",
+                durationTime = 1500,
+            });
+        }
+        else
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "桌面图标未创建",
+                iconType = "error",
+                durationTime = 1500,
+            });
 
-      }
-  },
-  (msg) =>
-  {
-      QG.ShowToast(new ShowToastParam()
-      {
-          title = "桌面图标异常",
-          iconType = "error",
-          durationTime = 1500,
-      });
-      Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg);
-  });
+        }
+    },
+    (msg) =>
+    {
+        QG.ShowToast(new ShowToastParam()
+        {
+            title = "桌面图标异常",
+            iconType = "error",
+            durationTime = 1500,
+        });
+        Debug.Log("QG.HasShortcutInstalled fail = " + msg.errMsg);
+    });
+    }
+
+    public void unityAudio()
+    {
+        SceneManager.LoadScene("unityAudio");
+        Debug.Log("Untiy原生音频");
+    }
+
+    public void onShow()
+    {
+        SceneManager.LoadScene("onShow");
+        Debug.Log("生命周期");
+    }
+
+    public void PlayerPrefsScenes()
+    {
+        SceneManager.LoadScene("PlayerPrefs");
+        Debug.Log("持久化存储");
+    }
+
+    public void onAuthDialogShow()
+    {
+        SceneManager.LoadScene("onAuthDialogShow");
+        Debug.Log("新用户账号登录及实名认证监听API");
     }
 }

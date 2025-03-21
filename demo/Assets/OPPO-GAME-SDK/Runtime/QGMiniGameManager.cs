@@ -772,6 +772,13 @@ namespace QGMiniGame
         {
             QGStorageRemoveItem(keyName);
         }
+
+        // 调用该方法会清空存储中的所有键名 
+        public static void StorageClear()
+        {
+            QGStorageClear();
+        }
+
         #endregion
 
         #region 支付
@@ -872,7 +879,7 @@ namespace QGMiniGame
             var ad = QGBaseAd.QGAds[res.callbackId];
             if (ad != null)
             {
-                ad.onCloseAction?.Invoke();
+                ad.onCloseAction?.Invoke(res);
             }
         }
 
@@ -1089,9 +1096,9 @@ namespace QGMiniGame
         {
             QGGetManifestInfo(QGCallBackManager.Add(successCallback), QGCallBackManager.Add(failCallback));
         }
-        public void GetProvider(Action<QGCommonResponse<QGProviderRponse>> callback = null)
+        public string GetProvider()
         {
-            QGGetProvider(QGCallBackManager.Add(callback));
+            return QGGetProvider();
         }
         public void SetPreferredFramesPerSecond(int fps)
         {
@@ -1454,6 +1461,72 @@ namespace QGMiniGame
         }
         #endregion
 
+        #region 生命周期
+        public void OnShow(Action<QGOnshowResponse> onShowCallback = null)
+        {
+            QGOnShow(QGCallBackManager.Add(onShowCallback));
+        }
+
+        public void OffShow(Action<QGBaseResponse> onShowCallback = null)
+        {
+            QGOffShow(QGCallBackManager.Add(onShowCallback));
+        }
+
+        public void OnHide(Action<QGBaseResponse> onHideCallback = null)
+        {
+            QGOnHide(QGCallBackManager.Add(onHideCallback));
+        }
+
+        public void OffHide(Action<QGBaseResponse> onHideCallback = null)
+        {
+            QGOffHide(QGCallBackManager.Add(onHideCallback));
+        }
+
+        public void QGOnShowCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGOnshowResponse>(msg);
+        }
+
+        public void QGOnHideCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGBaseResponse>(msg);
+        }
+
+        #endregion
+
+        #region 新用户账号登录及实名认证监听API
+        public void OnAuthDialogShow(Action<QGOnAuthDialog> onShowCallback = null)
+        {
+            QGOnAuthDialogShow(QGCallBackManager.Add(onShowCallback));
+        }
+
+        public void OffAuthDialogShow(Action<QGOnAuthDialog> onShowCallback = null)
+        {
+            QGOffAuthDialogShow(QGCallBackManager.Add(onShowCallback));
+        }
+
+        public void OnAuthDialogClose(Action<QGOnAuthDialog> onHideCallback = null)
+        {
+            QGOnAuthDialogClose(QGCallBackManager.Add(onHideCallback));
+        }
+
+        public void OffAuthDialogClose(Action<QGOnAuthDialog> onHideCallback = null)
+        {
+            QGOffAuthDialogClose(QGCallBackManager.Add(onHideCallback));
+        }
+
+        public void QGOnAuthDialogShowCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGOnAuthDialog>(msg);
+        }
+
+        public void QGOnAuthDialogCloseCallBack(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGOnAuthDialog>(msg);
+        }
+
+        #endregion
+
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
 
@@ -1508,6 +1581,8 @@ namespace QGMiniGame
 
         [DllImport("__Internal")]
         private static extern void QGStorageRemoveItem(string k);
+        [DllImport("__Internal")]
+        private static extern void QGStorageClear();
 
         [DllImport("__Internal")]
         private static extern void QGPay(string p, string s, string f);
@@ -1687,7 +1762,7 @@ namespace QGMiniGame
         [DllImport("__Internal")]
         private static extern void QGGetManifestInfo(string a, string b);
         [DllImport("__Internal")]
-        private static extern void QGGetProvider(string a);
+        private static extern string QGGetProvider();
         [DllImport("__Internal")]
         private static extern void QGSetPreferredFramesPerSecond(int a);
         [DllImport("__Internal")]
@@ -1754,5 +1829,21 @@ namespace QGMiniGame
         private static extern void QGRecorderResume(string a);
         [DllImport("__Internal")]
         private static extern void QGRecorderStop(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnShow(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffShow(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnHide(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffHide(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnAuthDialogShow(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffAuthDialogShow(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnAuthDialogClose(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffAuthDialogClose(string a);
     }
 }

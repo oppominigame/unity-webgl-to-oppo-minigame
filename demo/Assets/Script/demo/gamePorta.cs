@@ -108,9 +108,22 @@ public class gamePorta : MonoBehaviour
                     durationTime = 1500,
                 });
                 Debug
-                    .Log("QG.bannerAd.OnError success = " +
+                    .Log("QG.qGGamePortalAd.OnError success = " +
                     JsonUtility.ToJson(msg));
             });
+        qGGamePortalAd
+.OnClose((QGBaseResponse msg) =>
+{
+    QG.ShowToast(new ShowToastParam()
+    {
+        title = "互推盒子九宫格广告关闭回调",
+        iconType = "none",
+        durationTime = 1500,
+    });
+    Debug
+        .Log("QG.qGGamePortalAd.OnClose success = " +
+        JsonUtility.ToJson(msg));
+});
     }
 
 

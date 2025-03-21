@@ -1,5 +1,14 @@
 # 更新日志
 
+## 2025-3-19 【普通更新】
+### Feature
+
+- 重要：Unity微信小游戏一键转OPPO小游戏文档说明. [详情](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/wx-transfer)
+- 重要：上线新版本 Unity SDK，版本号 V8.1.0，位于 `tools/unity_webgl_rpk_oppo_v8.1.0.unitypackage`
+- 重要：新增 QG.OnShow,QG.OffShow,QG.OnHide,QG.OffHide 监听OPPO小游戏切换前台后台事件. 详情参考 [OPPO SDK API](doc/API.md#监听OPPO小游戏切换前台后台事件)
+- 重要：新增 QG.OnAuthDialogShow,QG.OffAuthDialogShow,QG.OnAuthDialogClose,QG.OffAuthDialogClose 账号登录及实名认证监听. 详情参考 [OPPO SDK API](doc/API.md#监听账号登录及实名认证)
+- 重要：适配 UnityEngine.PlayerPrefs. API: SetInt,GetInt,SetString,GetString,SetFloat,GetFloat,DeleteAll,DeleteKey,HasKey. 详情参考 [PlayerPrefs](doc/API.md#Unity持久化)
+
 ## 2025-1-9 【普通更新】
 ### Feature
 

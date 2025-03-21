@@ -71,7 +71,7 @@ public class banner : MonoBehaviour
     public void createBannerAdfunc()
     {
         bool isNumeric = Regex.IsMatch(inputAdUnitId, @"^\d+$");
-        Debug.Log("inputAdUnitId：：："+ inputAdUnitId+ isNumeric);
+        Debug.Log("inputAdUnitId：：：" + inputAdUnitId + isNumeric);
         if (!isNumeric)
         {
             QG.ShowToast(new ShowToastParam()
@@ -127,6 +127,19 @@ public class banner : MonoBehaviour
               durationTime = 1500,
           });
       });
+        qGBannerAd
+         .OnClose((QGBaseResponse msg) =>
+         {
+             QG.ShowToast(new ShowToastParam()
+             {
+                 title = "banner广告关闭回调",
+                 iconType = "none",
+                 durationTime = 1500,
+             });
+             Debug
+                 .Log("QG.qGBannerAd.OnClose success = " +
+                 JsonUtility.ToJson(msg));
+         });
     }
 
     public void stylefunc()

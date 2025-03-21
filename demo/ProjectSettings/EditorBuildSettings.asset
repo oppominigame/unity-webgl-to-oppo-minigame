@@ -71,4 +71,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NewScenes/recorder.unity
     guid: ba9f89b0f5fc7d7438760ea86fb8d208
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/unityAudio.unity
+    guid: 34f6804019c37fa418b66c48fbaa7252
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/onShow.unity
+    guid: ae76f2fc5cd703c4488e16713d6809cc
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/PlayerPrefs.unity
+    guid: 1209dbb85201e4945ba0d12b84b822b4
+  - enabled: 1
+    path: Assets/Scenes/NewScenes/onAuthDialogShow.unity
+    guid: 7f3e661492a592842b0b63b362f132f8
   m_configObjects: {}

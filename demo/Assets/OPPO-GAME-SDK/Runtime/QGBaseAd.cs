@@ -13,7 +13,7 @@ namespace QGMiniGame
         public string adId; // 广告的唯一标识 
         public Action onLoadAction;
         public Action<QGBaseResponse> onErrorAction;
-        public Action onCloseAction;
+        public Action<QGBaseResponse> onCloseAction;
         public Action onHideAction;
 
         public QGBaseAd(string adId)
@@ -53,12 +53,12 @@ namespace QGMiniGame
             onErrorAction -= offError;
         }
 
-        public virtual void OnClose(Action onClose)
+        public virtual void OnClose(Action<QGBaseResponse> onClose)
         {
             onCloseAction += onClose;
         }
 
-        public virtual void OffClose(Action offClose)
+        public virtual void OffClose(Action<QGBaseResponse> offClose)
         {
             onCloseAction -= offClose;
         }

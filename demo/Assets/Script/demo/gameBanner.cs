@@ -85,7 +85,7 @@ public class gameBanner : MonoBehaviour
         Debug.Log("创建互推盒子横幅广告开始运行");
         QG.ShowToast(new ShowToastParam()
         {
-            title = "创建互推盒子横幅广告,adUnitId = "+ inputAdUnitId,
+            title = "创建互推盒子横幅广告,adUnitId = " + inputAdUnitId,
             iconType = "none",
             durationTime = 1500,
         });
@@ -119,6 +119,19 @@ public class gameBanner : MonoBehaviour
                     .Log("QG.gameBannerAd.OnError success = " +
                     JsonUtility.ToJson(msg));
             });
+        qGGameBannerAd
+        .OnClose((QGBaseResponse msg) =>
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "互推盒子横幅广告关闭回调",
+                iconType = "none",
+                durationTime = 1500,
+            });
+            Debug
+                .Log("QG.qGGameBannerAd.OnClose success = " +
+                JsonUtility.ToJson(msg));
+        });
     }
 
 

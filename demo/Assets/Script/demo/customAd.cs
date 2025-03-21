@@ -113,7 +113,7 @@ public class customAd : MonoBehaviour
                 iconType = "none",
                 durationTime = 1500,
             });
-               Debug.Log("原生模板广告展示回调成功");
+            Debug.Log("原生模板广告展示回调成功");
         });
         qGCustomAd
             .OnError((QGBaseResponse msg) =>
@@ -138,6 +138,19 @@ public class customAd : MonoBehaviour
                     durationTime = 1500,
                 });
             });
+        qGCustomAd
+        .OnClose((QGBaseResponse msg) =>
+        {
+            QG.ShowToast(new ShowToastParam()
+            {
+                title = "原生模板广告关闭回调",
+                iconType = "none",
+                durationTime = 1500,
+            });
+            Debug
+                .Log("QG.bannerAd.OnClose success = " +
+                JsonUtility.ToJson(msg));
+        });
     }
 
 

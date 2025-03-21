@@ -99,6 +99,31 @@ QG.Login(
 
 ```
 
+## <a id="banner广告"></a>banner广告
+
+使用此接口可以让玩家在游戏中打开banner广告
+
+```c#
+        qGBannerAd = QG.CreateBannerAd(new QGCreateBannerAdParam(){ adUnitId = inputAdUnitId });
+        Debug.Log("创建Banner广告开始运行");
+        qGBannerAd.OnLoad(() =>
+            {
+                Debug.Log("banner加载成功");
+            });
+        qGBannerAd.OnError((QGBaseResponse msg) =>
+            {
+                Debug.Log("QG.bannerAd.OnError success = " + JsonUtility.ToJson(msg));
+            });
+        qGBannerAd.OnHide(() =>
+            {
+                Debug.Log("隐藏成功");
+            });
+        qGBannerAd.OnClose((QGBaseResponse msg) =>
+            {
+                Debug.Log("banner关闭回调 = " + JsonUtility.ToJson(msg));
+            });
+```
+
 ## <a id="激励视频广告"></a>激励视频广告
 
 使用此接口可以让玩家在游戏中打开激励视频广告
@@ -146,6 +171,10 @@ var qGInterstitialAd = QG.CreateInterstitialAd(new QGCommonAdParam()
           {
           Debug.Log("qGInterstitialAd.OnError = " + JsonUtility.ToJson(msg));
           });
+          qGInterstitialAd.OnClose((QGBaseResponse msg) =>
+          {
+          Debug.Log("插屏广告关闭回调 = " + JsonUtility.ToJson(msg));
+          });
          qGInterstitialAd.Load();
 ```
 
@@ -171,6 +200,10 @@ var qGCustomAd = QG.CreateCustomAd(new QGCreateCustomAdParam()
           {
             Debug.Log("原生模板广告展示失败 = " + msg.errMsg);
           });
+        qGCustomAd.OnClose((QGBaseResponse msg) =>
+        {
+            Debug.Log("原生模板广告关闭回调 = " + JsonUtility.ToJson(msg));
+        });
 ```
 
 ## <a id="互推盒子横幅广告"></a>互推盒子横幅广告
@@ -194,6 +227,10 @@ var qGGameBannerAd = QG.CreateGameBannerAd(new QGCommonAdParam()
             {
             Debug.Log("互推盒子横幅广告展示失败 = " + msg.errMsg);
             });
+            qGGameBannerAd.OnClose((QGBaseResponse msg) =>
+            {
+            Debug.Log("互推盒子横幅广告关闭回调 = " + JsonUtility.ToJson(msg));
+            });
 ```
 
 ## <a id="互推盒子九宫格广告"></a>互推盒子九宫格广告
@@ -214,6 +251,10 @@ var = qGGamePortalAd = QG.CreateGamePortalAd(new QGCommonAdParam()
                     Debug.Log("qGGamePortalAd.OnError = " + JsonUtility.ToJson(msg));
                 });
             qGGamePortalAd.Load();
+            qGGamePortalAd.OnClose((QGBaseResponse msg) =>
+                {
+                    Debug.Log("互推盒子九宫格广告关闭回调 = " + JsonUtility.ToJson(msg));
+                });
 ```
 
 ## <a id="互推盒子抽屉广告"></a>互推盒子抽屉广告
@@ -614,18 +655,23 @@ var = qGGameDrawerAd =QG.CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
         string brand = msg.brand; // 手机品牌
         string language = msg.language; // 系统语言
         string model = msg.model; // 手机型号
-        string statusBarHeight = msg.statusBarHeight; // 状态栏/异形缺口高度
-        string pixelRatio = msg.pixelRatio; // 设备像素比
+        float notchHeight = msg.notchHeight; //刘海高度
+        float statusBarHeight = msg.statusBarHeight; // 状态栏/异形缺口高度
+        float pixelRatio = msg.pixelRatio; // 设备像素比
+        string platform = msg.platform; // 客户端平台
+        float platformVersion = msg.platform; // 平台版本号
         string platformVersionName = msg.platformVersionName; // 客户端平台
-        string platformVersionCode = msg.platformVersionCode; // 网络类型
-        string screenHeight = msg.screenHeight; // 屏幕高度
-        string screenWidth = msg.screenWidth; // 屏幕宽度
+        float platformVersionCode = msg.platformVersionCode; // 网络类型
+        float screenHeight = msg.screenHeight; // 屏幕高度
+        float screenWidth = msg.screenWidth; // 屏幕宽度
         string system = msg.system; // 系统版本
-        string windowHeight = msg.windowHeight; // 可使用窗口高度
-        string windowWidth = msg.windowWidth; // 可使用窗口宽度
+        float windowHeight = msg.windowHeight; // 可使用窗口高度
+        float windowWidth = msg.windowWidth; // 可使用窗口宽度
         string theme = msg.theme; // 系统当前主题
         string deviceOrientation = msg.deviceOrientation; // 设备方向
-        string COREVersion = msg.COREVersion; // 版本号
+        float benchmarkLevel = msg.benchmarkLevel; // 设备性能等级（仅 Android）。取值为：（性能未知）-1，0<（低端机）<44，44<=（中端机）<58，>=58（高端机）
+        string COREVersion = msg.COREVersion; //版本号(兼容旧版本)
+        string coreVersion = msg.coreVersion; //版本号(客户端基础库版本)
         },
          (err) =>
          {
@@ -634,6 +680,7 @@ var = qGGameDrawerAd =QG.CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
 
     //系统信息(同步)
     string systemStr = QG.GetSystemInfoSync();
+    QGSystemInfo qgSystemInfo = JsonUtility.FromJson<QGSystemInfo>(systemStr);
     Debug.Log("QG.GetSystemInfoSyncFunc = " + systemStr);
 ```
 
@@ -642,10 +689,8 @@ var = qGGameDrawerAd =QG.CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
 使用此接口可以让玩家在游戏中获取渠道的名称
 
 ```c#
-        QG.GetProvider((msg) =>
-        {
-            Debug.Log("渠道信息: " + msg.data.provider);
-        });
+        string provider = QG.GetProvider();
+        Debug.Log("渠道信息: \n" + provider);
 ```
 
 ## <a id="获取配置文件Manifest"></a>获取配置文件 Manifest
@@ -1528,6 +1573,92 @@ var = qGGameDrawerAd =QG.CreateGameDrawerAd(new QGCreateGameDrawerAdParam()
             {
                 Debug.Log("调用接口失败");
             });
+```
+
+## <a id="UnityEngine.PlayerPrefs"></a>Unity持久化
+
+使用此接口可以让玩家在游戏中使用UnityEngine.PlayerPrefs
+
+```c#
+using UnityEngine;
+using QGMiniGame; //需要引入OPPO小游戏库
+    PlayerPrefs.SetInt("OPPO-Key-Int", 1);  //储存 int 类型
+    PlayerPrefs.SetString("OPPO-Key-String", "OPPO-Value-String"); //储存 string 类型键值
+    PlayerPrefs.SetFloat("OPPO-Key-Float", 2.333); //储存 float 类型
+
+    int ValueInt = PlayerPrefs.GetInt("OPPO-Key-Int");  //获取 int 类型
+    string ValueStr = PlayerPrefs.GetString("OPPO-Key-String"); //获取 string 类型键值
+    float ValueFloat = PlayerPrefs.GetFloat("OPPO-Key-Float");  //获取 float 类型
+    bool isHasKey = PlayerPrefs.HasKey("OPPO-Key-Int"); //是否存在Key
+    PlayerPrefs.DeleteKey("OPPO-Key-Int");              //删除单个键值存储
+    PlayerPrefs.DeleteAll();                            //清空存储中的所有键名
+```
+
+## <a id="监听OPPO小游戏切换前台后台事件"></a>监听OPPO小游戏切换前台后台事件
+
+使用此接口可以让玩家在游戏中监听OPPO小游戏切换前台后台事件
+
+```c#
+        //监听 OPPO 小游戏回到前台的事件
+        QG.OnShow((msg) =>
+         {
+             Debug.Log("QG.OnShow = " + JsonUtility.ToJson(msg));
+             Query query = msg.query; //启动小游戏的 query 参数
+             ReferrerInfo referrerInfo = msg.referrerInfo; //其他信息,包含跳转到该小游戏的应用带来的额外数据
+             string bdsTmp = msg.query.bdsTmp; 
+             string _ORNT_ = msg.query._ORNT_;
+             ExtraData extraData = msg.referrerInfo;
+         });
+
+        //取消监听 OPPO 小游戏回到前台的事件 
+        QG.OffShow((msg) =>
+         {
+             Debug.Log("QG.OffShow = " + JsonUtility.ToJson(msg));
+         });   
+
+        //监听 OPPO 小游戏隐藏到后台事件。锁屏、按 HOME 键退到桌面等操作会触发此事件。 
+        QG.OnHide((msg) =>
+         {
+             Debug.Log("QG.OnHide = " + JsonUtility.ToJson(msg));
+         });   
+
+        //取消监听 OPPO 小游戏隐藏到后台事件。锁屏、按 HOME 键退到桌面、显示在聊天顶部等操作会触发此事件。 
+        QG.OffHide((msg) =>
+         {
+             Debug.Log("QG.OffHide = " + JsonUtility.ToJson(msg));
+         });                            
+```
+
+## <a id="监听账号登录及实名认证"></a>监听账号登录及实名认证
+
+使用此接口可以让玩家在游戏中监听账号登录及实名认证
+
+```c#
+        //监控游戏中登录账号和实名制验证弹窗的显示
+        QG.OnAuthDialogShow((msg) =>
+         {
+             Debug.Log("QG.OnAuthDialogShow = " + JsonUtility.ToJson(msg));
+             int authType = msg.authType; // 弹窗类型：1-登录账号；2-实名认证
+         });
+
+        //取消监听游戏中登录账号和实名制验证弹窗的显示 
+        QG.OffAuthDialogShow((msg) =>
+         {
+             Debug.Log("QG.OffAuthDialogShow = " + JsonUtility.ToJson(msg));
+         });   
+
+        //监听游戏中登录账号和实名验证弹窗的关闭
+        QG.OnAuthDialogClose((msg) =>
+         {
+             Debug.Log("QG.OnAuthDialogClose = " + JsonUtility.ToJson(msg));
+             int authType = msg.authType; // 弹窗类型：1-登录账号；2-实名认证
+         });   
+         
+        //取消监听游戏中登录账号和实名验证弹窗的关闭 
+        QG.OffAuthDialogClose((msg) =>
+         {
+             Debug.Log("QG.OffAuthDialogClose = " + JsonUtility.ToJson(msg));
+         });                            
 ```
 
 ## <a id="自定义拓展"></a>自定义拓展
