@@ -1,5 +1,11 @@
 # 更新日志
 
+## 2025-4-9 【普通更新】
+### Feature
+
+- 普通：更新基础能力版本 Unity SDK，位于 `tools/unity_webgl_rpk_oppo_v8.0.7_open_ability.unitypackage`
+- 普通：新增基础能力版本 Unity SDK 创建桌面接口 QG.InstallShortcut.
+- 
 ## 2025-3-19 【普通更新】
 ### Feature
 
