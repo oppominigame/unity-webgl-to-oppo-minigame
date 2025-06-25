@@ -44,6 +44,12 @@ namespace QGMiniGame
         public bool available;
     }
 
+    [Serializable]
+    public class OtherSettingsConfig
+    {
+        public string environmentVariablePath;
+    }
+
     public class BuildConfigAsset : ScriptableObject
     {
         public static BuildFundamentalConfig Fundamentals => Instance.fundamentals;
@@ -53,6 +59,10 @@ namespace QGMiniGame
         public static BuildAssetCacheConfig AssetCache =>  Instance.assetCache;
         [SerializeField]
         private BuildAssetCacheConfig assetCache;
+
+        public static OtherSettingsConfig OtherSettingsConfig => Instance.otherSettingsConfig;
+        [SerializeField]
+        private OtherSettingsConfig otherSettingsConfig;
 
         private BuildConfigAsset() { }
 

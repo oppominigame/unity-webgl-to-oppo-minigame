@@ -1,11 +1,17 @@
 # 更新日志
 
+## 2025-6-25 【重要更新】
+- 重要：上线新版本 Unity SDK，版本号 V8.2.0，位于 `tools/unity_webgl_rpk_oppo_v8.2.0.unitypackage`
+- 重要：Unity SDK V8.2.0 新增支持 MacOS
+- 重要：Unity SDK V8.2.0 新增环境变量手动配置功能，解决部分用户自动获取环境变量失败，导致找不到命令的问题
+- 重要：Unity SDK V8.2.0 新增构建接口 `QGMiniGame.Builder.Build`，支持在主界面配置一次关键信息后，通过接口直接构建
+- 普通：Unity SDK V8.2.0 优化版本更新机制，改为只下载文件，不再自动导入安装包，避免出现兼容问题
+
 ## 2025-4-9 【普通更新】
 ### Feature
 
 - 普通：更新基础能力版本 Unity SDK，位于 `tools/unity_webgl_rpk_oppo_v8.0.7_open_ability.unitypackage`
 - 普通：新增基础能力版本 Unity SDK 创建桌面接口 QG.InstallShortcut.
-- 
 ## 2025-3-19 【普通更新】
 ### Feature
 

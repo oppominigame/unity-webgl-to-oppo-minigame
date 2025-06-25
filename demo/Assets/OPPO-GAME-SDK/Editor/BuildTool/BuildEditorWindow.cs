@@ -19,6 +19,7 @@ namespace QGMiniGame
         private enum RequestVersionStatus
         {
             Fail = -1,
+            Idle,
             InProgress,
             Success
         }
@@ -30,14 +31,16 @@ namespace QGMiniGame
             UpgradeCompleted = 2, //升级完成
         }
 
-        private const string WEBGL_BUILD_DIR = "webgl";
         private const string ASSET_CACHE_SYSTEM_MIN_VERSION = "2.1.9-beta.11";
         private const string SDK_SERVER_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/OPPO-GAME-SDK/tools";
         private const string UPDATE_LOG_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/CHANGELOG.md";
         private const string CONTACT_US_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/doc/IssueAndContact.md.md";
         private const string OPENSSL_EXE_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/hall/example/20240918/assets/OpenSSL-Win64.zip";
-        private static string OPENSSL_EXE_UNZIP_PATH = "";
-        private static string OPENSSL_EXE_LOCAL_PATH = "";
+        /// <summary>
+        /// spin 序列帧切换间隔（内置 12 张序列帧 icon，命名为 WaitSpin00-WaitSpin11）
+        /// </summary>
+        private const float SPIN_GAP = 1.0f / 12;
+
         private static string GenerateCertificatePath = "";     //证书路径
         private static bool isHaveCertificatePath = false;      //是否导入证书
         private static bool isInstallOpenssl = false;           //是否安装openssl(全局)
@@ -49,11 +52,6 @@ namespace QGMiniGame
 
         private static BuildEditorWindow instance;
 
-        private void OnEnable()
-        {
-            OPENSSL_EXE_UNZIP_PATH = $"{Application.temporaryCachePath}/OpenSSL-Win64";
-            OPENSSL_EXE_LOCAL_PATH = $"{OPENSSL_EXE_UNZIP_PATH}/bin/openssl.exe";
-        }
         private static bool HasOpenInstances
 #if UNITY_2019_3_OR_NEWER
             => HasOpenInstances<BuildEditorWindow>();
@@ -67,12 +65,11 @@ namespace QGMiniGame
         }
 #endif
 
+        public static string OpenSSLExeUnzipPath => $"{Application.temporaryCachePath}/OpenSSL-Win64";
+        public static string OpenSSLExeLocalPath => $"{OpenSSLExeUnzipPath}/bin/openssl.exe";
+
         private string LatestSDKPackageTempPath => Path.Combine(Application.temporaryCachePath, latestSDKPackageName);
 
-        /// <summary>
-        /// 校验集合，值为空代表通过，不为空代表错误信息
-        /// </summary>
-        private readonly Dictionary<string, string> validationMap = new Dictionary<string, string>();
         /// <summary>
         /// 立即触发1次校验的键列表
         /// </summary>
@@ -114,9 +111,13 @@ namespace QGMiniGame
         /// </summary>
         private Process qgBuildToolVersionProcess;
         /// <summary>
-        /// 获取打包工具版本信息状态
+        /// 获取打包工具当前版本信息状态
         /// </summary>
-        private RequestVersionStatus requestQGBuildToolVersionStatus = RequestVersionStatus.InProgress;
+        private RequestVersionStatus requestQGBuildToolCurrentVersionStatus = RequestVersionStatus.Idle;
+        /// <summary>
+        /// 获取打包工具最新版本信息状态
+        /// </summary>
+        private RequestVersionStatus requestQGBuildToolLatestVersionStatus = RequestVersionStatus.Idle;
         /// <summary>
         /// 当前打包工具版本
         /// </summary>
@@ -126,9 +127,9 @@ namespace QGMiniGame
         /// </summary>
         private string latestBuildToolVersion;
         /// <summary>
-        /// 获取工具包版本信息状态
+        /// 获取工具包最新版本信息状态
         /// </summary>
-        private RequestVersionStatus requestSDKVersionStatus = RequestVersionStatus.InProgress;
+        private RequestVersionStatus requestSDKLatestVersionStatus = RequestVersionStatus.Idle;
         /// <summary>
         /// 最新 SDK 版本
         /// </summary>
@@ -166,31 +167,7 @@ namespace QGMiniGame
             instance.OnWindowOpen();
         }
 
-        private static bool IsProcessSafeExit(Process process) => process.ExitCode == 0;
-
         private static BuildEditorWindow GetOrCreateWindow() => GetWindow(typeof(BuildEditorWindow), false, "打包小游戏", true) as BuildEditorWindow;
-        private static Process RunCommandProcess(string command)
-        {
-            return CmdRunner.CreateShellExProcess("cmd.exe", $"/c \"{command}\"");
-        }
-
-        private static bool RunCommandProcessWait(string command, out string output)
-        {
-            // 等待进程执行完成退出
-            var process = RunCommandProcess(command);
-            process.WaitForExit();
-            // 成功返回输出，失败返回错误信息
-            var isSuccess = IsProcessSafeExit(process);
-            var standardOutput = process.StandardOutput.ReadToEnd();
-            output = isSuccess ? standardOutput : process.StartInfo.Arguments + standardOutput;
-            // 控制台输出错误信息
-            if (!isSuccess)
-            {
-                Debug.LogError(output);
-            }
-            // 返回执行结果
-            return isSuccess;
-        }
 
         public static async Task GenerateCertificate(string command, string[] generateInfo, string path)
         {
@@ -205,8 +182,8 @@ namespace QGMiniGame
             // Openssl 已安装，开始创建证书
             EditorUtility.DisplayProgressBar("创建证书", "openssl 已安装", 0.7f);
 
-            var error = await CreateCertificate(command, generateInfo);
-            if (HandleError(error, "证书生成失败")) return;
+            var success = await CreateCertificate(command, generateInfo);
+            if (HandleError(success, "证书生成失败")) return;
 
             // 证书生成成功
             DisplayProgress("创建证书", "证书已生成", 0.9f);
@@ -220,9 +197,7 @@ namespace QGMiniGame
         private static async Task DisplayProgressAndCheckOpensslInstallation()
         {
             DisplayProgress("创建证书", "openssl 正在检测环境: ", 0.1f);
-            var error = await IsInstallOpenssl();
-
-            if (error.IsValid())
+            if (!await IsInstallOpenssl())
             {
                 if (await HandleOpensslDownloadAndInstall()) return;
             }
@@ -230,21 +205,21 @@ namespace QGMiniGame
 
         private static async Task<bool> HandleOpensslDownloadAndInstall()
         {
-            if (!File.Exists(OPENSSL_EXE_LOCAL_PATH) && !File.Exists($"{OPENSSL_EXE_UNZIP_PATH}/OpenSSL-Win64.zip"))
+            if (!File.Exists(OpenSSLExeLocalPath) && !File.Exists($"{OpenSSLExeUnzipPath}/OpenSSL-Win64.zip"))
             {
                 if (!ShowDownloadDialog("需要下载openssl")) return true;
 
                 DisplayProgress("创建证书", "openssl 下载中...", 0.3f);
-                var error = await StartDownloadOpenssl();
-                if (HandleError(error, "openssl下载失败")) return true;
+                var downloadSuccess = await StartDownloadOpenssl();
+                if (HandleError(downloadSuccess, "openssl下载失败")) return true;
 
                 DisplayProgress("创建证书", "openssl 下载成功", 0.4f);
             }
 
             // if (!ShowDownloadDialog("需要安装openssl")) return true; 默认安装
             DisplayProgress("创建证书", "openssl 安装中...", 0.5f);
-            var installError = await StartsInstallOpenssl();
-            return HandleError(installError, "openssl安装失败");
+            var installSuccess = await StartsInstallOpenssl();
+            return HandleError(installSuccess, "openssl安装失败");
         }
 
         private static bool ShowDownloadDialog(string message)
@@ -257,9 +232,9 @@ namespace QGMiniGame
             EditorUtility.DisplayProgressBar(title, message, progress);
         }
 
-        private static bool HandleError(string error, string errorMessage)
+        private static bool HandleError(bool success, string errorMessage)
         {
-            if (error.IsValid())
+            if (!success)
             {
                 EditorUtility.ClearProgressBar();
                 return EditorUtility.DisplayDialog("提示", errorMessage, "确认");
@@ -271,19 +246,20 @@ namespace QGMiniGame
         /// 异步判断是否安装openssl,以及是否已解压本地openssl
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private static Task<string> IsInstallOpenssl()
+        private static Task<bool> IsInstallOpenssl()
         {
             // 异步执行
             return Task.Run(() =>
             {
-                isInstallOpenssl = RunCommandProcessWait("openssl -v", out var output);
-                isHaveOpenSslZIP = File.Exists(OPENSSL_EXE_LOCAL_PATH);
-                if (isInstallOpenssl || isHaveOpenSslZIP)
+                try
                 {
-                    return string.Empty;
+                    ShellHelper.ExecuteCommand("openssl -v");
+                    return true;
                 }
-                // 失败返回错误
-                return output;
+                catch
+                {
+                    return File.Exists(OpenSSLExeLocalPath);
+                }
             });
         }
 
@@ -291,21 +267,24 @@ namespace QGMiniGame
         /// 异步下载openssl(下载压缩包)
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private static async Task<string> StartDownloadOpenssl()
+        private static async Task<bool> StartDownloadOpenssl()
         {
             // 异步执行
             return await Task.Run(() =>
             {
-                if (!Directory.Exists(OPENSSL_EXE_UNZIP_PATH))
+                if (!Directory.Exists(OpenSSLExeUnzipPath))
                 {
-                    Directory.CreateDirectory(OPENSSL_EXE_UNZIP_PATH);
+                    Directory.CreateDirectory(OpenSSLExeUnzipPath);
                 }
-                var isSuccess = RunCommandProcessWait($"curl -o {OPENSSL_EXE_UNZIP_PATH}/OpenSSL-Win64.zip {OPENSSL_EXE_URL}", out var output);
-                if (isSuccess)
+                try
                 {
-                    return string.Empty;
+                    ShellHelper.ExecuteCommand($"curl -o {OpenSSLExeUnzipPath}/OpenSSL-Win64.zip {OPENSSL_EXE_URL}");
+                    return true;
                 }
-                return output;
+                catch
+                {
+                    return false;
+                }
             });
         }
 
@@ -314,19 +293,21 @@ namespace QGMiniGame
         /// 异步安装openssl(解压缩包)
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private static async Task<string> StartsInstallOpenssl()
+        private static async Task<bool> StartsInstallOpenssl()
         {
             // 异步执行
             return await Task.Run(() =>
             {
-                var isSuccess = RunCommandProcessWait($"tar -xf {OPENSSL_EXE_UNZIP_PATH}/OpenSSL-Win64.zip -C {OPENSSL_EXE_UNZIP_PATH}", out var output);
-
-                if (isSuccess)
+                try
                 {
+                    ShellHelper.ExecuteCommand($"tar -xf {OpenSSLExeUnzipPath}/OpenSSL-Win64.zip -C {OpenSSLExeUnzipPath}");
                     isHaveOpenSslZIP = true;
-                    return string.Empty;
+                    return true;
                 }
-                return output;
+                catch
+                {
+                    return false;
+                }
             });
         }
 
@@ -334,7 +315,7 @@ namespace QGMiniGame
         /// 异步生成证书
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private static async Task<string> CreateCertificate(string command, string[] generateInfo)
+        private static async Task<bool> CreateCertificate(string command, string[] generateInfo)
         {
             // 异步执行
             return await Task.Run(() =>
@@ -345,11 +326,11 @@ namespace QGMiniGame
                 }
                 else if (isHaveOpenSslZIP)
                 {
-                    command = $"{OPENSSL_EXE_LOCAL_PATH}" + command;
+                    command = $"{OpenSSLExeLocalPath}" + command;
                 }
-                var isSuccess = RunCommandProcessWait(command, out var output);
-                if (isSuccess)
+                try
                 {
+                    ShellHelper.ExecuteCommand(command);
                     // 目标文件路径
                     string CertificateTxtPath = GenerateCertificatePath + "/证书.txt";
                     try
@@ -368,9 +349,12 @@ namespace QGMiniGame
                     {
                         Debug.LogError("证书写入异常: " + ex.Message);
                     }
-                    return string.Empty;
+                    return true;
                 }
-                return output;
+                catch
+                {
+                    return false;
+                }
             });
         }
 
@@ -504,6 +488,7 @@ namespace QGMiniGame
             DrawAssetCache();
             Separator();
             DrawAssetCheck();
+            DrawOtherSettings();
             EditorGUILayout.EndScrollView();
             GUILayout.FlexibleSpace();
             DrawBuildActionArea();
@@ -530,7 +515,7 @@ namespace QGMiniGame
                 qgBuildToolVersionProcess = null;
             }
             currentBuildToolVersion = null;
-            requestQGBuildToolVersionStatus = RequestVersionStatus.InProgress;
+            requestQGBuildToolCurrentVersionStatus = RequestVersionStatus.InProgress;
             instance = null;
             // 注销回调
             AssetDatabase.importPackageCompleted -= OnImportPackageCompleted;
@@ -549,21 +534,23 @@ namespace QGMiniGame
         /// 异步获取当前打包工具版本号
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private async Task<string> RequestQGBuildToolVersionAsync()
+        private async Task<bool> RequestQGBuildToolCurrentVersionAsync()
         {
+            // 先重置当前版本
+            currentBuildToolVersion = string.Empty;
             // 异步执行
             return await Task.Run(() =>
             {
-                // 打开控制台进程获取版本号
-                var isSuccess = RunCommandProcessWait("quickgame -V", out var output);
-                // 成功缓存版本号，返回无错误
-                if (isSuccess)
+                try
                 {
+                    var output = ShellHelper.ExecuteCommand("quickgame -V");
                     currentBuildToolVersion = output.TrimEnd('\n');
-                    return string.Empty;
+                    return true;
                 }
-                // 失败返回错误
-                return output;
+                catch
+                {
+                    return false;
+                }
             });
         }
 
@@ -571,24 +558,25 @@ namespace QGMiniGame
         /// 异步获取打包工具最新版本号
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private async Task<string> RequestQGBuildToolLatestVersionAsync()
+        private async Task<bool> RequestQGBuildToolLatestVersionAsync()
         {
+            // 先重置当前版本
+            latestBuildToolVersion = string.Empty;
             // 异步执行
             return await Task.Run(() =>
             {
-                // 打开控制台进程获取所有版本号
-                var isSuccess = RunCommandProcessWait("npm show @oppo-minigame/cli versions", out var output);
-                // 成功后进一步解析
-                if (isSuccess)
+                try
                 {
+                    var output = ShellHelper.ExecuteCommand("npm show @oppo-minigame/cli versions");
                     // 缓存最新版本号
                     var versions = output.Replace("\n", string.Empty).Replace(" ", string.Empty).TrimStart('[').TrimEnd(']').Split(',');
                     latestBuildToolVersion = versions[versions.Length - 1].TrimStart('\'').TrimEnd('\'');
-                    // 返回成功
-                    return string.Empty;
+                    return true;
                 }
-                // 失败返回错误
-                return output;
+                catch
+                {
+                    return false;
+                }
             });
         }
 
@@ -596,26 +584,31 @@ namespace QGMiniGame
         /// 异步升级打包工具到最新版本
         /// </summary>
         /// <returns>错误信息（没有代表成功）</returns>
-        private async Task<string> UpgradeQGBuildToolLatestVersionAsync()
+        private async Task<bool> UpgradeQGBuildToolLatestVersionAsync()
         {
             // 异步执行
             return await Task.Run(() =>
             {
-                // 打开控制台进程执行升级命令
-                var isSuccess = RunCommandProcessWait($"npm install @oppo-minigame/cli@{latestBuildToolVersion} -g", out var output);
-                // 返回成功
-                if (isSuccess) return string.Empty;
-                // 失败返回错误
-                return output;
+                try
+                {
+                    ShellHelper.ExecuteCommand($"npm install @oppo-minigame/cli@{latestBuildToolVersion} -g");
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             });
         }
 
         /// <summary>
         /// 异步获取最新 SDK 版本
         /// </summary>
-        /// <returns>错误信息（没有代表成功）</returns>
-        private async Task<string> RequestLatestSDKVersionAsync()
+        /// <returns></returns>
+        private async Task<bool> RequestLatestSDKVersionAsync()
         {
+            // 先重置当前版本数据
+            latestSDKVersion = latestSDKPackageName = latestSDKPackageMD5 = string.Empty;
             // 发送网络请求版本号
             var uwr = UnityWebRequest.Get($"{SDK_SERVER_URL}/version");
             uwr.SendWebRequest();
@@ -623,8 +616,8 @@ namespace QGMiniGame
             await WaitWebRequestComplete(uwr);
             // 当前请求成功
             var error = uwr.error;
-            var isSuccess = !error.IsValid();
-            if (isSuccess)
+            var success = !error.IsValid();
+            if (success)
             {
                 // 版本信息解析成功则进行缓存
                 var versionText = (uwr.downloadHandler as DownloadHandlerBuffer).text;
@@ -638,79 +631,93 @@ namespace QGMiniGame
                 // 版本信息解析失败则此次请求失败
                 else
                 {
-                    isSuccess = false;
+                    success = false;
                     error = "Parse version failed";
                 }
             }
-            if (!isSuccess)
+            if (!success)
             {
                 latestSDKVersion = latestSDKPackageName = string.Empty;
                 // 输出错误信息到控制台
                 Debug.LogError(error);
             }
             // 返回结果
-            return isSuccess ? string.Empty : error;
+            return success;
         }
 
         /// <summary>
         /// 控制台输出处理器
         /// </summary>
-        /// <param name="output"></param>
+        /// <param name="success"></param>
         /// <returns>是否成功</returns>
-        private bool CommandOutputHandler(string output)
+        private bool CommandOutputHandler(bool success)
         {
-            if (!output.IsValid()) return true;
+            if (success)
+            {
+                return true;
+            }
             EditorUtility.DisplayDialog("提示", $"出错了，请根据控制台错误，查阅技术文档或联系技术客服", "确认");
-            Debug.LogError(output);
             EditorUtility.ClearProgressBar();
             return false;
         }
 
         /// <summary>
-        /// 异步更新打包工具版本状态
+        /// 异步更新打包工具当前版本状态
         /// </summary>
-        private async void UpdateQGBuildToolVersionStatusAsync()
+        private async void UpdateQGBuildToolCurrentVersionStatusAsync()
         {
             // 异步获取版本号信息
-            requestQGBuildToolVersionStatus = RequestVersionStatus.InProgress;
-            var error = await RequestQGBuildToolVersionAsync();
+            requestQGBuildToolCurrentVersionStatus = RequestVersionStatus.InProgress;
+            var success = await RequestQGBuildToolCurrentVersionAsync();
             // 获取当前版本失败，中断退出
-            if (error.IsValid())
+            if (!success)
             {
-                requestQGBuildToolVersionStatus = RequestVersionStatus.Fail;
-                Repaint();
-                return;
-            }
-            error = await RequestQGBuildToolLatestVersionAsync();
-            // 获取最新版本失败，中断退出
-            if (error.IsValid())
-            {
-                requestQGBuildToolVersionStatus = RequestVersionStatus.Fail;
+                requestQGBuildToolCurrentVersionStatus = RequestVersionStatus.Fail;
                 Repaint();
                 return;
             }
             // 设置获取成功
-            requestQGBuildToolVersionStatus = RequestVersionStatus.Success;
+            requestQGBuildToolCurrentVersionStatus = RequestVersionStatus.Success;
             Repaint();
         }
 
         /// <summary>
-        /// 异步更新 SDK 版本状态
+        /// 异步更新打包工具最新版本状态
         /// </summary>
-        private async void UpdateSDKVersionStatusAsync()
+        private async void UpdateQGBuildToolLatestVersionStatusAsync()
         {
-            // 异步获取最新版本信息
-            requestSDKVersionStatus = RequestVersionStatus.InProgress;
-            var error = await RequestLatestSDKVersionAsync();
+            // 异步获取最新版本
+            requestQGBuildToolLatestVersionStatus = RequestVersionStatus.InProgress;
+            var success = await RequestQGBuildToolLatestVersionAsync();
             // 获取最新版本失败，中断退出
-            if (error.IsValid())
+            if (!success)
             {
-                requestSDKVersionStatus = RequestVersionStatus.Fail;
+                requestQGBuildToolLatestVersionStatus = RequestVersionStatus.Fail;
                 Repaint();
                 return;
             }
             // 设置获取成功
-            requestSDKVersionStatus = RequestVersionStatus.Success;
+            requestQGBuildToolLatestVersionStatus = RequestVersionStatus.Success;
+            Repaint();
+        }
+
+        /// <summary>
+        /// 异步更新 SDK 最新版本状态
+        /// </summary>
+        private async void UpdateSDKLatestVersionStatusAsync()
+        {
+            // 异步获取最新版本信息
+            requestSDKLatestVersionStatus = RequestVersionStatus.InProgress;
+            var success = await RequestLatestSDKVersionAsync();
+            // 获取最新版本失败，中断退出
+            if (!success)
+            {
+                requestSDKLatestVersionStatus = RequestVersionStatus.Fail;
+                Repaint();
+                return;
+            }
+            // 设置获取成功
+            requestSDKLatestVersionStatus = RequestVersionStatus.Success;
             // 状态更新后立即重绘，否则要等很久
             Repaint();
         }
@@ -731,8 +738,7 @@ namespace QGMiniGame
         private void OnWindowOpen()
         {
             // 立即更新版本状态
-            UpdateQGBuildToolVersionStatusAsync();
-            UpdateSDKVersionStatusAsync();
+            UpdateQGBuildToolCurrentVersionStatusAsync();
             // 注册回调
             AssetDatabase.importPackageCompleted += OnImportPackageCompleted;
             AssetDatabase.importPackageFailed += OnImportPackageFailed;
@@ -795,6 +801,21 @@ namespace QGMiniGame
             AddCursorRect(MouseCursor.Link);
         }
 
+        private void WaitSpinIcon()
+        {
+            // 使用内置序列帧图片，每秒转一圈
+            var frac = Time.realtimeSinceStartupAsDouble - Math.Truncate(Time.realtimeSinceStartup);
+            var index = (int)Math.Truncate(frac / SPIN_GAP);
+            var indexStr = index.ToString();
+            if (index < 10)
+            {
+                indexStr = "0" + indexStr;
+            }
+            GUILayout.Label(EditorGUIUtility.IconContent($"WaitSpin{indexStr}"));
+            // 需要立即重新绘制，不然界面不会动
+            Repaint();
+        }
+
         private void ValidateLabel(string text, int indentPlus = -1)
         {
             if (!text.IsValid()) return;
@@ -810,18 +831,15 @@ namespace QGMiniGame
             EditorGUI.indentLevel -= indentPlus;
         }
 
-        private string ValidationTextField(ref string target, string key, string label, string text, bool allowEmpty, string emptyText = "不能为空", string validatePattern = "", string validateText = "校验失败", Func<bool> validateFunc = null, bool showErrorGUI = true)
+        private string ValidationTextField(ref string target, string key, string label, string text, bool allowEmpty, string emptyError = "不能为空", string pattern = "", string invalidError = "校验失败", Func<bool> customFunc = null, bool showErrorGUI = true)
         {
-            return ValidationTextField(ref target, key, new GUIContent(label), text, allowEmpty, emptyText, validatePattern, validateText, validateFunc, showErrorGUI);
+            return ValidationTextField(ref target, key, new GUIContent(label), text, allowEmpty, emptyError, pattern, invalidError, customFunc, showErrorGUI);
         }
 
-        private string ValidationTextField(ref string target, string key, GUIContent label, string text, bool allowEmpty, string emptyText = "不能为空", string validatePattern = "", string validateText = "校验失败", Func<bool> validateFunc = null, bool showErrorGUI = true)
+        private string ValidationTextField(ref string target, string key, GUIContent label, string text, bool allowEmpty, string emptyError = "不能为空", string pattern = "", string invalidError = "校验失败", Func<bool> customFunc = null, bool showErrorGUI = true)
         {
             // 记录需要校验的属性，默认校验通过
-            if (!validationMap.ContainsKey(key))
-            {
-                validationMap.Add(key, string.Empty);
-            }
+            Builder.InitValidation(key);
             // 输入变化时做校验
             EditorGUI.BeginChangeCheck();
             target = EditorGUILayout.TextField(label, text);
@@ -834,40 +852,24 @@ namespace QGMiniGame
             // 若强制触发1次校验，则在校验后标记已完成
             if (hasChange || validateForOnceKeyList.Contains(key))
             {
-                ValidateTextProperty(target, key, allowEmpty, emptyText, validatePattern, validateText, validateFunc);
+                Builder.Validate(new Builder.ValidateParameterData
+                {
+                    target = target,
+                    key = key,
+                    allowEmpty = allowEmpty,
+                    emptyError = emptyError,
+                    pattern = pattern,
+                    invalidError = invalidError,
+                    customFunc = customFunc
+                });
                 validateForOnceKeyList.Remove(key);
             }
             // 校验失败且需要立即显示错误提示
-            if (validationMap.TryGetValue(key, out var errorText) && errorText.IsValid() && showErrorGUI)
+            if (Builder.GetValidation(key, out var error) && error.IsValid() && showErrorGUI)
             {
-                ValidateLabel(errorText);
+                ValidateLabel(error);
             }
-            return errorText;
-        }
-
-        private string ValidateTextProperty(string target, string key, bool allowEmpty, string emptyText = "不能为空", string validatePattern = "", string validateText = "校验失败", Func<bool> validateFunc = null)
-        {
-            // 校验输入为空
-            if (!target.IsValid() && !allowEmpty)
-            {
-                validationMap[key] = emptyText;
-            }
-            // 校验传入的方法
-            else if (validateFunc != null)
-            {
-                validationMap[key] = validateFunc() ? string.Empty : validateText;
-            }
-            // 校验正则表达式
-            else if (target.IsValid() && validatePattern.IsValid())
-            {
-                validationMap[key] = Regex.IsMatch(target, validatePattern) ? string.Empty : validateText;
-            }
-            // 其他情况都校验通过
-            else
-            {
-                validationMap[key] = string.Empty;
-            }
-            return validationMap[key];
+            return error;
         }
 
         private void ValidateTextFieldForOnce(string key)
@@ -877,7 +879,7 @@ namespace QGMiniGame
 
         private void ValidateAllTextFieldForOnce()
         {
-            var keys = validationMap.Keys;
+            var keys = Builder.ValidationKeys;
             foreach (var key in keys)
             {
                 ValidateTextFieldForOnce(key);
@@ -907,21 +909,6 @@ namespace QGMiniGame
             }
         }
 
-        private bool IsAllValidatePass
-        {
-            get
-            {
-                var validateValues = validationMap.Values;
-                foreach (var value in validateValues)
-                {
-                    // 任意1项有错误内容，则验证失败
-                    if (value.IsValid()) return false;
-                }
-                // 全部验证通过
-                return true;
-            }
-        }
-
         /// <summary>
         /// 画上一个 UI 的框
         /// @note: 此方法用于调试，别删除
@@ -945,10 +932,10 @@ namespace QGMiniGame
                         label: "游戏图标",
                         text: fundamentals.iconPath,
                         allowEmpty: false,
-                        emptyText: "请选择游戏图标路径",
-                        validatePattern: string.Empty,
-                        validateText: "图标不存在，请重新选择",
-                        validateFunc: () => { return File.Exists(fundamentals.iconPath); },
+                        emptyError: "请选择游戏图标路径",
+                        pattern: string.Empty,
+                        invalidError: "图标不存在，请重新选择",
+                        customFunc: () => { return File.Exists(fundamentals.iconPath); },
                         showErrorGUI: false);
                     if (GUILayout.Button("选择", GUILayout.Width(64f)))
                     {
@@ -958,7 +945,7 @@ namespace QGMiniGame
                         {
                             SaveProperty(ref fundamentals.iconPath, iconPath);
                             // 选择了即有效，直接修改结果
-                            validationMap[nameof(fundamentals.iconPath)] = string.Empty;
+                            Builder.ModifyValidation(nameof(fundamentals.iconPath), string.Empty);
                         }
                         GUIUtility.ExitGUI();
                     }
@@ -982,10 +969,10 @@ namespace QGMiniGame
                         label: "证书文件路径",
                         text: fundamentals.signCertificate,
                         allowEmpty: !useCustomSign,
-                        emptyText: "请选择证书路径",
-                        validatePattern: string.Empty,
-                        validateText: "证书不存在，请重新选择",
-                        validateFunc: () => { return useCustomSign ? File.Exists(fundamentals.signCertificate) : true; },
+                        emptyError: "请选择证书路径",
+                        pattern: string.Empty,
+                        invalidError: "证书不存在，请重新选择",
+                        customFunc: () => { return useCustomSign ? File.Exists(fundamentals.signCertificate) : true; },
                         showErrorGUI: false);
                     if (GUILayout.Button("选择", GUILayout.Width(64f)))
                     {
@@ -995,7 +982,7 @@ namespace QGMiniGame
                         {
                             SaveProperty(ref fundamentals.signCertificate, certificatePath);
                             // 选择了即有效，直接修改结果
-                            validationMap[nameof(fundamentals.signCertificate)] = string.Empty;
+                            Builder.ModifyValidation(nameof(fundamentals.signCertificate), string.Empty);
                         }
                         GUIUtility.ExitGUI();
                     }
@@ -1016,10 +1003,10 @@ namespace QGMiniGame
                         label: "私钥文件路径",
                         text: fundamentals.signPrivate,
                         allowEmpty: !useCustomSign,
-                        emptyText: "请选择私钥路径",
-                        validatePattern: string.Empty,
-                        validateText: "私钥不存在，请重新选择",
-                        validateFunc: () => { return useCustomSign ? File.Exists(fundamentals.signPrivate) : true; },
+                        emptyError: "请选择私钥路径",
+                        pattern: string.Empty,
+                        invalidError: "私钥不存在，请重新选择",
+                        customFunc: () => { return useCustomSign ? File.Exists(fundamentals.signPrivate) : true; },
                         showErrorGUI: false);
                     if (GUILayout.Button("选择", GUILayout.Width(64f)))
                     {
@@ -1029,7 +1016,7 @@ namespace QGMiniGame
                         {
                             SaveProperty(ref fundamentals.signPrivate, privatePath);
                             // 选择了即有效，直接修改结果
-                            validationMap[nameof(fundamentals.signPrivate)] = string.Empty;
+                            Builder.ModifyValidation(nameof(fundamentals.signPrivate), string.Empty);
                         }
                         GUIUtility.ExitGUI();
                     }
@@ -1039,8 +1026,8 @@ namespace QGMiniGame
                         var privatePaths = $"{GenerateCertificatePath}/private.pem";
                         SaveProperty(ref fundamentals.signCertificate, certificatePaths);
                         SaveProperty(ref fundamentals.signPrivate, privatePaths);
-                        validationMap[nameof(fundamentals.signCertificate)] = string.Empty;
-                        validationMap[nameof(fundamentals.signPrivate)] = string.Empty;
+                        Builder.ModifyValidation(nameof(fundamentals.signCertificate), string.Empty);
+                        Builder.ModifyValidation(nameof(fundamentals.signPrivate), string.Empty);
                         isHaveCertificatePath = false;
                     }
 
@@ -1060,8 +1047,8 @@ namespace QGMiniGame
                         else
                         {
                             // 不使用的情况下清除校验
-                            validationMap[nameof(fundamentals.signCertificate)] = string.Empty;
-                            validationMap[nameof(fundamentals.signPrivate)] = string.Empty;
+                            Builder.ModifyValidation(nameof(fundamentals.signCertificate), string.Empty);
+                            Builder.ModifyValidation(nameof(fundamentals.signPrivate), string.Empty);
                         }
                     }
                     // 记录使用状态
@@ -1081,9 +1068,9 @@ namespace QGMiniGame
                         key: nameof(fundamentals.streamingAssetsURL),
                         label: new GUIContent("服务器地址", "例如http://localhost:8080/StreamingAssets"), fundamentals.streamingAssetsURL,
                         allowEmpty: !useRemoteStreamingAssets,
-                        emptyText: "地址不能为空",
-                        validatePattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
-                        validateText: "需填写填写http://或https://开头的有效URL地址",
+                        emptyError: "地址不能为空",
+                        pattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
+                        invalidError: "需填写填写http://或https://开头的有效URL地址",
                         showErrorGUI: false);
                     ValidateLabel(errorText, -2);
                     --EditorGUI.indentLevel;
@@ -1099,7 +1086,7 @@ namespace QGMiniGame
                         else
                         {
                             // 不使用的情况下清除校验
-                            validationMap[nameof(fundamentals.streamingAssetsURL)] = string.Empty;
+                            Builder.ModifyValidation(nameof(fundamentals.streamingAssetsURL), string.Empty);
                         }
                     }
                     fundamentals.useRemoteStreamingAssets = useRemoteStreamingAssets;
@@ -1114,10 +1101,10 @@ namespace QGMiniGame
                         label: new GUIContent("导出路径", "导出的WebGL和小游戏工程根目录"),
                         text: fundamentals.exportPath,
                         allowEmpty: false,
-                        emptyText: "请选择导出路径",
-                        validatePattern: string.Empty,
-                        validateText: "路径不存在，请重新选择",
-                        validateFunc: () => { return isExportPathExist(); },
+                        emptyError: "请选择导出路径",
+                        pattern: string.Empty,
+                        invalidError: "路径不存在，请重新选择",
+                        customFunc: () => { return isExportPathExist(); },
                         showErrorGUI: false);
                     GUI.enabled = fundamentals.exportPath.IsValid() && isExportPathExist();
                     if (GUILayout.Button("打开", GUILayout.Width(64f)))
@@ -1134,7 +1121,7 @@ namespace QGMiniGame
                         {
                             SaveProperty(ref fundamentals.exportPath, exportPath);
                             // 选择了即有效，直接修改结果
-                            validationMap[nameof(fundamentals.exportPath)] = string.Empty;
+                            Builder.ModifyValidation(nameof(fundamentals.exportPath), string.Empty);
                         }
                         GUIUtility.ExitGUI();
                     }
@@ -1177,9 +1164,9 @@ namespace QGMiniGame
                     label: new GUIContent("游戏版本名称", "一般与版本号相匹配，例如版本号为1，则版本名称为1.0.0"),
                     text: StringNoEmpty(fundamentals.projectVersionName, "1.0.0"),
                     allowEmpty: true,
-                    emptyText: string.Empty,
-                    validatePattern: @"^[0-9]+(\.[0-9]+)*$",
-                    validateText: "需以英文句号分隔，每一段只能包含数字");
+                    emptyError: string.Empty,
+                    pattern: @"^[0-9]+(\.[0-9]+)*$",
+                    invalidError: "需以英文句号分隔，每一段只能包含数字");
                 DirtySaveField(() =>
                 {
                     fundamentals.minPlatformVersion = EditorGUILayout.IntField(
@@ -1200,7 +1187,7 @@ namespace QGMiniGame
                 // 提示缓存系统依赖库版本过低
                 UpdateAssetCacheSystemAvailability();
                 var isSystemAvailable = BuildConfigAsset.AssetCache.available;
-                if (!isSystemAvailable && requestQGBuildToolVersionStatus != RequestVersionStatus.InProgress)
+                if (!isSystemAvailable && requestQGBuildToolCurrentVersionStatus != RequestVersionStatus.InProgress)
                 {
                     GUILayout.BeginHorizontal();
                     var text = $"小游戏打包工具版本不符，缓存系统不可用，请升级至 {ASSET_CACHE_SYSTEM_MIN_VERSION} 及以上版本";
@@ -1229,27 +1216,27 @@ namespace QGMiniGame
                     label: new GUIContent("缓存CDN路径(必填)", "缓存路径必填项，例如 http://10.117.224.49:8080/StreamingAssets"),
                     text: assetCache.gameCDNRoot,
                     allowEmpty: !assetCache.enableBundleCache,
-                    emptyText: "地址不能为空",
-                    validatePattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
-                    validateText: "需填写填写http://或https://开头的有效URL地址");
+                    emptyError: "地址不能为空",
+                    pattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
+                    invalidError: "需填写填写http://或https://开头的有效URL地址");
                 ValidationTextField(
                     target: ref assetCache.bundlePathIdentifier,
                     key: nameof(assetCache.bundlePathIdentifier),
                     label: new GUIContent("缓存路径标识", "不填写代表所有路径都进行缓存判断。填写时多个时使用英文分号分隔，例如 StreamingAssets;bundles"),
                     text: assetCache.bundlePathIdentifier,
                     allowEmpty: true,
-                    emptyText: string.Empty,
-                    validatePattern: @"^([\w/]+)(;[\w/]+)*$",
-                    validateText: "路径只能使用字母、数字、下划线，多个路径之间用英文分号分隔");
+                    emptyError: string.Empty,
+                    pattern: @"^([\w/]+)(;[\w/]+)*$",
+                    invalidError: "路径只能使用字母、数字、下划线，多个路径之间用英文分号分隔");
                 ValidationTextField(
                     target: ref assetCache.excludeFileExtensions,
                     key: nameof(assetCache.excludeFileExtensions),
                     label: new GUIContent("不缓存的文件类型", "不填写代表所有文件都进行缓存判断。填写多个时使用英文分号分隔，例如 .json;.hash"),
                     text: assetCache.excludeFileExtensions,
                     allowEmpty: true,
-                    emptyText: string.Empty,
-                    validatePattern: @"^\.[A-Za-z0-9]+(;\.[A-Za-z0-9]+)*$",
-                    validateText: "类型必须以英文句号开头，名称只能使用英文和数字，多个路径之间用英文分号分隔");
+                    emptyError: string.Empty,
+                    pattern: @"^\.[A-Za-z0-9]+(;\.[A-Za-z0-9]+)*$",
+                    invalidError: "类型必须以英文句号开头，名称只能使用英文和数字，多个路径之间用英文分号分隔");
                 DirtySaveField(() =>
                 {
                     assetCache.bundleHashLength = EditorGUILayout.IntPopup(
@@ -1276,9 +1263,9 @@ namespace QGMiniGame
                     label: new GUIContent("清理忽略文件", "自动清理时忽略的文件，支持纯hash或名称，名称尽量不要使用特殊字符。不填写代表所有缓存都有可能被清理。填写多个时使用英文分号分隔，例如 8d265a9dfd6cb7669cdb8b726f0afb1e;asset1"),
                     text: assetCache.excludeClearFiles,
                     allowEmpty: true,
-                    emptyText: string.Empty,
-                    validatePattern: @"^[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+(;[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+)*$",
-                    validateText: "不支持/?<>\\:*|\"等特殊字符，多个文件之间用英文分号分隔");
+                    emptyError: string.Empty,
+                    pattern: @"^[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+(;[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+)*$",
+                    invalidError: "不支持/?<>\\:*|\"等特殊字符，多个文件之间用英文分号分隔");
                 DirtySaveField(() =>
                 {
                     assetCache.enableCacheLog = EditorGUILayout.Toggle(new GUIContent("开启日志", "是否将缓存信息输出到控制台，便于调试"), assetCache.enableCacheLog);
@@ -1319,6 +1306,19 @@ namespace QGMiniGame
             });
         }
 
+        private void DrawOtherSettings()
+        {
+            Foldout("其他设置", () =>
+            {
+                ValidationTextField(
+                    target: ref BuildConfigAsset.OtherSettingsConfig.environmentVariablePath,
+                    key: nameof(BuildConfigAsset.OtherSettingsConfig.environmentVariablePath),
+                    label: new GUIContent("环境变量 Path", "自定义的环境变量集合，Windows 以分号分隔路径，MacOS 以冒号分隔路径"),
+                    text: BuildConfigAsset.OtherSettingsConfig.environmentVariablePath,
+                    allowEmpty: true);
+            });
+        }
+
         private void DrawBuildActionArea()
         {
             GUILayout.BeginHorizontal();
@@ -1335,8 +1335,10 @@ namespace QGMiniGame
             EditorUtil.Space(4f);
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            var sdkVersionReady = requestSDKVersionStatus == RequestVersionStatus.Success;
-            var qgBuildToolVersionReady = requestQGBuildToolVersionStatus == RequestVersionStatus.Success;
+            var sdkVersionReady =
+                requestSDKLatestVersionStatus == RequestVersionStatus.Idle ||
+                requestSDKLatestVersionStatus == RequestVersionStatus.Success;
+            var qgBuildToolVersionReady = requestQGBuildToolCurrentVersionStatus == RequestVersionStatus.Success;
             GUI.enabled = qgBuildToolVersionReady && sdkVersionReady && !isUpgradingSDK && !isUpgradingQGBuildTool;
             if (GUILayout.Button("打包", GUILayout.Width(100f)))
             {
@@ -1354,15 +1356,22 @@ namespace QGMiniGame
         {
             void CheckLatestVersionButton()
             {
-                MiniLinkButton("检查更新", UpdateSDKVersionStatusAsync);
+                MiniLinkButton("检查更新", UpdateSDKLatestVersionStatusAsync);
+            }
+            void UpgradeButton()
+            {
+                MiniLinkButton("下载更新", SDKUpdateProcess);
             }
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             MiniLabelField($"SDK 版本: {VersionInfo.VERSION}", Color.green, false);
-            switch (requestSDKVersionStatus)
+            switch (requestSDKLatestVersionStatus)
             {
+                case RequestVersionStatus.Idle:
+                    CheckLatestVersionButton();
+                    break;
                 case RequestVersionStatus.InProgress:
-                    MiniLabelField("正在检测 SDK 版本更新...", Color.red, true);
+                    WaitSpinIcon();
                     break;
                 case RequestVersionStatus.Success:
                     EditorGUILayout.BeginHorizontal();
@@ -1370,10 +1379,7 @@ namespace QGMiniGame
                     var versionCompare = CompareVersion(VersionInfo.VERSION, latestSDKVersion);
                     if (versionCompare.HasValue && versionCompare < 0)
                     {
-                        MiniLinkButton("升级版本", () =>
-                        {
-                            SDKUpdateProcess();
-                        });
+                        UpgradeButton();
                     }
                     else
                     {
@@ -1384,7 +1390,7 @@ namespace QGMiniGame
                 case RequestVersionStatus.Fail:
                     EditorGUILayout.BeginHorizontal();
                     CheckLatestVersionButton();
-                    MiniLabelField("更新获取失败", Color.red, true);
+                    MiniLabelField("检查更新失败", Color.red, true);
                     EditorGUILayout.EndHorizontal();
                     break;
             }
@@ -1394,13 +1400,13 @@ namespace QGMiniGame
         private async void SDKUpdateProcess()
         {
             // 弹窗让用户确认升级
-            var option = EditorUtility.DisplayDialogComplex("提示", $"是否确认安装SDK最新版本 {latestSDKVersion}", "确认", "取消", "查看更新日志");
+            var option = EditorUtility.DisplayDialogComplex("提示", $"是否确认下载SDK最新版本 {latestSDKVersion}", "确认", "取消", "查看更新日志");
             switch (option)
             {
                 case 0:
                     if (isUpgradingSDK) return;
                     isUpgradingSDK = true;
-                    var progressDialogTitle = $"安装 SDK V{latestSDKVersion}";
+                    var progressDialogTitle = $"下载 SDK V{latestSDKVersion}";
                     void ContactUsDialog(string message)
                     {
                         if (!EditorUtility.DisplayDialog("提示", message, "查看联系方式", "确认")) return;
@@ -1457,12 +1463,12 @@ namespace QGMiniGame
                         }
                         EditorUtility.ClearProgressBar();
                     }
-                    // 导入安装包
-                    EditorPrefs.SetInt(ImportingClass, (int)ImportStatus.Importimg);
-                    AssetDatabase.ImportPackage(LatestSDKPackageTempPath, false);
+                    // 安装完成后打开安装包目录，提示用户导入手动导入升级
                     isUpgradingSDK = false;
-                    // 导入超时处理
-                    ImportTiming();
+                    if (EditorUtility.DisplayDialog("提示", "下载完成，建议删除【OPPO-GAME-SDK】目录后重新导入，避免出现兼容问题", "确定"))
+                    {
+                        QGGameTools.ShowInExplorer(LatestSDKPackageTempPath);
+                    }
                     break;
                 case 1:
                     break;
@@ -1474,9 +1480,13 @@ namespace QGMiniGame
 
         private void DrawQGBuildToolVersionInfo()
         {
-            void RefreshVersionButton()
+            void CheckCurrentVersionButton()
             {
-                RefreshButton(UpdateQGBuildToolVersionStatusAsync);
+                RefreshButton(UpdateQGBuildToolCurrentVersionStatusAsync);
+            }
+            void CheckLatestVersionButton()
+            {
+                MiniLinkButton("检查更新", UpdateQGBuildToolLatestVersionStatusAsync);
             }
             void UpgradeButton()
             {
@@ -1490,15 +1500,15 @@ namespace QGMiniGame
                     isUpgradingQGBuildTool = true;
                     var title = "安装小游戏打包工具";
                     EditorUtility.DisplayProgressBar(title, $"正在安装最新版本: {latestBuildToolVersion}", 0.2f);
-                    var error = await UpgradeQGBuildToolLatestVersionAsync();
-                    if (!CommandOutputHandler(error))
+                    var success = await UpgradeQGBuildToolLatestVersionAsync();
+                    if (!CommandOutputHandler(success))
                     {
                         isUpgradingQGBuildTool = false;
                         return;
                     }
                     EditorUtility.DisplayProgressBar(title, "正在校验版本...", 0.5f);
-                    error = await RequestQGBuildToolVersionAsync();
-                    if (!CommandOutputHandler(error))
+                    success = await RequestQGBuildToolCurrentVersionAsync();
+                    if (!CommandOutputHandler(success))
                     {
                         isUpgradingQGBuildTool = false;
                         return;
@@ -1517,31 +1527,52 @@ namespace QGMiniGame
             }
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            switch (requestQGBuildToolVersionStatus)
+            switch (requestQGBuildToolCurrentVersionStatus)
             {
                 case RequestVersionStatus.InProgress:
-                    MiniLabelField("正在检查打包工具版本...", Color.red);
+                    MiniLabelField("获取版本中", Color.red);
+                    WaitSpinIcon();
                     break;
                 case RequestVersionStatus.Success:
                     EditorGUILayout.BeginHorizontal();
                     MiniLabelField($"小游戏打包工具版本: {currentBuildToolVersion}", Color.green);
-                    RefreshVersionButton();
-                    var versionCompare = CompareVersion(currentBuildToolVersion, latestBuildToolVersion);
-                    if (versionCompare.HasValue && versionCompare < 0)
+                    switch (requestQGBuildToolLatestVersionStatus)
                     {
-                        UpgradeButton();
+                        case RequestVersionStatus.Idle:
+                            CheckCurrentVersionButton();
+                            CheckLatestVersionButton();
+                            break;
+                        case RequestVersionStatus.InProgress:
+                            WaitSpinIcon();
+                            break;
+                        case RequestVersionStatus.Success:
+                            CheckCurrentVersionButton();
+                            CheckLatestVersionButton();
+                            var versionCompare = CompareVersion(currentBuildToolVersion, latestBuildToolVersion);
+                            if (versionCompare.HasValue && versionCompare < 0)
+                            {
+                                UpgradeButton();
+                            }
+                            else
+                            {
+                                MiniLabelField("已是最新版本", Color.gray, true);
+                            }
+                            break;
+                        case RequestVersionStatus.Fail:
+                            CheckCurrentVersionButton();
+                            CheckLatestVersionButton();
+                            MiniLabelField("检查更新失败", Color.red, true);
+                            break;
                     }
-                    else
+                    if (requestQGBuildToolLatestVersionStatus == RequestVersionStatus.Idle)
                     {
-                        MiniLabelField("已是最新版本", Color.gray, true);
                     }
                     EditorGUILayout.EndHorizontal();
                     break;
                 case RequestVersionStatus.Fail:
                     EditorGUILayout.BeginHorizontal();
-                    MiniLabelField("获取打包工具版本失败，请安装后重试", Color.red);
-                    RefreshVersionButton();
-                    UpgradeButton();
+                    MiniLabelField("获取打包工具版本失败，请根据日志指引操作", Color.red);
+                    CheckCurrentVersionButton();
                     EditorGUILayout.EndHorizontal();
                     break;
             }
@@ -1607,7 +1638,7 @@ namespace QGMiniGame
                 return;
             }
             // 校验成功
-            if (IsAllValidatePass)
+            if (Builder.IsAllValidationPass)
             {
                 // 先切换到 WebGL 平台
                 var platformPass = EditorUserBuildSettings.activeBuildTarget == BuildTarget.WebGL;
@@ -1641,23 +1672,8 @@ namespace QGMiniGame
                         EditorUtility.DisplayProgressBar("Shader真机测试", "正在构建测试场景...", 0.5f);
                         ShaderRuntimeDetector.AddShaderDetection(useRuntimeShaderDetection);
                         EditorUtility.ClearProgressBar();
-                        // 获取导出路径
-                        var exportPath = BuildConfigAsset.Fundamentals.exportPath;
-                        var webGLExportPath = Path.Combine(exportPath, WEBGL_BUILD_DIR);
-                        // 进行符合小游戏规范的项目设置
-                        QGGameTools.SetPlayer();
-                        // 获取当前是否使用WEBGL2.0
-                        QGGameTools.GetUserWebGLVersion();
-                        // 删除之前构建的目录
-                        QGGameTools.DelectDir(webGLExportPath);
-                        // 构建导出 WebGL 工程
-                        var buildReport = QGGameTools.BuildWebGL(webGLExportPath);
-                        if (buildReport.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
-                        {
-                            // 开始将 WebGL 转化为小游戏工程
-                            QGGameTools.ConvetWebGL(exportPath, webGLExportPath);
-                        }
-                        else
+                        // 构建游戏
+                        if (!QGGameTools.BuildGame(true))
                         {
                             ShowNotification(new GUIContent("构建 WebGL 失败，请根据控制台输出修复错误后，再重新打包"));
                         }
@@ -1727,15 +1743,7 @@ namespace QGMiniGame
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void OnScriptReload()
         {
-            bool isBuildEditorWindowRunning = false;
-#if UNITY_2019_1_OR_NEWER
-        // Use the HasOpenInstances method if available (Unity 2019 and later)
-        isBuildEditorWindowRunning =  EditorWindow.HasOpenInstances<BuildEditorWindow>();
-#else
-            // Use the GetWindow method and check if the result is not null (Unity 2018 and earlier)
-            isBuildEditorWindowRunning = EditorWindow.GetWindow<BuildEditorWindow>(false) != null;
-#endif
-            if (isBuildEditorWindowRunning && (EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.Importimg
+            if (HasOpenInstances && (EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.Importimg
                 || EditorPrefs.GetInt(ImportingClass) == (int)ImportStatus.FirstInjection))
             {
                 EditorUtility.ClearProgressBar();

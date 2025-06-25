@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using UnityEngine.Rendering;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
 namespace QGMiniGame
@@ -16,8 +12,30 @@ namespace QGMiniGame
     {
         private const string EDITOR_CONFIG_PATH = "Assets/OPPO-GAME-SDK/Editor/BuildTool/QGBuildConfig.asset";
 
+        public static bool BuildGame(bool showResultWindow = false)
+        {
+            // 获取导出路径
+            var exportPath = BuildConfigAsset.Fundamentals.exportPath;
+            var webGLExportPath = Path.Combine(exportPath, GlobalDefines.WEBGL_BUILD_DIR);
+            // 进行符合小游戏规范的项目设置
+            SetPlayer();
+            // 获取当前是否使用WEBGL2.0
+            GetUserWebGLVersion();
+            // 删除之前构建的目录
+            DelectDir(webGLExportPath);
+            // 构建导出 WebGL 工程
+            var buildReport = BuildWebGL(webGLExportPath);
+            var success = buildReport.summary.result == BuildResult.Succeeded;
+            if (success)
+            {
+                // 开始将 WebGL 转化为小游戏工程
+                success = ConvetWebGL(exportPath, webGLExportPath, showResultWindow);
+            }
+            return success;
+        }
+
         //构建小游戏
-        public static void ConvetWebGL(string buildSrc, string webglSrc)
+        public static bool ConvetWebGL(string buildSrc, string webglSrc, bool showResultWindow = false)
         {
             QGLog.Log("[BuildMiniGame] Start: Please Waitting");
 
@@ -28,18 +46,18 @@ namespace QGMiniGame
 
             if (BuildConfigAsset.Fundamentals.useRemoteStreamingAssets && BuildConfigAsset.Fundamentals.streamingAssetsURL.IsValid())
             {
-                commandStr += (" --addressable=" + BuildConfigAsset.Fundamentals.streamingAssetsURL);
+                commandStr += (" --addressable=" + BuildConfigAsset.Fundamentals.streamingAssetsURL.ToPlatformQuoted());
             }
 
-            commandStr += (" --gameName=" + BuildConfigAsset.Fundamentals.projectName);
-            commandStr += (" --unityVer=" + Application.unityVersion);
-            commandStr += (" --icon=" + BuildConfigAsset.Fundamentals.iconPath);
+            commandStr += (" --gameName=" + BuildConfigAsset.Fundamentals.projectName.ToPlatformQuoted());
+            commandStr += (" --unityVer=" + Application.unityVersion.ToPlatformQuoted());
+            commandStr += (" --icon=" + BuildConfigAsset.Fundamentals.iconPath.ToPlatformQuoted());
 
-            commandStr += (" --packageName=" + BuildConfigAsset.Fundamentals.packageName);
+            commandStr += (" --packageName=" + BuildConfigAsset.Fundamentals.packageName.ToPlatformQuoted());
 
             var orientationArr = new[] { "portrait", "landscape", "landscapeLeft", "landscapeRight" };
-            commandStr += (" --orientation=" + orientationArr[BuildConfigAsset.Fundamentals.orientation]);
-            commandStr += (" --versionName=" + BuildConfigAsset.Fundamentals.projectVersionName);
+            commandStr += (" --orientation=" + orientationArr[BuildConfigAsset.Fundamentals.orientation].ToPlatformQuoted());
+            commandStr += (" --versionName=" + BuildConfigAsset.Fundamentals.projectVersionName.ToPlatformQuoted());
             commandStr += (" --versionCode=" + BuildConfigAsset.Fundamentals.projectVersion);
             commandStr += (" --minPlatformVersion=" + BuildConfigAsset.Fundamentals.minPlatformVersion);
 
@@ -52,10 +70,10 @@ namespace QGMiniGame
                 }
                 commandStr += (" --keepOldVersion=" + BuildConfigAsset.AssetCache.keepOldVersion);
                 commandStr += (" --enableCacheLog=" + BuildConfigAsset.AssetCache.enableCacheLog);
-                commandStr += (" --gameCDNRoot=" + BuildConfigAsset.AssetCache.gameCDNRoot);
-                commandStr += (" --bundlePathIdentifier=" + BuildConfigAsset.AssetCache.bundlePathIdentifier);
-                commandStr += (" --excludeFileExtensions=" + BuildConfigAsset.AssetCache.excludeFileExtensions);
-                commandStr += (" --excludeClearFiles=" + BuildConfigAsset.AssetCache.excludeClearFiles);
+                commandStr += (" --gameCDNRoot=" + BuildConfigAsset.AssetCache.gameCDNRoot.ToPlatformQuoted());
+                commandStr += (" --bundlePathIdentifier=" + BuildConfigAsset.AssetCache.bundlePathIdentifier.ToPlatformQuoted());
+                commandStr += (" --excludeFileExtensions=" + BuildConfigAsset.AssetCache.excludeFileExtensions.ToPlatformQuoted());
+                commandStr += (" --excludeClearFiles=" + BuildConfigAsset.AssetCache.excludeClearFiles.ToPlatformQuoted());
                 commandStr += (" --bundleHashLength=" + BuildConfigAsset.AssetCache.bundleHashLength);
                 commandStr += (" --defaultReleaseSize=" + BuildConfigAsset.AssetCache.defaultReleaseSize);
             }
@@ -68,73 +86,41 @@ namespace QGMiniGame
 
             if (BuildConfigAsset.Fundamentals.useCustomSign)
             {
-                commandStr += (" --signCertificate=" + BuildConfigAsset.Fundamentals.signCertificate);
-                commandStr += (" --signPrivate=" + BuildConfigAsset.Fundamentals.signPrivate);
+                commandStr += (" --signCertificate=" + BuildConfigAsset.Fundamentals.signCertificate.ToPlatformQuoted());
+                commandStr += (" --signPrivate=" + BuildConfigAsset.Fundamentals.signPrivate.ToPlatformQuoted());
                 commandStr += " release";
             }
 
-            // 要执行的命令字符串
-            string commandString = "cd /d " + webglSrc + " && " + commandStr;
-            // 创建 ProcessStartInfo 对象
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = "cmd.exe";
-            startInfo.Arguments = "/c \"" + commandString + "\"";
-            // 设置 UseShellExecute 为 false
-            startInfo.UseShellExecute = false;
-            // 重定向标准输出流
-            startInfo.RedirectStandardOutput = true;
-
-            startInfo.CreateNoWindow = true;
-            // 创建进程并执行命令
-            Process commandProcess = new Process();
-            commandProcess.StartInfo = startInfo;
-            commandProcess.Start();
-            // 创建 CancellationTokenSource 对象
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            // 启动后台任务异步读取标准输出流
-            Task.Factory.StartNew(() =>
+            // 执行打包命令
+            var success = true;
+            try
             {
-                while (!tokenSource.IsCancellationRequested)
+                ShellHelper.ExecuteCommand(commandStr, webglSrc);
+            }
+            catch
+            {
+                success = false;
+            }
+
+            if (success && showResultWindow)
+            {
+                // 创建一个提示框，显示"Hello World!"消息，点击确定按钮后返回true
+                string unityUseWebGL2 = $"渲染版本: {(BuildConfigAsset.AssetCache.unityUseWebGL2 ? "WebGL2.0" : "WebGL1.0")}";
+                string useCustomSign = $"发布类型: {(BuildConfigAsset.Fundamentals.useCustomSign ? "release" : "debug")}";
+                bool result = EditorUtility.DisplayDialog("提示", $"完成打包\n\n{unityUseWebGL2}\n{useCustomSign}", "确定");
+
+                // 检查返回值
+                if (result)
                 {
-                    string output = commandProcess.StandardOutput.ReadLine();
-                    if (output != null)
-                    {
-                        QGLog.Log(output);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    ShowInExplorer(buildSrc);
                 }
-            }, tokenSource.Token);
-            // 等待命令执行完毕
-            commandProcess.WaitForExit();
-            // 终止异步任务
-            tokenSource.Cancel();
-
-            QGLog.Log(commandString);
-
-            /*        CmdRunner.RunBat("build.bat", "", buildSrc);*/
-            MyCommandEnd(buildSrc);
-        }
-
-        [MenuItem("MyMenu/MyCommand")]
-        static void MyCommandEnd(string buildSrc)
-        {
-            // 创建一个提示框，显示"Hello World!"消息，点击确定按钮后返回true
-            string unityUseWebGL2 = $"渲染版本: {(BuildConfigAsset.AssetCache.unityUseWebGL2 ? "WebGL2.0" : "WebGL1.0")}";
-            string useCustomSign = $"发布类型: {(BuildConfigAsset.Fundamentals.useCustomSign ? "release" : "debug")}";
-            bool result = EditorUtility.DisplayDialog("提示", $"完成打包\n\n{unityUseWebGL2}\n{useCustomSign}", "确定");
-
-            // 检查返回值
-            if (result)
-            {
-                ShowInExplorer(buildSrc);
+                else
+                {
+                    QGLog.Log("");
+                }
             }
-            else
-            {
-                QGLog.Log("");
-            }
+
+            return success;
         }
 
         // 删除文件夹
