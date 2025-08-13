@@ -4,7 +4,7 @@ using QGMiniGame;
 using UnityEngine.SceneManagement;
 using System;
 using UnityEngine.EventSystems;
-using UnityEngine.Windows;
+
 public class showModal : MonoBehaviour
 {
     public Button comebackbtn;
@@ -215,7 +215,7 @@ public class showModal : MonoBehaviour
         QG.ShowLoading(loadingText);
         QG.SetTimeout(loadingTimes, (msg) =>
         {
-            QG.HideLoading((msg) =>
+            QG.HideLoading((hideMsg) =>
             {
                 Debug.Log("关闭进度成功");
             });

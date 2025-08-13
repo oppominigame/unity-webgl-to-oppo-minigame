@@ -1,5 +1,9 @@
 # 更新日志
 
+## 2025-8-13 【重要更新】
+- 重要：上线新版本 Unity SDK，版本号 V8.3.0，位于 `tools/unity_webgl_rpk_oppo_v8.3.0.unitypackage`
+- 重要：Unity SDK V8.3.0 新增支持 rpk 自动安装（要求小游戏打包工具版本 >= 3.0.0）
+
 ## 2025-6-25 【重要更新】
 - 重要：上线新版本 Unity SDK，版本号 V8.2.0，位于 `tools/unity_webgl_rpk_oppo_v8.2.0.unitypackage`
 - 重要：Unity SDK V8.2.0 新增支持 MacOS

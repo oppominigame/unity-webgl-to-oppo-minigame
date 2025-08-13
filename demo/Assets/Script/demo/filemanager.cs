@@ -525,13 +525,13 @@ public class filemanager : MonoBehaviour
         {
             string filename = "/database2";
             string encoding = "binary"; //utf8 binary
-            QG.ReadFile(filename, encoding, (success) =>
+            QG.ReadFile(filename, encoding, (readSuccess) =>
           {
-              ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
-              Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(success));
+              ReadFileResponse res = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(readSuccess));
+              Debug.Log("QG.ReadFile success = " + JsonUtility.ToJson(readSuccess));
               if (res.encoding == "utf8")
               {
-                  loginMessage.text = "QG.ReadFile success = " + JsonUtility.ToJson(success) + "\n >>>>>>>> \n encoding:" + res.encoding + "\n dataUtf8:" + res.dataUtf8;
+                  loginMessage.text = "QG.ReadFile success = " + JsonUtility.ToJson(readSuccess) + "\n >>>>>>>> \n encoding:" + res.encoding + "\n dataUtf8:" + res.dataUtf8;
               }
               else if (res.encoding == "binary")
               {
@@ -567,16 +567,16 @@ public class filemanager : MonoBehaviour
         {
             string filename = "/database3";
             string encoding = "binary"; //utf8 binary
-            ReadFileResponse res = QG.ReadFileSync(filename, encoding, (success) =>
+            ReadFileResponse res = QG.ReadFileSync(filename, encoding, (readSuccess) =>
            {
-               ReadFileResponse readFileResponse = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(success));
+               ReadFileResponse readFileResponse = JsonUtility.FromJson<ReadFileResponse>(JsonUtility.ToJson(readSuccess));
                if (readFileResponse.encoding == "utf8")
                {
-                   Debug.Log("QG.ReadFileSync utf8 success = " + JsonUtility.ToJson(success));
+                   Debug.Log("QG.ReadFileSync utf8 success = " + JsonUtility.ToJson(readSuccess));
                }
                else if (readFileResponse.encoding == "binary")
                {
-                   Debug.Log("QG.ReadFileSync binary success = " + JsonUtility.ToJson(success));
+                   Debug.Log("QG.ReadFileSync binary success = " + JsonUtility.ToJson(readSuccess));
                }
            },
            (fail) =>

@@ -4,7 +4,6 @@ using QGMiniGame;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using System;
-using UnityEngine.Windows;
 
 public class gameSystemInfo : MonoBehaviour
 {

@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using UnityEngine.Rendering;
 using UnityEditor.Build.Reporting;
+using static UnityEditor.PlayerSettings;
 
 namespace QGMiniGame
 {
@@ -12,7 +13,7 @@ namespace QGMiniGame
     {
         private const string EDITOR_CONFIG_PATH = "Assets/OPPO-GAME-SDK/Editor/BuildTool/QGBuildConfig.asset";
 
-        public static bool BuildGame(bool showResultWindow = false)
+        public static bool BuildGame()
         {
             // 获取导出路径
             var exportPath = BuildConfigAsset.Fundamentals.exportPath;
@@ -29,16 +30,14 @@ namespace QGMiniGame
             if (success)
             {
                 // 开始将 WebGL 转化为小游戏工程
-                success = ConvetWebGL(exportPath, webGLExportPath, showResultWindow);
+                success = ConvetWebGL(exportPath, webGLExportPath);
             }
             return success;
         }
 
         //构建小游戏
-        public static bool ConvetWebGL(string buildSrc, string webglSrc, bool showResultWindow = false)
+        public static bool ConvetWebGL(string buildSrc, string webglSrc)
         {
-            QGLog.Log("[BuildMiniGame] Start: Please Waitting");
-
             /*         CopyDirectory(Path.Combine(UnityEngine.Application.dataPath, "OPPO-GAME-SDK/Default"), buildSrc, true);*/
 
             //拼接打包命令
@@ -66,10 +65,16 @@ namespace QGMiniGame
             {
                 if (!BuildConfigAsset.AssetCache.enableBundleCache)
                 {
-                    commandStr += (" --disableBundleCache=true");
+                    commandStr += " --disableBundleCache";
                 }
-                commandStr += (" --keepOldVersion=" + BuildConfigAsset.AssetCache.keepOldVersion);
-                commandStr += (" --enableCacheLog=" + BuildConfigAsset.AssetCache.enableCacheLog);
+                if (BuildConfigAsset.AssetCache.keepOldVersion)
+                {
+                    commandStr += " --keepOldVersion";
+                }
+                if (BuildConfigAsset.AssetCache.enableCacheLog)
+                {
+                    commandStr += " --enableCacheLog";
+                }
                 commandStr += (" --gameCDNRoot=" + BuildConfigAsset.AssetCache.gameCDNRoot.ToPlatformQuoted());
                 commandStr += (" --bundlePathIdentifier=" + BuildConfigAsset.AssetCache.bundlePathIdentifier.ToPlatformQuoted());
                 commandStr += (" --excludeFileExtensions=" + BuildConfigAsset.AssetCache.excludeFileExtensions.ToPlatformQuoted());
@@ -81,7 +86,7 @@ namespace QGMiniGame
             //UnityWebGLVersion
             if (BuildConfigAsset.AssetCache.unityUseWebGL2)
             {
-                commandStr += (" --unityUseWebGL2=" + BuildConfigAsset.AssetCache.unityUseWebGL2);
+                commandStr += " --unityUseWebGL2";
             }
 
             if (BuildConfigAsset.Fundamentals.useCustomSign)
@@ -89,6 +94,11 @@ namespace QGMiniGame
                 commandStr += (" --signCertificate=" + BuildConfigAsset.Fundamentals.signCertificate.ToPlatformQuoted());
                 commandStr += (" --signPrivate=" + BuildConfigAsset.Fundamentals.signPrivate.ToPlatformQuoted());
                 commandStr += " release";
+            }
+
+            if (BuildConfigAsset.OtherSettingsConfig.autoInstallAvailable && BuildConfigAsset.OtherSettingsConfig.autoInstall)
+            {
+                commandStr += " --auto-install";
             }
 
             // 执行打包命令
@@ -102,22 +112,13 @@ namespace QGMiniGame
                 success = false;
             }
 
-            if (success && showResultWindow)
+            if (success)
             {
-                // 创建一个提示框，显示"Hello World!"消息，点击确定按钮后返回true
-                string unityUseWebGL2 = $"渲染版本: {(BuildConfigAsset.AssetCache.unityUseWebGL2 ? "WebGL2.0" : "WebGL1.0")}";
-                string useCustomSign = $"发布类型: {(BuildConfigAsset.Fundamentals.useCustomSign ? "release" : "debug")}";
-                bool result = EditorUtility.DisplayDialog("提示", $"完成打包\n\n{unityUseWebGL2}\n{useCustomSign}", "确定");
-
-                // 检查返回值
-                if (result)
-                {
-                    ShowInExplorer(buildSrc);
-                }
-                else
-                {
-                    QGLog.Log("");
-                }
+                QGLog.Log("构建成功");
+                QGLog.Log($"打包命令：{commandStr}");
+                QGLog.Log($"小游戏工程路径：{buildSrc}/quickgame");
+                QGLog.Log($"渲染类型：{(BuildConfigAsset.AssetCache.unityUseWebGL2 ? "WebGL2.0" : "WebGL1.0")}");
+                QGLog.Log($"发布类型: {(BuildConfigAsset.Fundamentals.useCustomSign ? "Release" : "Debug")}");
             }
 
             return success;
@@ -157,10 +158,8 @@ namespace QGMiniGame
         //构建WebGL
         public static BuildReport BuildWebGL(string path)
         {
-            QGLog.Log("[BuildWebGL] Start: Please Waitting");
             BuildOptions option = BuildOptions.None;
             var report = BuildPipeline.BuildPlayer(GetScenePaths(), path, BuildTarget.WebGL, option);
-            QGLog.Log("[BuildWebGL] Done: " + path);
             return report;
         }
 

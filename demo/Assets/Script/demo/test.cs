@@ -180,8 +180,8 @@ public class test : MonoBehaviour
                 };
                 QG.PayTest(
                     param,
-                    (msg) => { Debug.Log("QG.Pay success = " + JsonUtility.ToJson(msg)); },
-                    (msg) => { Debug.Log("QG.Pay fail = " + JsonUtility.ToJson(msg)); }
+                    (successMsg) => { Debug.Log("QG.Pay success = " + JsonUtility.ToJson(successMsg)); },
+                    (failMsg) => { Debug.Log("QG.Pay fail = " + JsonUtility.ToJson(failMsg)); }
                 );
             }
             else

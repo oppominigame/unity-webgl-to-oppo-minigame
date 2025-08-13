@@ -48,6 +48,10 @@ namespace QGMiniGame
     public class OtherSettingsConfig
     {
         public string environmentVariablePath;
+        public bool autoInstall = true;
+
+        [NonSerialized]
+        public bool autoInstallAvailable;
     }
 
     public class BuildConfigAsset : ScriptableObject

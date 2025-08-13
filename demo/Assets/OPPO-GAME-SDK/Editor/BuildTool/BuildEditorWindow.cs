@@ -32,6 +32,7 @@ namespace QGMiniGame
         }
 
         private const string ASSET_CACHE_SYSTEM_MIN_VERSION = "2.1.9-beta.11";
+        private const string AUTO_INSTALL_MIN_VERSION = "3.0.0";
         private const string SDK_SERVER_URL = "https://ie-activity-cn.heytapimage.com/static/minigame/OPPO-GAME-SDK/tools";
         private const string UPDATE_LOG_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/CHANGELOG.md";
         private const string CONTACT_US_URL = "https://github.com/oppominigame/unity-webgl-to-oppo-minigame/blob/main/doc/IssueAndContact.md.md";
@@ -722,19 +723,6 @@ namespace QGMiniGame
             Repaint();
         }
 
-        private void UpdateAssetCacheSystemAvailability()
-        {
-            if (currentBuildToolVersion.IsValid())
-            {
-                var versionCompare = CompareVersion(currentBuildToolVersion, ASSET_CACHE_SYSTEM_MIN_VERSION);
-                BuildConfigAsset.AssetCache.available = versionCompare.HasValue && versionCompare >= 0;
-            }
-            else
-            {
-                BuildConfigAsset.AssetCache.available = false;
-            }
-        }
-
         private void OnWindowOpen()
         {
             // 立即更新版本状态
@@ -804,7 +792,7 @@ namespace QGMiniGame
         private void WaitSpinIcon()
         {
             // 使用内置序列帧图片，每秒转一圈
-            var frac = Time.realtimeSinceStartupAsDouble - Math.Truncate(Time.realtimeSinceStartup);
+            var frac = Time.realtimeSinceStartup - (float)Math.Truncate(Time.realtimeSinceStartup);
             var index = (int)Math.Truncate(frac / SPIN_GAP);
             var indexStr = index.ToString();
             if (index < 10)
@@ -886,10 +874,10 @@ namespace QGMiniGame
             }
         }
 
-        private void DirtySaveField(Action fieldBuilder)
+        private void DirtySaveField(Action fieldsBuilder)
         {
             EditorGUI.BeginChangeCheck();
-            fieldBuilder();
+            fieldsBuilder();
             if (EditorGUI.EndChangeCheck())
             {
                 SaveConfigAsset();
@@ -1180,97 +1168,111 @@ namespace QGMiniGame
             });
         }
 
+        private void QGBuildToolVersionFields(string version, string error, ref bool satisfySign, Action fieldsBuilder)
+        {
+            if (currentBuildToolVersion.IsValid())
+            {
+                var versionCompare = CompareVersion(currentBuildToolVersion, version);
+                satisfySign = versionCompare.HasValue && versionCompare >= 0;
+            }
+            else
+            {
+                satisfySign = false;
+            }
+            if (!satisfySign && requestQGBuildToolCurrentVersionStatus != RequestVersionStatus.InProgress)
+            {
+                GUILayout.BeginHorizontal();
+                var text = $"小游戏打包工具版本不符，{error}，请升级至 {version} 及以上版本";
+                EditorGUILayout.LabelField(text, new GUIStyle()
+                {
+                    normal = new GUIStyleState()
+                    {
+                        textColor = Color.red
+                    },
+                    fontSize = EditorStyles.miniFont.fontSize,
+                    alignment = TextAnchor.LowerLeft
+                }, GUILayout.Width(GetLabelSize(text).x));
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+            }
+            GUI.enabled = satisfySign;
+            fieldsBuilder();
+            GUI.enabled = true;
+        }
+
         private void DrawAssetCache()
         {
             Foldout("缓存设置", () =>
             {
-                // 提示缓存系统依赖库版本过低
-                UpdateAssetCacheSystemAvailability();
-                var isSystemAvailable = BuildConfigAsset.AssetCache.available;
-                if (!isSystemAvailable && requestQGBuildToolCurrentVersionStatus != RequestVersionStatus.InProgress)
+                QGBuildToolVersionFields(ASSET_CACHE_SYSTEM_MIN_VERSION, "缓存系统不可用", ref BuildConfigAsset.AssetCache.available, () =>
                 {
-                    GUILayout.BeginHorizontal();
-                    var text = $"小游戏打包工具版本不符，缓存系统不可用，请升级至 {ASSET_CACHE_SYSTEM_MIN_VERSION} 及以上版本";
-                    EditorGUILayout.LabelField(text, new GUIStyle()
+                    var assetCache = BuildConfigAsset.AssetCache;
+                    DirtySaveField(() =>
                     {
-                        normal = new GUIStyleState()
-                        {
-                            textColor = Color.red
-                        },
-                        fontSize = EditorStyles.miniFont.fontSize,
-                        alignment = TextAnchor.LowerLeft
-                    }, GUILayout.Width(GetLabelSize(text).x));
-                    GUILayout.FlexibleSpace();
-                    GUILayout.EndHorizontal();
-                }
-                GUI.enabled = isSystemAvailable;
-                var assetCache = BuildConfigAsset.AssetCache;
-                DirtySaveField(() =>
-                {
-                    assetCache.enableBundleCache = EditorGUILayout.Toggle("启用缓存", assetCache.enableBundleCache);
+                        assetCache.enableBundleCache = EditorGUILayout.Toggle("启用缓存", assetCache.enableBundleCache);
+                    });
+                    GUI.enabled &= assetCache.enableBundleCache;
+                    ValidationTextField(
+                        target: ref assetCache.gameCDNRoot,
+                        key: nameof(assetCache.gameCDNRoot),
+                        label: new GUIContent("缓存CDN路径(必填)", "缓存路径必填项，例如 http://10.117.224.49:8080/StreamingAssets"),
+                        text: assetCache.gameCDNRoot,
+                        allowEmpty: !assetCache.enableBundleCache,
+                        emptyError: "地址不能为空",
+                        pattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
+                        invalidError: "需填写填写http://或https://开头的有效URL地址");
+                    ValidationTextField(
+                        target: ref assetCache.bundlePathIdentifier,
+                        key: nameof(assetCache.bundlePathIdentifier),
+                        label: new GUIContent("缓存路径标识", "不填写代表所有路径都进行缓存判断。填写时多个时使用英文分号分隔，例如 StreamingAssets;bundles"),
+                        text: assetCache.bundlePathIdentifier,
+                        allowEmpty: true,
+                        emptyError: string.Empty,
+                        pattern: @"^([\w/]+)(;[\w/]+)*$",
+                        invalidError: "路径只能使用字母、数字、下划线，多个路径之间用英文分号分隔");
+                    ValidationTextField(
+                        target: ref assetCache.excludeFileExtensions,
+                        key: nameof(assetCache.excludeFileExtensions),
+                        label: new GUIContent("不缓存的文件类型", "不填写代表所有文件都进行缓存判断。填写多个时使用英文分号分隔，例如 .json;.hash"),
+                        text: assetCache.excludeFileExtensions,
+                        allowEmpty: true,
+                        emptyError: string.Empty,
+                        pattern: @"^\.[A-Za-z0-9]+(;\.[A-Za-z0-9]+)*$",
+                        invalidError: "类型必须以英文句号开头，名称只能使用英文和数字，多个路径之间用英文分号分隔");
+                    DirtySaveField(() =>
+                    {
+                        assetCache.bundleHashLength = EditorGUILayout.IntPopup(
+                        new GUIContent("哈希长度", "资源hash占多少长度，默认32位"),
+                        assetCache.bundleHashLength,
+                        new GUIContent[] { new GUIContent("32位"), new GUIContent("64位"), new GUIContent("128位") },
+                        new[] { 32, 64, 128 });
+                    });
+                    DirtySaveField(() =>
+                    {
+                        assetCache.defaultReleaseSize = EditorGUILayout.IntPopup(
+                        new GUIContent("额外清理大小", "清理缓存时默认额外清理的大小，单位MB，默认30MB"),
+                        assetCache.defaultReleaseSize,
+                        new GUIContent[] { new GUIContent("30MB"), new GUIContent("60MB"), new GUIContent("120MB"), new GUIContent("160MB") },
+                        new[] { 30, 60, 120, 160 });
+                    });
+                    DirtySaveField(() =>
+                    {
+                        assetCache.keepOldVersion = EditorGUILayout.Toggle(new GUIContent("保留旧版本", "资源更新后是否保留旧版本资源，默认删除不保留"), assetCache.keepOldVersion);
+                    });
+                    ValidationTextField(
+                        target: ref assetCache.excludeClearFiles,
+                        key: nameof(assetCache.excludeClearFiles),
+                        label: new GUIContent("清理忽略文件", "自动清理时忽略的文件，支持纯hash或名称，名称尽量不要使用特殊字符。不填写代表所有缓存都有可能被清理。填写多个时使用英文分号分隔，例如 8d265a9dfd6cb7669cdb8b726f0afb1e;asset1"),
+                        text: assetCache.excludeClearFiles,
+                        allowEmpty: true,
+                        emptyError: string.Empty,
+                        pattern: @"^[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+(;[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+)*$",
+                        invalidError: "不支持/?<>\\:*|\"等特殊字符，多个文件之间用英文分号分隔");
+                    DirtySaveField(() =>
+                    {
+                        assetCache.enableCacheLog = EditorGUILayout.Toggle(new GUIContent("开启日志", "是否将缓存信息输出到控制台，便于调试"), assetCache.enableCacheLog);
+                    });
                 });
-                GUI.enabled &= assetCache.enableBundleCache;
-                ValidationTextField(
-                    target: ref assetCache.gameCDNRoot,
-                    key: nameof(assetCache.gameCDNRoot),
-                    label: new GUIContent("缓存CDN路径(必填)", "缓存路径必填项，例如 http://10.117.224.49:8080/StreamingAssets"),
-                    text: assetCache.gameCDNRoot,
-                    allowEmpty: !assetCache.enableBundleCache,
-                    emptyError: "地址不能为空",
-                    pattern: @"https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]",
-                    invalidError: "需填写填写http://或https://开头的有效URL地址");
-                ValidationTextField(
-                    target: ref assetCache.bundlePathIdentifier,
-                    key: nameof(assetCache.bundlePathIdentifier),
-                    label: new GUIContent("缓存路径标识", "不填写代表所有路径都进行缓存判断。填写时多个时使用英文分号分隔，例如 StreamingAssets;bundles"),
-                    text: assetCache.bundlePathIdentifier,
-                    allowEmpty: true,
-                    emptyError: string.Empty,
-                    pattern: @"^([\w/]+)(;[\w/]+)*$",
-                    invalidError: "路径只能使用字母、数字、下划线，多个路径之间用英文分号分隔");
-                ValidationTextField(
-                    target: ref assetCache.excludeFileExtensions,
-                    key: nameof(assetCache.excludeFileExtensions),
-                    label: new GUIContent("不缓存的文件类型", "不填写代表所有文件都进行缓存判断。填写多个时使用英文分号分隔，例如 .json;.hash"),
-                    text: assetCache.excludeFileExtensions,
-                    allowEmpty: true,
-                    emptyError: string.Empty,
-                    pattern: @"^\.[A-Za-z0-9]+(;\.[A-Za-z0-9]+)*$",
-                    invalidError: "类型必须以英文句号开头，名称只能使用英文和数字，多个路径之间用英文分号分隔");
-                DirtySaveField(() =>
-                {
-                    assetCache.bundleHashLength = EditorGUILayout.IntPopup(
-                    new GUIContent("哈希长度", "资源hash占多少长度，默认32位"),
-                    assetCache.bundleHashLength,
-                    new GUIContent[] { new GUIContent("32位"), new GUIContent("64位"), new GUIContent("128位") },
-                    new[] { 32, 64, 128 });
-                });
-                DirtySaveField(() =>
-                {
-                    assetCache.defaultReleaseSize = EditorGUILayout.IntPopup(
-                    new GUIContent("额外清理大小", "清理缓存时默认额外清理的大小，单位MB，默认30MB"),
-                    assetCache.defaultReleaseSize,
-                    new GUIContent[] { new GUIContent("30MB"), new GUIContent("60MB"), new GUIContent("120MB"), new GUIContent("160MB") },
-                    new[] { 30, 60, 120, 160 });
-                });
-                DirtySaveField(() =>
-                {
-                    assetCache.keepOldVersion = EditorGUILayout.Toggle(new GUIContent("保留旧版本", "资源更新后是否保留旧版本资源，默认删除不保留"), assetCache.keepOldVersion);
-                });
-                ValidationTextField(
-                    target: ref assetCache.excludeClearFiles,
-                    key: nameof(assetCache.excludeClearFiles),
-                    label: new GUIContent("清理忽略文件", "自动清理时忽略的文件，支持纯hash或名称，名称尽量不要使用特殊字符。不填写代表所有缓存都有可能被清理。填写多个时使用英文分号分隔，例如 8d265a9dfd6cb7669cdb8b726f0afb1e;asset1"),
-                    text: assetCache.excludeClearFiles,
-                    allowEmpty: true,
-                    emptyError: string.Empty,
-                    pattern: @"^[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+(;[\w!@#\$%\^&\(\)\-=\+\[\]\{\}',\.`~]+)*$",
-                    invalidError: "不支持/?<>\\:*|\"等特殊字符，多个文件之间用英文分号分隔");
-                DirtySaveField(() =>
-                {
-                    assetCache.enableCacheLog = EditorGUILayout.Toggle(new GUIContent("开启日志", "是否将缓存信息输出到控制台，便于调试"), assetCache.enableCacheLog);
-                });
-                GUI.enabled = true;
             });
         }
 
@@ -1316,6 +1318,13 @@ namespace QGMiniGame
                     label: new GUIContent("环境变量 Path", "自定义的环境变量集合，Windows 以分号分隔路径，MacOS 以冒号分隔路径"),
                     text: BuildConfigAsset.OtherSettingsConfig.environmentVariablePath,
                     allowEmpty: true);
+                QGBuildToolVersionFields(AUTO_INSTALL_MIN_VERSION, "不支持自动安装", ref BuildConfigAsset.OtherSettingsConfig.autoInstallAvailable, () =>
+                {
+                    DirtySaveField(() =>
+                    {
+                        BuildConfigAsset.OtherSettingsConfig.autoInstall = EditorGUILayout.Toggle(new GUIContent("自动安装游戏", "打包结束后，自动将游戏包.rpk安装至 USB 连接的手机上"), BuildConfigAsset.OtherSettingsConfig.autoInstall);
+                    });
+                });
             });
         }
 
@@ -1571,7 +1580,7 @@ namespace QGMiniGame
                     break;
                 case RequestVersionStatus.Fail:
                     EditorGUILayout.BeginHorizontal();
-                    MiniLabelField("获取打包工具版本失败，请根据日志指引操作", Color.red);
+                    MiniLabelField("获取打包工具版本失败，请刷新重试或根据日志指引操作", Color.red);
                     CheckCurrentVersionButton();
                     EditorGUILayout.EndHorizontal();
                     break;
@@ -1673,10 +1682,8 @@ namespace QGMiniGame
                         ShaderRuntimeDetector.AddShaderDetection(useRuntimeShaderDetection);
                         EditorUtility.ClearProgressBar();
                         // 构建游戏
-                        if (!QGGameTools.BuildGame(true))
-                        {
-                            ShowNotification(new GUIContent("构建 WebGL 失败，请根据控制台输出修复错误后，再重新打包"));
-                        }
+                        var success = QGGameTools.BuildGame();
+                        ShowNotification(new GUIContent(success ? "构建成功" : "构建失败，请根据控制台输出修复错误后，再重新打包"));
                     }
                     while (false);
                 }

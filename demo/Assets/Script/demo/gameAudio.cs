@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using QGMiniGame;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
-using Newtonsoft.Json.Linq;
 
 public class gameAudio : MonoBehaviour
 {
