@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 using System.Diagnostics;
 using System.Text;
 
@@ -10,7 +9,7 @@ namespace QGMiniGame
 
     public static class ShellHelper
     {
-        private static readonly Encoding GB2312 = Encoding.GetEncoding("GB2312");
+        private static readonly Encoding STD_IO_ENCODING = Encoding.GetEncoding(65001);
 
         /// <summary>
         /// 执行 shell 命令
@@ -34,8 +33,8 @@ namespace QGMiniGame
                     Arguments = args,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    StandardOutputEncoding = GB2312,
-                    StandardErrorEncoding = GB2312,
+                    StandardOutputEncoding = STD_IO_ENCODING,
+                    StandardErrorEncoding = STD_IO_ENCODING,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 }

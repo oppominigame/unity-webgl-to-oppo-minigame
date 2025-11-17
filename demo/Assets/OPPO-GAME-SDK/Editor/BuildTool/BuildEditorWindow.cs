@@ -190,7 +190,7 @@ namespace QGMiniGame
             DisplayProgress("创建证书", "证书已生成", 0.9f);
             EditorUtility.ClearProgressBar();
 
-            if (EditorUtility.DisplayDialog("提示", "证书已生成", "确认")) ;
+            if (EditorUtility.DisplayDialog("提示", "证书已生成", "确认"));
             QGGameTools.ShowInExplorer(GenerateCertificatePath);
             isHaveCertificatePath = true;
         }

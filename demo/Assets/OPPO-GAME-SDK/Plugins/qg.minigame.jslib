@@ -51,6 +51,68 @@ var QgGameBridge = {
     onHideCallBack: null,
     onAuthDialogShowCallBack : null,
     onAuthDialogCloseCallBack : null,
+    onTouchStartCallbacks: null,
+    onTouchMoveCallbacks: null,
+    onTouchEndCallbacks: null,
+    onTouchCancelCallbacks: null
+  },
+
+  $qgUtils: {
+    onTouchHandler: function (type, cb) {
+      if (typeof window.jsb == "undefined") {
+        console.log("qg.minigame.jslib  window.jsb is undefined");
+        return;
+      }
+      var cbIdStr = UTF8ToString(cb);
+      var callback = function (res) {
+        var data = {};
+        data.timeStamp = res._timeStamp;
+        data.changedTouches = [];
+        if (res.changedTouches.length > 0) {
+          for (var changedTouch of res.changedTouches) {
+            data.changedTouches.push({
+              identifier: changedTouch.identifier,
+              clientX: changedTouch.clientX,
+              clientY: window.innerHeight - changedTouch.clientY
+            });
+          }
+        }
+        var json = JSON.stringify({
+          callbackId: cbIdStr,
+          timeStamp: data.timeStamp,
+          changedTouches: data.changedTouches
+        });
+        unityInstance.SendMessage(
+          CONSTANT.ACTION_CALL_BACK_CLASS_NAME_DEFAULT,
+          'QGOnTouchCallback',
+          json
+        );
+      };
+      var callbackName = "onTouch" + type + "Callbacks";
+      if (!property[callbackName]) {
+        property[callbackName] = {};
+      }
+      property[callbackName][cbIdStr] = callback;
+      window.jsb["onTouch" + type](callback);
+    },
+    offTouchHandler: function (type, cb) {
+      if (typeof window.jsb == "undefined") {
+        console.log('qg.minigame.jslib  window.jsb is undefined');
+        return;
+      }
+      var callbackName = "onTouch" + type + "Callbacks";
+      if (!property[callbackName]) {
+        return;
+      }
+      var cbIdStr = UTF8ToString(cb);
+      var callback = property[callbackName][cbIdStr];
+      if (!callback) {
+        console.warn('[QGOffTouch' + type + ']', 'callback is not registered, remove failed');
+        return;
+      }
+      window.jsb['offTouch' + type](callback);
+      delete property[callbackName][cbIdStr];
+    }
   },
 
   QGLog: function () {
@@ -4993,11 +5055,44 @@ var QgGameBridge = {
     qg.offAuthDialogClose(property.onAuthDialogCloseCallBack);
     property.onAuthDialogCloseCallBack = null;
   },
+
+  QGOnTouchStart: function (cb) {
+    qgUtils.onTouchHandler('Start', cb);
+  },
+
+  QGOffTouchStart: function (cb) {
+    qgUtils.offTouchHandler('Start', cb);
+  },
+
+  QGOnTouchMove: function (cb) {
+    qgUtils.onTouchHandler('Move', cb);
+  },
+
+  QGOffTouchMove: function (cb) {
+    qgUtils.offTouchHandler('Move', cb);
+  },
+
+  QGOnTouchEnd: function (cb) {
+    qgUtils.onTouchHandler('End', cb);
+  },
+
+  QGOffTouchEnd: function (cb) {
+    qgUtils.offTouchHandler('End', cb);
+  },
+
+  QGOnTouchCancel: function (cb) {
+    qgUtils.onTouchHandler('Cancel', cb);
+  },
+
+  QGOffTouchCancel: function (cb) {
+    qgUtils.offTouchHandler('Cancel', cb);
+  }
 };
 
 autoAddDeps(QgGameBridge, "$mAdMap");
 autoAddDeps(QgGameBridge, "$CONSTANT");
 autoAddDeps(QgGameBridge, "$mFileData");
 autoAddDeps(QgGameBridge, "$property");
+autoAddDeps(QgGameBridge, "$qgUtils");
 
 mergeInto(LibraryManager.library, QgGameBridge);

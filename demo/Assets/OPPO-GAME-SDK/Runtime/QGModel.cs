@@ -589,4 +589,19 @@ namespace QGMiniGame
     {
         public int authType; //1-登录账号；2-实名认证
     }
+
+    [Serializable]
+    public class QGTouchData : QGBaseResponse
+    {
+        [Serializable]
+        public class ChangedTouches
+        {
+            public int identifier;
+            public float clientX;
+            public float clientY;
+        }
+
+        public long timeStamp;
+        public ChangedTouches[] changedTouches;
+    }
 }

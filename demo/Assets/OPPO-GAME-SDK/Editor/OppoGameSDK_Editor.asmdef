@@ -2,7 +2,7 @@
     "name": "OppoGameSDK_Editor",
     "rootNamespace": "QGMiniGame",
     "references": [
-        "OppoGameSDK"
+        "GUID:4f07a863d6a06924589ff792f0d14301"
     ],
     "includePlatforms": [
         "Editor"

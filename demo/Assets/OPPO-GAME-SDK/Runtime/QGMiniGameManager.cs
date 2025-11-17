@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Text;
 using AOT;
+using UnityEngine.Scripting;
 
 namespace QGMiniGame
 {
@@ -1527,6 +1528,61 @@ namespace QGMiniGame
 
         #endregion
 
+        #region Touch
+        public string OnTouchStart(Action<QGTouchData> onTouchStartCallback = null)
+        {
+            var key = QGCallBackManager.Add(onTouchStartCallback);
+            QGOnTouchStart(key);
+            return key;
+        }
+
+        public string OnTouchMove(Action<QGTouchData> onTouchMoveCallback = null)
+        {
+            var key = QGCallBackManager.Add(onTouchMoveCallback);
+            QGOnTouchMove(key);
+            return key;
+        }
+
+        public string OnTouchEnd(Action<QGTouchData> onTouchEndCallback = null)
+        {
+            var key = QGCallBackManager.Add(onTouchEndCallback);
+            QGOnTouchEnd(key);
+            return key;
+        }
+
+        public string OnTouchCancel(Action<QGTouchData> onTouchCancelCallback = null)
+        {
+            var key = QGCallBackManager.Add(onTouchCancelCallback);
+            QGOnTouchCancel(key);
+            return key;
+        }
+
+        public void OffTouchStart(string key)
+        {
+            QGOffTouchStart(key);
+        }
+
+        public void OffTouchMove(string key)
+        {
+            QGOffTouchMove(key);
+        }
+
+        public void OffTouchEnd(string key)
+        {
+            QGOffTouchEnd(key);
+        }
+
+        public void OffTouchCancel(string key)
+        {
+            QGOffTouchCancel(key);
+        }
+
+        public void QGOnTouchCallback(string msg)
+        {
+            QGCallBackManager.InvokeResponseCallback<QGTouchData>(msg, false);
+        }
+        #endregion
+
         [DllImport("__Internal")]
         private static extern void QGLogin(string s, string f);
 
@@ -1818,6 +1874,7 @@ namespace QGMiniGame
         [DllImport("__Internal")]
         private static extern void QGIsStartupByShortcut(string a, string b);
         [DllImport("__Internal")]
+        [Preserve]
         private static extern void QGUniversalCallback(string a, string b);
         [DllImport("__Internal")]
         private static extern void QGGetRecorderManager(string a);
@@ -1845,5 +1902,21 @@ namespace QGMiniGame
         private static extern void QGOnAuthDialogClose(string a);
         [DllImport("__Internal")]
         private static extern void QGOffAuthDialogClose(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnTouchStart(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffTouchStart(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnTouchMove(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffTouchMove(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnTouchEnd(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffTouchEnd(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOnTouchCancel(string a);
+        [DllImport("__Internal")]
+        private static extern void QGOffTouchCancel(string a);
     }
 }

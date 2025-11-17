@@ -45,7 +45,6 @@ namespace QGMiniGame
         public static void InvokeResponseCallback<T>(string str, bool remove = true)
             where T : QGBaseResponse
         {
-          QGLog.LogWarning("remove = " + remove);
             if (str != null)
             {
                 T res = JsonUtility.FromJson<T>(str);
