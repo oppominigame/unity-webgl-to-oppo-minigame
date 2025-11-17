@@ -1,22 +1,27 @@
 # 更新日志
 
-## 2025-8-13 【重要更新】
+## 2025-11-17【重要更新】
+- 重要：上线新版本 Unity SDK，版本号 V8.3.1，位于 `tools/unity_webgl_rpk_oppo_v8.3.1.unitypackage`
+- 重要：修复多点触控在同时抬起时，高概率出现部分抬起事件未触发的问题
+- 普通：修复控制台打印中文出现乱码的问题
+
+## 2025-8-13【重要更新】
 - 重要：上线新版本 Unity SDK，版本号 V8.3.0，位于 `tools/unity_webgl_rpk_oppo_v8.3.0.unitypackage`
 - 重要：Unity SDK V8.3.0 新增支持 rpk 自动安装（要求小游戏打包工具版本 >= 3.0.0）
 
-## 2025-6-25 【重要更新】
+## 2025-6-25【重要更新】
 - 重要：上线新版本 Unity SDK，版本号 V8.2.0，位于 `tools/unity_webgl_rpk_oppo_v8.2.0.unitypackage`
 - 重要：Unity SDK V8.2.0 新增支持 MacOS
 - 重要：Unity SDK V8.2.0 新增环境变量手动配置功能，解决部分用户自动获取环境变量失败，导致找不到命令的问题
 - 重要：Unity SDK V8.2.0 新增构建接口 `QGMiniGame.Builder.Build`，支持在主界面配置一次关键信息后，通过接口直接构建
 - 普通：Unity SDK V8.2.0 优化版本更新机制，改为只下载文件，不再自动导入安装包，避免出现兼容问题
 
-## 2025-4-9 【普通更新】
+## 2025-4-9【普通更新】
 ### Feature
 
 - 普通：更新基础能力版本 Unity SDK，位于 `tools/unity_webgl_rpk_oppo_v8.0.7_open_ability.unitypackage`
 - 普通：新增基础能力版本 Unity SDK 创建桌面接口 QG.InstallShortcut.
-## 2025-3-19 【普通更新】
+## 2025-3-19【普通更新】
 ### Feature
 
 - 重要：Unity微信小游戏一键转OPPO小游戏文档说明. [详情](https://ie-activity-cn.heytapimage.com/static/minigame/CN/docs/index.html#/develop/games/wx-transfer)
@@ -25,13 +30,13 @@
 - 重要：新增 QG.OnAuthDialogShow,QG.OffAuthDialogShow,QG.OnAuthDialogClose,QG.OffAuthDialogClose 账号登录及实名认证监听. 详情参考 [OPPO SDK API](doc/API.md#监听账号登录及实名认证)
 - 重要：适配 UnityEngine.PlayerPrefs. API: SetInt,GetInt,SetString,GetString,SetFloat,GetFloat,DeleteAll,DeleteKey,HasKey. 详情参考 [PlayerPrefs](doc/API.md#Unity持久化)
 
-## 2025-1-9 【普通更新】
+## 2025-1-9【普通更新】
 ### Feature
 
 - 普通：更新基础能力版本 Unity SDK，位于 `tools/unity_webgl_rpk_oppo_v8.0.7_open_ability.unitypackage`
 - 普通：新增基础能力版本 Unity SDK 获取渠道接口.
 
-## 2025-1-6 【重要更新】
+## 2025-1-6【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.9，位于 `tools/unity_webgl_rpk_oppo_v8.0.9.unitypackage`
@@ -39,7 +44,7 @@
 - 普通：修改构建默认关闭nameFilesAsHashes.
 - 普通：修改构建完成提示渲染版本和发布类型.
 
-## 2024-12-18 【重要更新】
+## 2024-12-18【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.8，位于 `tools/unity_webgl_rpk_oppo_v8.0.8.unitypackage`
@@ -50,7 +55,7 @@
 - 重要：修改 [资源缓存系统](doc/AssetCache.md) 使用指导，新增 缓存CDN路径, 修改 缓存路径标识.
 - 重要：修改 视频能力参数补充.详情参考 [OPPO SDK API](doc/API.md#视频播放)
 
-## 2024-11-14 【重要更新】
+## 2024-11-14【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.7，位于 `tools/unity_webgl_rpk_oppo_v8.0.7.unitypackage`
@@ -59,7 +64,7 @@
 - 重要：修改 QG.HasShortcutInstalled, QG.InstallShortcut 获取/创建桌面异常.详情参考 [OPPO SDK API](doc/API.md#判断是否已经创建桌面图标)
 
 
-## 2024-11-07 【重要更新】
+## 2024-11-07【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.6，位于 `tools/unity_webgl_rpk_oppo_v8.0.6.unitypackage`
@@ -69,7 +74,7 @@
 - 重要：新增 画面旋转设置 "landscapeLeft" or "landscapeRight", OPPO 小游戏调试器 V9.2.0 有效.
 - 重要：新增 FileSystemManager 适配.详情参考 [OPPO SDK API](doc/API.md#获取本地临时文件或本地用户文件的文件信息) 
 
-## 2024-9-18 【重要更新】
+## 2024-9-18【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.5，位于 `tools/unity_webgl_rpk_oppo_v8.0.5.unitypackage`
@@ -80,7 +85,7 @@
 
 - 普通：新增 设备方向接口.
 
-## 2024-8-6 【普通更新】
+## 2024-8-6【普通更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.4，位于 `tools/unity_webgl_rpk_oppo_v8.0.4.unitypackage`
@@ -88,7 +93,7 @@
 - 普通：修改unity2018,unity2019 js语法适配.
 - 普通：修改激励视频广告示例,新增.load调用.
 
-## 2024-7-23 【重要更新】
+## 2024-7-23【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.3，位于 `tools/unity_webgl_rpk_oppo_v8.0.3.unitypackage`
@@ -99,7 +104,7 @@
 
 
 
-## 2024-7-3 【重要更新】
+## 2024-7-3【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.2，位于 `tools/unity_webgl_rpk_oppo_v8.0.2.unitypackage`
@@ -110,12 +115,12 @@
 - 重要：新增 消息框,对话框,进度条,定时器,云储存,系统信息,渠道信息,配置文件信息,修改渲染帧率,电量,亮度,获取设备ID,获取地理和速度,加速计,剪切板,罗盘 接口. 详情参考 [OPPO SDK API](doc/API.md)
 - 重要：新增 示例 支付,云储存,系统信息,设备信息,提示框 场景.
 
-## 2024-5-30 【普通更新】
+## 2024-5-30【普通更新】
 
 ### Fix
 - 普通：更新打包工具版本至 `2.1.8-beta.1`，修复配置项 `bundleHashLength`，`defaultReleaseSize` 类型错误导致的缓存系统失效
 
-## 2024-5-20 【重要更新】
+## 2024-5-20【重要更新】
 
 ### Feature
 - 重要：上线新版本 Unity SDK，版本号 V8.0.1，位于 `tools/unity_webgl_rpk_oppo_v8.0.1.unitypackage`
@@ -126,7 +131,7 @@
 - 普通：修复 `qg.showKeyboard` 等键盘接口报错
 - 普通：修复广告创建后自动展示的问题，详情参考 [OPPO SDK API 激励视频广告](doc/API.md#激励视频广告)
 
-## 2024-5-7 【重要更新】
+## 2024-5-7【重要更新】
 ### Feature
 
 - 重要：上线新版本 Unity SDK，版本号 V8.0.0，位于 `tools/unity_webgl_rpk_oppo_v8.0.0.unitypackage`
