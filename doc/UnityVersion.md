@@ -1,6 +1,6 @@
 # 推荐引擎版本
 
-本适配方案理论上支持的 Unity 版本包括2018、2019、2020、2021，但并非每个小版本都经过了严格的验证，具体情况如下
+本适配方案理论上支持的 Unity 版本包括2018、2019、2020、2021、2022、团结引擎，但并非每个小版本都经过了严格的验证，具体情况如下
 
 | 引擎版本 | 已验证版本 | 下载链接 |
 | --- | --- | --- |
@@ -8,3 +8,5 @@
 | 2019.4 | 2019.4.35f1 | https://unity.com/releases/editor/whats-new/2019.4.35 |
 | 2020.3 | 2020.3.25f1, 2020.3.47f1 | https://unity.com/releases/editor/whats-new/2020.3.47 |
 | 2021.3 | 2021.3.14f1 | https://unity.com/releases/editor/whats-new/2021.3.14 |
+| 2022.3 | 2022.1.24f1, 2022.2.23f1, 2022.3.62f1 | https://unity.cn/releases/lts/2022 |
+| 团结引擎 | 团结1.5.1 | https://unity.cn/tuanjie/releases |
